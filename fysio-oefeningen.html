@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fysio">
+<title>Fysio</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23000000'/%3E%3Crect x='2' y='13' width='4' height='6' rx='1.5' fill='%237b68ff'/%3E%3Crect x='4' y='11' width='3' height='10' rx='1.5' fill='%237b68ff'/%3E%3Crect x='26' y='13' width='4' height='6' rx='1.5' fill='%237b68ff'/%3E%3Crect x='25' y='11' width='3' height='10' rx='1.5' fill='%237b68ff'/%3E%3Crect x='7' y='14.5' width='18' height='3' rx='1.5' fill='%237b68ff'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme:  dark;
+  --bg:          #000000;
+  --surface:     rgba(255,255,255,0.05);
+  --surface2:    rgba(255,255,255,0.08);
+  --surface3:    rgba(255,255,255,0.12);
+  --border:      rgba(255,255,255,0.08);
+  --border2:     rgba(255,255,255,0.12);
+  --accent:      #7b68ff;
+  --accent-dim:  rgba(123,104,255,0.12);
+  --accent-glow: rgba(123,104,255,0.4);
+  --green:       #34d399;
+  --green-dim:   rgba(52,211,153,0.1);
+  --green-glow:  rgba(52,211,153,0.3);
+  --red:         #f43f5e;
+  --red-glow:    rgba(244,63,94,0.3);
+  --orange:      #fbbf24;
+  --text:        #ffffff;
+  --text2:       rgba(255,255,255,0.6);
+  --text3:       rgba(255,255,255,0.35);
+  --sans:        -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  --mono:        'SF Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
+  --r:           8px;
+  --r-lg:        12px;
+  --r-xl:        16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: var(--sans);
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* Screen transitions */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.screen.active { animation: fadeIn 0.25s ease-out; }
+
+::-webkit-scrollbar { width: 0; }
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+
+/* HOME */
+.home-top {
+  padding: 0 28px 0;
+  padding-top: max(80px, calc(env(safe-area-inset-top) + 48px));
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  min-height: 320px; justify-content: center;
+}
+.home-orb {
+  position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+  width: 340px; height: 340px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(123,104,255,0.18) 0%, rgba(123,104,255,0.04) 50%, transparent 70%);
+  filter: blur(40px);
+  animation: orbPulse 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes orbPulse {
+  0%,100% { transform: translateX(-50%) scale(1); opacity: 0.7; }
+  50% { transform: translateX(-50%) scale(1.15); opacity: 1; }
+}
+
+.home-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 12px;
+  font-family: var(--mono); position: relative;
+}
+.home-title {
+  font-size: 48px; font-weight: 800; letter-spacing: -2px;
+  line-height: 1; margin-bottom: 0; position: relative;
+  background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.streak-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: none; border: none;
+  padding: 12px 0; margin-top: 16px;
+  font-size: 14px; font-weight: 500; color: var(--text3);
+  font-family: var(--mono); position: relative;
+}
+.streak-pill b { color: var(--orange); font-weight: 700; }
+
+/* Session cards */
+.home-list { padding: 24px 28px; display: flex; flex-direction: column; gap: 8px; }
+.list-label {
+  font-size: 13px; font-weight: 500; color: var(--text3);
+  margin-bottom: 12px;
+}
+
+/* Picker */
+.pick-trigger {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; font-family: var(--mono); transition: background 0.12s;
+  color: var(--text2); font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.pick-trigger:active { background: var(--surface2); }
+.pick-trigger-left { display: flex; align-items: center; gap: 8px; }
+.pick-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 2px solid var(--border2);
+  border-radius: var(--r); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; width: 100%; text-align: left; font-family: var(--mono);
+  transition: background 0.12s;
+}
+.pick-item:active { background: var(--surface2); }
+.pick-item.selected { border-left-color: var(--accent); background: var(--accent-dim); }
+.pick-check { width: 20px; height: 20px; border-radius: 3px; border: 2px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+.pick-item.selected .pick-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pick-item-name { font-size: 13px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+.pick-item-sub { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+.pick-item-right { color: var(--text3); flex-shrink: 0; }
+.pick-gear { color: var(--text3); }
+.pick-gear-free { color: var(--green); }
+.pick-filter-btn {
+  padding: 10px 16px; border-radius: var(--r); font-family: var(--mono);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); color: var(--text3);
+  transition: all 0.12s;
+}
+.pick-filter-btn.active { background: var(--accent-dim); border-color: rgba(123,104,255,0.3); color: var(--accent); }
+.gear-tag { font-size: 9px; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.gear-tag-free { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
+.gear-tag-need { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+
+/* History */
+.home-history { padding: 24px 28px 48px; padding-bottom: max(48px, calc(env(safe-area-inset-bottom) + 24px)); }
+.hist-empty { font-size: 13px; color: var(--text3); padding: 4px 0; }
+.hist-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.hist-label { flex: 1; color: var(--text2); }
+.hist-date  { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+
+/* WORKOUT NAV */
+.wk-nav {
+  background: rgba(0,0,0,0.85);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px; padding-top: max(16px, calc(env(safe-area-inset-top) + 8px));
+  display: flex; align-items: center; gap: 8px;
+  position: sticky; top: 0; z-index: 30;
+}
+.wk-back {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: none; border: none; color: var(--accent);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: var(--sans); padding: 4px 0; flex-shrink: 0;
+}
+.wk-nav-center { flex: 1; text-align: center; }
+.wk-nav-title  { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+.wk-nav-sub    { font-size: 12px; color: var(--text2); margin-top: 3px; font-family: var(--mono); }
+.wk-nav-spacer { width: 64px; }
+
+/* Segmented progress */
+.seg-track {
+  display: flex; gap: 3px; padding: 0 24px 16px;
+  background: transparent;
+}
+.seg { flex: 1; height: 3px; border-radius: 2px; background: var(--border2); transition: background 0.4s ease; }
+.seg.done   { background: var(--accent); }
+.seg.active { background: var(--accent); opacity: 0.4; }
+
+/* Workout body */
+.wk-body { flex: 1; padding: 20px 24px 40px; padding-bottom: max(40px, calc(env(safe-area-inset-bottom) + 20px)); display: flex; flex-direction: column; gap: 12px; }
+
+/* Exercise header */
+.ex-card {
+  background: none; border: none;
+  padding: 8px 0 0;
+}
+.ex-eyebrow {
+  font-size: 13px; font-weight: 500; color: var(--text3);
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ex-name { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1.05; margin-bottom: 14px; color: var(--text); }
+.ex-labels { display: flex; flex-wrap: wrap; gap: 6px; }
+.ex-label {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: var(--r); padding: 5px 10px;
+  font-size: 11px; font-weight: 600; font-family: var(--mono);
+}
+.ex-label-blue   { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(123,104,255,0.2); }
+.ex-label-gray   { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
+.ex-label-orange { background: rgba(251,191,36,0.1); color: var(--orange); border: 1px solid rgba(251,191,36,0.2); }
+
+/* Video */
+.video-wrap {
+  border-radius: var(--r); overflow: hidden;
+  background: #000; aspect-ratio: 16/9;
+  border: 1px solid var(--border);
+}
+.video-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+
+/* Ref card */
+.ref-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r); padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none; color: var(--text);
+  transition: background 0.12s;
+}
+.ref-card:active { background: var(--surface2); }
+.ref-icon {
+  width: 32px; height: 32px; background: var(--accent-dim);
+  border: 1px solid rgba(123,104,255,0.2); border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); flex-shrink: 0;
+}
+.ref-title { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+.ref-sub   { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* Desc */
+.desc-card {
+  background: var(--surface);
+  border: 1px solid var(--border); border-left: 2px solid rgba(123,104,255,0.4);
+  border-radius: var(--r); padding: 13px 15px;
+  font-size: 13px; line-height: 1.7; color: var(--text2);
+}
+
+/* Cues */
+.cues-card {
+  background: var(--surface);
+  border: none;
+  border-radius: var(--r-xl); overflow: hidden;
+}
+.cues-header {
+  display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+  border-bottom: 1px solid var(--border); background: var(--surface2);
+  font-size: 12px; font-weight: 600; color: var(--text2);
+  font-family: var(--mono);
+}
+.cue-row {
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px; color: var(--text2); line-height: 1.6;
+}
+.cue-row:last-child { border-bottom: none; }
+.cue-icon { color: var(--green); flex-shrink: 0; margin-top: 2px; }
+
+
+/* Set card */
+.set-card {
+  background: var(--surface);
+  border: none;
+  border-radius: var(--r-xl); overflow: hidden;
+}
+.set-card-top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.set-card-label  { font-size: 12px; font-weight: 700; color: var(--text2); display: flex; align-items: center; gap: 6px; font-family: var(--mono); }
+.set-card-detail { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+
+.pips { display: flex; gap: 4px; padding: 14px 18px; }
+.pip { flex: 1; height: 4px; border-radius: 2px; background: var(--border2); transition: background 0.3s; }
+.pip.done   { background: var(--accent); }
+.pip.active { background: var(--accent); opacity: 0.4; }
+
+.reps-block { text-align: center; padding: 28px 0 30px; border-bottom: 1px solid var(--border); }
+.reps-big {
+  font-size: 88px; font-weight: 800; letter-spacing: -5px; line-height: 1;
+  color: var(--text); font-family: var(--mono);
+}
+.reps-unit { font-size: 13px; color: var(--text2); margin-top: 8px; }
+
+.set-card-actions { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; }
+
+/* Buttons */
+.btn-primary {
+  width: 100%;
+  background: #fff;
+  color: #000; border: none;
+  border-radius: 100px; padding: 18px;
+  font-size: 16px; font-weight: 700; cursor: pointer; font-family: var(--sans);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  letter-spacing: -0.2px;
+  transition: opacity 0.15s, transform 0.2s;
+}
+.btn-primary:active { opacity: 0.85; transform: scale(0.97); }
+.btn-primary.finish {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 32px var(--accent-glow);
+}
+
+.btn-ghost {
+  width: 100%; background: none;
+  border: 1px solid var(--border2);
+  color: var(--text2); border-radius: 100px; padding: 14px;
+  font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--sans);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.15s;
+}
+.btn-ghost:active { background: var(--surface); }
+.btn-sm { width: auto; padding: 10px 20px; font-size: 13px; border-radius: 100px; min-width: 96px; }
+
+/* REST TIMER */
+.rest-view {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 24px 22px 28px;
+}
+.rest-eyebrow {
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 6px; font-family: var(--mono);
+}
+.rest-ring-wrap { position: relative; width: 180px; height: 180px; margin-bottom: 18px; }
+.rest-ring-wrap svg { transform: rotate(-90deg); display: block; }
+.ring-bg   { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+.ring-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear, stroke 2s ease, filter 2s ease;
+}
+.rest-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.rest-sec  { font-size: 72px; font-weight: 800; letter-spacing: -3px; line-height: 1; font-family: var(--mono); }
+.rest-unit { font-size: 11px; font-weight: 600; color: var(--text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.12em; font-family: var(--mono); }
+
+.rest-msg  { font-size: 16px; font-weight: 600; color: var(--text2); text-align: center; line-height: 1.5; margin-bottom: 8px; }
+.rest-next { font-size: 13px; color: var(--text3); margin-bottom: 32px; display: flex; align-items: center; gap: 6px; font-family: var(--mono); }
+.rest-btns { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.rest-skip {
+  width: 100%; background: #fff;
+  color: #000; border: none;
+  border-radius: 100px; padding: 18px; font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: var(--sans); display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+  transition: opacity 0.15s, transform 0.2s;
+}
+.rest-skip:active { opacity: 0.85; transform: scale(0.97); }
+.rest-add {
+  width: 100%; background: none; border: none; color: var(--text3);
+  padding: 12px; font-size: 14px; cursor: pointer; font-family: var(--sans);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+/* DONE */
+#screen-done { align-items: center; justify-content: center; text-align: center; padding: 48px 28px; padding-bottom: max(48px, calc(env(safe-area-inset-bottom) + 24px)); }
+.done-icon {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--green-dim); border: 1px solid rgba(52,211,153,0.2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 28px; color: var(--green);
+  box-shadow: 0 0 40px var(--green-glow);
+}
+.done-title { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+.done-sub   { font-size: 16px; color: var(--text3); line-height: 1.6; margin-bottom: 32px; font-weight: 400; }
+.done-stats { display: flex; gap: 8px; margin-bottom: 28px; width: 100%; max-width: 340px; }
+.done-stat  {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 18px 12px; text-align: center;
+}
+.done-stat-n { font-size: 32px; font-weight: 800; letter-spacing: -1px; font-family: var(--mono); color: var(--accent); }
+.done-stat-l { font-size: 11px; color: var(--text3); margin-top: 6px; font-weight: 600; font-family: var(--mono); }
+.done-home-btn {
+  width: 100%; max-width: 340px;
+  background: none; border: 1px solid var(--border2);
+  border-radius: 100px; color: var(--text2); padding: 18px;
+  font-size: 15px; font-weight: 500; cursor: pointer; font-family: var(--sans);
+  transition: background 0.15s, transform 0.2s;
+}
+.done-home-btn:active { background: var(--surface); transform: scale(0.97); }
+
+/* iPad / desktop: center and constrain width */
+@media (min-width: 600px) {
+  body { display: flex; justify-content: center; }
+  .screen { max-width: 480px; width: 100%; }
+}
+
+/* Collapsible video */
+.video-toggle {
+  width: 100%; background: var(--surface);
+  border: 1px solid rgba(123,104,255,0.15);
+  border-radius: var(--r-lg); padding: 14px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; font-family: var(--sans); color: var(--accent);
+  font-size: 13px; font-weight: 600;
+  transition: background 0.15s;
+}
+.video-toggle:active { background: var(--surface2); }
+.video-toggle-left { display: flex; align-items: center; gap: 8px; }
+.video-toggle-chevron { display: inline-flex; transform: rotate(90deg); transition: transform 0.2s ease; color: var(--accent); opacity: 0.6; }
+.video-toggle-chevron.open { transform: rotate(-90deg); }
+.video-collapsible { display: none; }
+.video-collapsible.open { display: block; }
+
+/* Exercise timer card */
+.ex-timer-card {
+  background: none; border: none;
+  padding: 20px 0 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.ex-timer-eyebrow { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; font-family: var(--mono); }
+.ex-timer-ring-wrap { position: relative; width: 180px; height: 180px; filter: drop-shadow(0 0 20px var(--accent-glow)); }
+.ex-timer-ring-wrap svg { transform: rotate(-90deg); display: block; }
+.ex-timer-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ex-timer-sec { font-size: 64px; font-weight: 800; letter-spacing: -3px; line-height: 1; font-family: var(--mono); }
+.ex-timer-unit { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; font-family: var(--mono); }
+@keyframes pulse-green {
+  0%,100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+  50%     { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
+}
+.btn-primary.pulse { animation: pulse-green 0.8s ease-in-out infinite; }
+
+/* Live coaching cue */
+.live-cue {
+  text-align: center; padding: 0 16px;
+  font-size: 15px; font-weight: 500; color: var(--text2);
+  line-height: 1.5; min-height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.4s ease;
+}
+.live-cue.fade { opacity: 0; }
+
+/* Breathing indicator */
+.adem-bar {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 16px;
+  background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.12);
+  border-radius: var(--r); font-size: 13px; color: var(--green);
+  font-family: var(--mono);
+}
+.adem-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  animation: ademPulse 3s ease-in-out infinite;
+}
+@keyframes ademPulse { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+
+/* 1. Breathing circle during rest */
+.breathe-circle {
+  width: 110px; height: 110px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(123,104,255,0.15), transparent 70%);
+  border: 2px solid rgba(123,104,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--accent); font-weight: 600;
+  position: absolute; inset: 0; margin: auto;
+  animation: breathe 8s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,100% { transform: scale(0.7); opacity: 0.4; }
+  25% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(0.7); opacity: 0.4; }
+  75% { transform: scale(1); opacity: 0.8; }
+}
+
+/* 3. Number flip animation */
+@keyframes numTick {
+  0% { transform: scale(1); opacity: 1; }
+  20% { transform: scale(1.06); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.ex-timer-sec.tick { animation: numTick 0.35s ease-out; }
+
+/* 4. Timer ring color shift */
+.ring-fill.progress-good { stroke: var(--green); filter: drop-shadow(0 0 8px var(--green-glow)); }
+.ring-fill.urgent { stroke: var(--red); filter: drop-shadow(0 0 12px var(--red-glow)); animation: ringPulse 1s ease-in-out infinite; }
+@keyframes ringPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+/* 5. Exercise name slide-in */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+.ex-name { animation: slideUp 0.4s ease-out; }
+
+/* 6. Noise texture */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat; background-size: 256px;
+}
+
+/* Confetti canvas */
+#confetti-canvas { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+
+/* Session preview */
+.preview-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 20px; animation: fadeIn 0.2s ease-out;
+}
+.preview-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+}
+.preview-title { font-size: 15px; font-weight: 700; }
+.preview-shuffle {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 6px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--sans);
+  color: var(--accent); display: flex; align-items: center; gap: 5px;
+  transition: opacity 0.15s;
+}
+.preview-shuffle:active { opacity: 0.7; }
+.preview-list {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--surface2); border-radius: var(--r); overflow: hidden;
+  margin-bottom: 4px;
+}
+.preview-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; font-size: 13px;
+}
+.preview-name { font-weight: 600; }
+.preview-meta { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+.preview-action { margin-top: 12px; }
+.preview-action-secondary { margin-top: 6px; }
+
+/* Quick start */
+.quick-section { padding: 0 28px 8px; }
+.quick-section .list-label { text-align: center; margin-bottom: 14px; font-size: 13px; color: var(--text3); font-weight: 400; text-transform: none; letter-spacing: 0; font-family: var(--sans); }
+.quick-card {
+  background: var(--accent);
+  border: none;
+  border-radius: 100px;
+  padding: 20px 32px;
+  cursor: pointer; width: 100%;
+  text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: opacity 0.15s, transform 0.2s;
+  box-shadow: 0 8px 40px rgba(123,104,255,0.4), 0 0 80px rgba(123,104,255,0.15);
+}
+.quick-card:active { opacity: 0.9; transform: scale(0.97); }
+.quick-icon { display: none; }
+.quick-body { }
+.quick-title { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.2px; margin-bottom: 0; }
+.quick-sub { font-size: 12px; color: rgba(255,255,255,0.7); font-family: var(--mono); margin-top: 2px; }
+.quick-chev { display: none; }
+
+/* Session buttons */
+.day-nrg-btn {
+  width: 100%; padding: 16px 14px;
+  border-radius: 100px; font-family: var(--sans);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: opacity 0.15s, transform 0.2s;
+}
+.day-nrg-btn:active { opacity: 0.8; transform: scale(0.97); }
+.day-nrg-low  { background: var(--surface); border: 1px solid var(--border); color: var(--text3); }
+.day-nrg-mid  { background: var(--surface); border: 1px solid var(--border2); color: var(--text2); }
+.day-nrg-high { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); }
+
+/* Featured session button */
+.session-featured {
+  width: 100%; padding: 20px 24px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--r-xl); cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  color: var(--text); font-family: var(--sans);
+  transition: opacity 0.15s, transform 0.2s;
+}
+.session-featured:active { opacity: 0.8; transform: scale(0.98); }
+.session-featured-left { text-align: left; }
+.session-featured-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.session-featured-sub { font-size: 13px; color: var(--text3); }
+
+/* Layout utilities */
+.home-section { padding: 0 28px 16px; }
+.session-grid { display: flex; flex-direction: column; gap: 6px; }
+.session-row  { display: flex; gap: 4px; }
+.session-row > button { flex: 1; }
+.pause-wrap { text-align: center; margin: 4px 0; }
+.list-label--flush { margin-top: 8px; margin-bottom: 0; }
+.pick-body { flex: 1; }
+#session-preview { display: none; padding: 0 24px 16px; }
+#pick-filter { padding: 8px 24px 0; display: flex; gap: 6px; }
+#pick-list { padding: 12px 24px 16px; display: flex; flex-direction: column; gap: 6px; }
+#pick-start-bar {
+  display: none; position: sticky; bottom: 0;
+  padding: 12px 24px; padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
+  background: linear-gradient(transparent, var(--bg) 20%);
+}
+
+/* Focus states (accessibility) */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn-primary:focus-visible { outline-color: var(--green); }
+.pick-item:focus-visible { outline-offset: -2px; }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="home-top">
+    <div class="home-orb"></div>
+    <div class="home-eyebrow" id="home-eyebrow">Herstelschema</div>
+    <div class="home-title">Fysio</div>
+    <div class="streak-pill" id="streak-pill"><span id="streak-text"><b>0</b> dagen op rij</span></div>
+  </div>
+  <section class="quick-section" aria-label="Snelstart">
+    <button class="quick-card" id="quick-card" onclick="startQuick()" aria-label="Start een snelle oefening"></button>
+  </section>
+  <div class="home-list">
+    <div class="list-label">Kies je sessie</div>
+    <div id="session-btns"></div>
+  </div>
+  <div id="session-preview"></div>
+  <div class="home-section">
+    <div class="list-label">Zelf samenstellen</div>
+    <button class="pick-trigger" onclick="showPicker()">
+      <span class="pick-trigger-left">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M3 9h6M15 9h6M3 15h6M15 15h6"/></svg>
+        Kies oefeningen
+      </span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+  <div class="home-history">
+    <div class="list-label">Recente sessies</div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<!-- PICK -->
+<div id="screen-pick" class="screen">
+  <div class="wk-nav">
+    <button class="wk-back" onclick="show('home')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Terug
+    </button>
+    <div class="wk-nav-center">
+      <div class="wk-nav-title">Oefeningen</div>
+      <div class="wk-nav-sub">Bouw of kies een sessie</div>
+    </div>
+    <div class="wk-nav-spacer"></div>
+  </div>
+  <div class="home-section"><div class="list-label">Stel zelf samen</div></div>
+  <div id="pick-filter"></div>
+  <div id="pick-list"></div>
+  <div id="pick-start-bar">
+    <button class="btn-primary" id="pick-start-btn" onclick="startCustom()"></button>
+  </div>
+</div>
+
+<!-- WORKOUT -->
+<div id="screen-workout" class="screen">
+  <div class="wk-nav">
+    <button class="wk-back" id="wk-back-btn" onclick="goHome()">Terug</button>
+    <div class="wk-nav-center">
+      <div class="wk-nav-title" id="wk-title"></div>
+      <div class="wk-nav-sub"   id="wk-sub"></div>
+    </div>
+    <div class="wk-nav-spacer"></div>
+  </div>
+  <div class="seg-track" id="seg-track"></div>
+  <div class="wk-body"   id="wk-body"></div>
+</div>
+
+<!-- DONE -->
+<div id="screen-done" class="screen">
+  <div class="done-icon">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div class="done-title">Goed gedaan</div>
+  <p class="done-sub" id="done-p"></p>
+  <div class="done-stats">
+    <div class="done-stat"><div class="done-stat-n" id="ds-ex">6</div><div class="done-stat-l">Oefeningen</div></div>
+    <div class="done-stat"><div class="done-stat-n" id="ds-sets">18</div><div class="done-stat-l">Sets</div></div>
+    <div class="done-stat"><div class="done-stat-n" id="ds-streak">1</div><div class="done-stat-l">Streak</div></div>
+  </div>
+  <button class="done-home-btn" onclick="goHome()">Terug naar home</button>
+</div>
+<canvas id="confetti-canvas"></canvas>
+
+<script>
+const PATHS={
+  'chevron-right':`<polyline points="9 18 15 12 9 6"/>`,
+  'chevron-left': `<polyline points="15 18 9 12 15 6"/>`,
+  'arrow-right':  `<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>`,
+  'check':        `<polyline points="20 6 9 17 4 12"/>`,
+  'check-circle': `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,
+  'clock':        `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
+  'flame':        `<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/>`,
+  'dumbbell':     `<path d="M6 5v14M18 5v14M3 9h6M15 9h6M3 15h6M15 15h6"/>`,
+  'link2':        `<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>`,
+  'circle':       `<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>`,
+  'play':         `<polygon points="5 3 19 12 5 21 5 3"/>`,
+  'pause':        `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`,
+  'info':         `<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>`,
+  'bag':          `<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>`,
+  'skip':         `<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>`,
+  'plus':         `<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
+  'activity':     `<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>`,
+  'zap':          `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`,
+};
+function ic(n,s=16){ return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${PATHS[n]||''}</svg>`; }
+
+const P={
+  1:[
+    {naam:'Jefferson Curl',sets:3,reps:'6–8',  type:'vimeo',vid:'236884896',notitie:'',gear:'Dumbbell',adem:'Uit bij afrollen, in bij oprollen',cues:['Rol je wervelkolom op wervel voor wervel — begin bij het hoofd','Houd de knieën licht gebogen gedurende de hele beweging','Houd het gewicht dicht bij je lichaam']},
+    {naam:'Goblet Squat',  sets:3,reps:'10–12',type:'vimeo',vid:'169669956',notitie:'12 kg',gear:'Kettlebell',adem:'In bij zakken, uit bij opstaan',cues:['Houd de kettlebell dicht tegen je borst','Knieën wijzen in de richting van je tenen','Hak blijft volledig op de grond tijdens de beweging']},
+    {naam:'Pallof Press',  sets:3,reps:'10',   type:'yt',  vid:'Y0e2w0aKOXw',notitie:'',gear:'Band',adem:'Uit bij uitstrekken, in bij terugtrekken',cues:['Houd je kern actief en je rug recht','Strek de armen langzaam en gecontroleerd uit','Laat je romp niet mee draaien bij het uitstrekken']},
+    {naam:'Face Pull',     sets:3,reps:'12',   type:'yt',  vid:'0GRycI5CXnM',notitie:'',gear:'Band',adem:'Uit bij trekken, in bij loslaten',cues:['Trek naar je voorhoofd — ellebogen omhoog','Schouderbladen naar elkaar toe in de eindpositie','Langzame, gecontroleerde beweging terug']},
+    {naam:'Side Bends',    sets:3,reps:'10',   type:'yt',  vid:'mjRUPpMh988',notitie:'',gear:'Dumbbell',adem:'Uit bij buigen, in bij terugkomen',cues:['Beweeg recht naar opzij — niet naar voren of achteren','Houd beide heupen op dezelfde hoogte','Voel de rek aan de zijkant van je romp']},
+    {naam:'Been zijwaarts heffen',sets:3,reps:'12',type:'vimeo',vid:'183702383',notitie:'Per kant',gear:'',adem:'Uit bij heffen, in bij zakken',cues:['Houd je romp stabiel — niet scheef zakken','Beweeg langzaam en gecontroleerd omhoog en omlaag','Houd een lichte spanning in je bilspier gedurende de beweging']},
+    {naam:'Heupbuiger mobilisatie',sets:3,reps:'10',type:'yt',vid:'bnVfloe6yTo',notitie:'Per kant',gear:'Yogablok',adem:'Uit bij optillen, in bij zakken',cues:['Knie op het blokje, handen op de grond','Til de knie langzaam op en laat gecontroleerd zakken','Houd je romp stabiel — beweeg vanuit de heup']},
+    {naam:'Heupbuiger stretch',sets:3,reps:'30s',type:'yt',vid:'iZ1eZBY4fwM',notitie:'Per kant',gear:'Yogablok',adem:'Rustig doorademen, uit bij dieper zakken',cues:['Voet op het blokje, knie 90°','Duw je heup langzaam naar voren','Houd je romp rechtop — niet voorover leunen']},
+    {naam:'Bekkenbodem',   sets:3,reps:'12',   type:'text',notitie:'Op buik met bal',gear:'Bal',adem:'Uit bij aanspannen en optillen',desc:'Ga op je buik liggen met de bal tussen je enkels. Bekken plat op de grond, voorhoofd op je handen. Adem uit: buig je benen, druk op de bal en til je benen 1 cm op — echt maar een heel klein beetje.',cues:['Houd je bekken plat op de grond tijdens de hele oefening','Adem volledig uit voordat je de benen optilt','De beweging is klein — kwaliteit boven kwantiteit']},
+  ],
+  2:[
+    {naam:'Jefferson Curl',sets:3,reps:'6–8',  type:'vimeo',vid:'236884896',notitie:'',gear:'Dumbbell',adem:'Uit bij afrollen, in bij oprollen',cues:['Rol je wervelkolom op wervel voor wervel — begin bij het hoofd','Houd de knieën licht gebogen gedurende de hele beweging','Houd het gewicht dicht bij je lichaam']},
+    {naam:'Split Squats',  sets:3,reps:'8',    type:'yt',  vid:'SGHnCftrZkA',notitie:'Per kant',gear:'',adem:'In bij zakken, uit bij opstaan',cues:['Houd je voorste knie boven je voet — niet te ver naar voren','Romp blijft recht omhoog, niet naar voren leunen','Achterste knie rustig en gecontroleerd naar de grond']},
+    {naam:'Liggende Press',sets:3,reps:'8–10', type:'yt',  vid:'NubSSALIqsU',notitie:'7 kg',gear:'Dumbbell',adem:'Uit bij omhoog duwen, in bij zakken',cues:['Houd je onderrug plat op de onderlaag','Ellebogen licht naar binnen tijdens de beweging','Gecontroleerd zakken, krachtig omhoog duwen']},
+    {naam:'Curtsy lunge',  sets:3,reps:'8–10', type:'yt',  vid:'WAW-2ehQ1GM',notitie:'Per been',gear:'',adem:'In bij zakken, uit bij opstaan',cues:['Stap achterwaarts en kruis het been achter je standbeen','Houd je voorste knie boven je voet — niet naar binnen zakken','Romp rechtop — niet naar voren leunen']},
+    {naam:'Bruggetjes',    sets:3,reps:'12–15',type:'text',notitie:'',gear:'',adem:'Uit bij optillen, in bij zakken',desc:'Lig op je rug met gebogen knieën, voeten op de grond. Duw je heupen omhoog tot een rechte lijn van knieën tot schouders. Houd even vast en laat langzaam zakken.',cues:['Duw via je hielen omhoog — niet via je tenen','Span je bilspieren actief aan in de bovenste positie','Houd je bekken horizontaal — niet scheef laten zakken']},
+    {naam:'Heupbuiger mobilisatie',sets:3,reps:'10',type:'yt',vid:'bnVfloe6yTo',notitie:'Per kant',gear:'Yogablok',adem:'Uit bij optillen, in bij zakken',cues:['Knie op het blokje, handen op de grond','Til de knie langzaam op en laat gecontroleerd zakken','Houd je romp stabiel — beweeg vanuit de heup']},
+    {naam:'Heupbuiger stretch',sets:3,reps:'30s',type:'yt',vid:'iZ1eZBY4fwM',notitie:'Per kant',gear:'Yogablok',adem:'Rustig doorademen, uit bij dieper zakken',cues:['Voet op het blokje, knie 90°','Duw je heup langzaam naar voren','Houd je romp rechtop — niet voorover leunen']},
+    {naam:'Bekkenbodem',   sets:3,reps:'12',   type:'text',notitie:'Tafelpositie',gear:'Bal',adem:'Uit bij spreiden van de knieën',desc:'Plaats de bal onder je heiligbeen. Breng je benen in tafelpositie. Plak de binnenkant van je voeten tegen elkaar. Adem uit: spreid je knieën zo ver mogelijk uit elkaar terwijl je voeten bij elkaar blijven.',cues:['Houd de bal stabiel onder je heiligbeen','Beweeg rustig en gecontroleerd vanuit je heupen','Adem bewust uit bij het spreiden van de knieën']},
+  ],
+  3:[
+    {naam:'Side Bends',    sets:3,reps:'10',   type:'yt',  vid:'mjRUPpMh988',notitie:'Per kant',gear:'Dumbbell',adem:'Uit bij buigen, in bij terugkomen',cues:['Beweeg recht naar opzij — niet naar voren of achteren','Houd beide heupen op dezelfde hoogte','Voel de rek aan de zijkant van je romp']},
+    {naam:'Goblet Squat',  sets:3,reps:'12',   type:'vimeo',vid:'169669956',notitie:'',gear:'Kettlebell',adem:'In bij zakken, uit bij opstaan',cues:['Houd de kettlebell dicht tegen je borst','Knieën wijzen in de richting van je tenen','Hak blijft volledig op de grond tijdens de beweging']},
+    {naam:'Pallof Press',  sets:3,reps:'10',   type:'yt',  vid:'Y0e2w0aKOXw',notitie:'',gear:'Band',adem:'Uit bij uitstrekken, in bij terugtrekken',cues:['Houd je kern actief en je rug recht','Strek de armen langzaam en gecontroleerd uit','Laat je romp niet mee draaien bij het uitstrekken']},
+    {naam:'Face Pull',     sets:3,reps:'10–12',type:'yt',  vid:'0GRycI5CXnM',notitie:'',gear:'Band',adem:'Uit bij trekken, in bij loslaten',cues:['Trek naar je voorhoofd — ellebogen omhoog','Schouderbladen naar elkaar toe in de eindpositie','Langzame, gecontroleerde beweging terug']},
+    {naam:'Liggende Press',sets:3,reps:'8–10', type:'yt',  vid:'NubSSALIqsU',notitie:'',gear:'Dumbbell',adem:'Uit bij omhoog duwen, in bij zakken',cues:['Houd je onderrug plat op de onderlaag','Ellebogen licht naar binnen tijdens de beweging','Gecontroleerd zakken, krachtig omhoog duwen']},
+    {naam:'Been zijwaarts heffen',sets:3,reps:'12',type:'vimeo',vid:'183702383',notitie:'Per kant',gear:'',adem:'Uit bij heffen, in bij zakken',cues:['Houd je romp stabiel — niet scheef zakken','Beweeg langzaam en gecontroleerd omhoog en omlaag','Houd een lichte spanning in je bilspier gedurende de beweging']},
+    {naam:'Heupbuiger mobilisatie',sets:3,reps:'10',type:'yt',vid:'bnVfloe6yTo',notitie:'Per kant',gear:'Yogablok',adem:'Uit bij optillen, in bij zakken',cues:['Knie op het blokje, handen op de grond','Til de knie langzaam op en laat gecontroleerd zakken','Houd je romp stabiel — beweeg vanuit de heup']},
+    {naam:'Heupbuiger stretch',sets:3,reps:'30s',type:'yt',vid:'iZ1eZBY4fwM',notitie:'Per kant',gear:'Yogablok',adem:'Rustig doorademen, uit bij dieper zakken',cues:['Voet op het blokje, knie 90°','Duw je heup langzaam naar voren','Houd je romp rechtop — niet voorover leunen']},
+    {naam:'Bekkenbodem',   sets:3,reps:'12',   type:'text',notitie:'Zijligging · per kant',gear:'Bal',adem:'Uit bij been omhoog brengen',desc:'In zijligging: laat het bovenste been langs het andere been glijden en breng het omhoog. Druk tegelijkertijd met een gestrekte arm in de bal. Adem in — laat met een uitademing het been zakken.',cues:['Houd je romp stabiel — niet naar voren of achteren kantelen','Druk bewust en gelijkmatig met je arm in de bal','De beweging komt vanuit je heup, niet je rug']},
+  ],
+};
+
+const SPR={ // seconden per herhaling
+  'Jefferson Curl':5,'Goblet Squat':3,'Pallof Press':3,'Face Pull':3,
+  'Side Bends':3,'Bekkenbodem':3,'Split Squats':4,'Liggende Press':3,'Bruggetjes':3,
+  'Been zijwaarts heffen':3,'Curtsy lunge':4,'Heupbuiger mobilisatie':3,'Heupbuiger stretch':1,
+};
+const ALTIJD_PER_KANT=['Side Bends','Split Squats','Been zijwaarts heffen','Curtsy lunge','Heupbuiger mobilisatie','Heupbuiger stretch'];
+function calcSetDur(o){
+  const parts=o.reps.split(/[–\-]/);
+  const avg=parts.length===2?(parseInt(parts[0])+parseInt(parts[1]))/2:parseInt(parts[0]);
+  const perKant=ALTIJD_PER_KANT.includes(o.naam)||o.notitie.toLowerCase().includes('kant');
+  return Math.round(avg*(SPR[o.naam]||3)*(perKant?2:1));
+}
+function calcExsDuration(exs){
+  const totalSets=exs.reduce((s,o)=>s+o.sets,0);
+  const work=exs.reduce((s,o)=>s+o.sets*calcSetDur(o),0);
+  return Math.round((work+(totalSets-1)*REST_SECS)/60);
+}
+let st={day:null,ex:0,set:0,history:[],exercises:[],mode:null,circuit:false,circuitOrder:[],step:0};
+let nextExPending=false,restInterval=null,setTimerInterval=null,breatheInterval=null;
+
+function buildCircuitOrder(exs){
+  const maxSets=Math.max(...exs.map(o=>o.sets));
+  const order=[];
+  for(let r=0;r<maxSets;r++) for(let e=0;e<exs.length;e++) if(r<exs[e].sets) order.push({ex:e,set:r});
+  return order;
+}
+function initCircuit(){
+  if(!st.circuit||st.exercises.length<2)return;
+  st.circuitOrder=buildCircuitOrder(st.exercises);
+  st.step=0;st.ex=st.circuitOrder[0].ex;st.set=st.circuitOrder[0].set;
+}
+function advanceCircuit(){
+  st.step++;
+  if(st.step>=st.circuitOrder.length)return false;
+  st.ex=st.circuitOrder[st.step].ex;st.set=st.circuitOrder[st.step].set;
+  return true;
+}
+const REST_SECS=45;
+const COACH=['Goed gedaan. Even bijkomen.','Sterke set. Haal adem.','Lekker bezig — bijna klaar.','Top! Blijf gefocust.','Geweldig. Nog even.','Knap! Klaar voor de volgende?'];
+
+function load(){
+  try{const d=localStorage.getItem('fysio-v6');if(d)st.history=JSON.parse(d);}catch(e){}
+  renderHome();
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('mode')==='quick') startQuick();
+}
+function save(){ try{localStorage.setItem('fysio-v6',JSON.stringify(st.history));}catch(e){} }
+function today(){ return new Date().toISOString().split('T')[0]; }
+function fmtDate(d){ return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'}); }
+function getStreak(){ const days=new Set(st.history.map(h=>h.datum));let s=0,d=new Date();while(true){const k=d.toISOString().split('T')[0];if(days.has(k)){s++;d.setDate(d.getDate()-1);}else break;}return s; }
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0); }
+
+function renderHome(){
+  document.getElementById('home-eyebrow').innerHTML=ic('activity',12)+' Herstelschema';
+  const streak=getStreak();
+  document.getElementById('streak-pill').innerHTML=ic('flame',13)+` <span><b>${streak}</b> dag${streak!==1?'en':''} op rij</span>`;
+
+  // Quick card
+  const qp=getQuickPick();
+  document.getElementById('quick-card').innerHTML=`
+    <div class="quick-body">
+      <div class="quick-title">Start een oefening</div>
+      <div class="quick-sub">${qp.naam}</div>
+    </div>`;
+
+  document.getElementById('session-btns').innerHTML=`
+    <div class="session-grid">
+      <button class="session-featured" onclick="buildSession(10,false)">
+        <div class="session-featured-left">
+          <div class="session-featured-title">${ic('clock',14)} 10 minuten</div>
+          <div class="session-featured-sub">Meest gekozen · perfecte balans</div>
+        </div>
+        ${ic('chevron-right',16)}
+      </button>
+      <div class="session-row">
+        <button class="day-nrg-btn day-nrg-low" onclick="buildSession(5,false)">5 min</button>
+        <button class="day-nrg-btn day-nrg-mid" onclick="buildSession(15,false)">15 min</button>
+        <button class="day-nrg-btn day-nrg-high" onclick="buildSession(25,false)">25 min</button>
+      </div>
+      <div class="list-label list-label--flush">Zonder spullen</div>
+      <div class="session-row">
+        <button class="day-nrg-btn day-nrg-low" onclick="buildSession(5,true)">${ic('zap',10)} 5 min</button>
+        <button class="day-nrg-btn day-nrg-mid" onclick="buildSession(10,true)">${ic('zap',10)} 10 min</button>
+        <button class="day-nrg-btn day-nrg-mid" onclick="buildSession(15,true)">${ic('zap',10)} 15 min</button>
+      </div>
+    </div>`;
+
+  const recent=[...st.history].reverse().slice(0,7);
+  document.getElementById('history-list').innerHTML=recent.length===0
+    ?`<div class="hist-empty">Nog geen sessies — start je eerste training</div>`
+    :recent.map(h=>{
+      const label=h.count?`${h.count} oefening${h.count>1?'en':''} gedaan`:h.dag?`Dag ${h.dag} voltooid`:'Sessie voltooid';
+      return `<div class="hist-item"><div class="hist-dot"></div><div class="hist-label">${label}</div><div class="hist-date">${fmtDate(h.datum)}</div></div>`;
+    }).join('');
+}
+
+function triggerWatchWorkout(){
+  if(!/iPhone/.test(navigator.userAgent)) return;
+  try{ window.location.href='shortcuts://run-shortcut?name=Start%20core%20work-out'; }catch(e){}
+}
+function toggleVideo(){
+  const c=document.getElementById('video-content'),ch=document.getElementById('video-chev');
+  if(!c)return;
+  const open=c.classList.toggle('open');
+  if(ch)ch.classList.toggle('open',open);
+}
+let setTimerPaused=false;
+let setTimerSecs=0;
+let setTimerDur=0;
+let liveCueInterval=null;
+let liveCues=[];
+function startLiveCues(cues){
+  clearInterval(liveCueInterval);
+  if(!cues||cues.length===0)return;
+  liveCues=[...cues,'Goed zo, blijf gefocust','Adem rustig door'];
+  let idx=0;
+  const el=document.getElementById('live-cue');
+  if(!el)return;
+  function showCue(){
+    el.classList.add('fade');
+    setTimeout(()=>{el.textContent=liveCues[idx%liveCues.length];el.classList.remove('fade');idx++;},400);
+  }
+  showCue();
+  liveCueInterval=setInterval(showCue,5000);
+}
+function startSetTimer(dur){
+  clearInterval(setTimerInterval);clearInterval(liveCueInterval);
+  setTimerPaused=false;
+  setTimerDur=dur;
+  setTimerSecs=dur;
+  const circ=2*Math.PI*78;
+  const ring=document.getElementById('ex-ring'),label=document.getElementById('ex-timer-sec');
+  if(!label)return;
+  if(ring){ring.style.strokeDasharray=circ;ring.style.strokeDashoffset=0;ring.classList.remove('urgent');}
+  label.textContent=dur;
+  updatePauseBtn();
+  setTimerInterval=setInterval(()=>{
+    if(setTimerPaused)return;
+    setTimerSecs--;
+    const r=document.getElementById('ex-ring'),l=document.getElementById('ex-timer-sec');
+    if(!l){clearInterval(setTimerInterval);return;}
+    const pct=Math.max(0,setTimerSecs/setTimerDur);
+    if(r){
+      r.style.strokeDashoffset=circ*(1-pct);
+      if(setTimerSecs<=10){r.classList.add('urgent');r.classList.remove('progress-good');}
+      else if(pct<0.35){r.classList.add('progress-good');r.classList.remove('urgent');}
+    }
+    l.textContent=setTimerSecs>0?setTimerSecs:'—';
+    l.classList.remove('tick');void l.offsetWidth;l.classList.add('tick');
+    if(setTimerSecs<=0){clearInterval(setTimerInterval);clearInterval(liveCueInterval);playBeep();document.querySelector('#wk-body .btn-primary')?.classList.add('pulse');}
+  },1000);
+}
+function togglePauseTimer(){
+  setTimerPaused=!setTimerPaused;
+  updatePauseBtn();
+}
+function updatePauseBtn(){
+  const btn=document.getElementById('pause-btn');
+  if(!btn)return;
+  btn.innerHTML=setTimerPaused
+    ?`${ic('play',13)} Hervat`
+    :`${ic('pause',13)} Pauze`;
+}
+function getQuickPick(){
+  const seen=new Set();
+  const all=[1,2,3].flatMap(d=>P[d]).filter(o=>{if(seen.has(o.naam))return false;seen.add(o.naam);return true;});
+  const dayOfYear=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
+  return all[dayOfYear%all.length];
+}
+function startQuick(){
+  const ex=getQuickPick();
+  st.day=null;st.exercises=[ex];st.mode='single';st.circuit=false;
+  st.ex=0;st.set=0;renderWorkout();show('workout');
+}
+function togglePick(naam,el){
+  if(pickSelected.has(naam)){pickSelected.delete(naam);el.classList.remove('selected');el.querySelector('.pick-check').innerHTML='';}
+  else{pickSelected.add(naam);el.classList.add('selected');el.querySelector('.pick-check').innerHTML=ic('check',12);}
+  updatePickBar();
+}
+function updatePickBar(){
+  const bar=document.getElementById('pick-start-bar'),btn=document.getElementById('pick-start-btn');
+  if(!bar)return;
+  const n=pickSelected.size;
+  if(n===0){bar.style.display='none';return;}
+  bar.style.display='block';
+  const exs=getExsByNames([...pickSelected]);
+  const dur=calcExsDuration(exs);
+  btn.innerHTML=`${ic('check',15)} Start ${n} oefening${n>1?'en':''} · ~${dur} min`;
+}
+function getExsByNames(names){
+  const seen=new Set();
+  return [1,2,3].flatMap(d=>P[d]).filter(o=>{if(seen.has(o.naam)||!names.includes(o.naam))return false;seen.add(o.naam);return true;});
+}
+function startCustom(){
+  const exs=getExsByNames([...pickSelected]);
+  if(exs.length===0)return;
+  st.day=null;st.exercises=exs;st.mode=exs.length===1?'single':'short';
+  st.circuit=exs.length>1;st.ex=0;st.set=0;initCircuit();
+  renderWorkout();show('workout');
+}
+function startSingle(naam){
+  for(const d of [1,2,3]){const o=P[d].find(x=>x.naam===naam);if(o){st.day=null;st.exercises=[o];st.mode='single';st.circuit=false;st.ex=0;st.set=0;renderWorkout();show('workout');return;}}
+}
+let pickSelected=new Set();
+function showPicker(filter){
+  cancelPreview();
+  pickSelected.clear();
+  updatePickBar();
+  const seen=new Set();
+  const all=[1,2,3].flatMap(d=>P[d]).filter(o=>{if(seen.has(o.naam))return false;seen.add(o.naam);return true;});
+  const filtered=filter==='no-gear'?all.filter(o=>!o.gear):all;
+  document.getElementById('pick-filter').innerHTML=`
+    <button class="pick-filter-btn${!filter?' active':''}" onclick="showPicker()">Alles</button>
+    <button class="pick-filter-btn${filter==='no-gear'?' active':''}" onclick="showPicker('no-gear')">Zonder spullen</button>`;
+  document.getElementById('pick-list').innerHTML=filtered.map(o=>{
+    const pk=ALTIJD_PER_KANT.includes(o.naam)||o.notitie.toLowerCase().includes('kant')||o.notitie.toLowerCase().includes('been');
+    const gearLabel=o.gear?o.gear:'Geen spullen';
+    const gearClass=o.gear?'pick-gear':'pick-gear pick-gear-free';
+    const esc=o.naam.replace(/'/g,"\\'");
+    return `<button class="pick-item" data-naam="${o.naam}" onclick="togglePick('${esc}',this)">
+      <div class="pick-check"></div>
+      <div class="pick-body"><div class="pick-item-name">${o.naam}</div><div class="pick-item-sub">${o.sets}×${o.reps}${pk?' · per kant':''} · <span class="${gearClass}">${gearLabel}</span></div></div>
+    </button>`;
+  }).join('');
+  show('pick');
+}
+let pendingSession=null;
+function pickSessionExercises(minutes,noGear){
+  const seen=new Set();
+  const pool=[1,2,3].flatMap(d=>P[d]).filter(o=>{
+    if(seen.has(o.naam))return false;seen.add(o.naam);
+    if(noGear&&o.gear)return false;
+    return true;
+  });
+  const shuffled=[...pool].sort(()=>Math.random()-0.5);
+  const target=minutes*60;let total=0;const result=[];
+  for(const o of shuffled){
+    const exDur=o.sets*calcSetDur(o)+(o.sets-1)*REST_SECS;
+    if(result.length>=1&&total+exDur>target) break;
+    total+=exDur+(result.length>0?REST_SECS:0);
+    result.push(o);
+  }
+  return result;
+}
+function buildSession(minutes,noGear){
+  const result=pickSessionExercises(minutes,noGear);
+  if(result.length===0) return;
+  pendingSession={exercises:result,minutes,noGear};
+  showSessionPreview();
+}
+function showSessionPreview(){
+  const s=pendingSession;if(!s)return;
+  const dur=calcExsDuration(s.exercises);
+  const prev=document.getElementById('session-preview');
+  prev.style.display='block';
+  prev.innerHTML=`
+    <div class="preview-card">
+      <div class="preview-header">
+        <span class="preview-title">${s.exercises.length} oefeningen · ~${dur} min</span>
+        <button class="preview-shuffle" onclick="reshuffleSession()">${ic('activity',12)} Shuffle</button>
+      </div>
+      <div class="preview-list">${s.exercises.map(o=>{
+        const pk=ALTIJD_PER_KANT.includes(o.naam);
+        return `<div class="preview-item"><span class="preview-name">${o.naam}</span><span class="preview-meta">${o.sets}×${o.reps}${pk?' per kant':''}</span></div>`;
+      }).join('')}</div>
+      <button class="btn-primary preview-action" onclick="startPendingSession()">${ic('zap',15)} Start sessie</button>
+      <button class="btn-ghost preview-action-secondary" onclick="cancelPreview()">Annuleer</button>
+    </div>`;
+  prev.scrollIntoView({behavior:'smooth'});
+}
+function reshuffleSession(){
+  if(!pendingSession)return;
+  pendingSession.exercises=pickSessionExercises(pendingSession.minutes,pendingSession.noGear);
+  showSessionPreview();
+}
+function startPendingSession(){
+  if(!pendingSession)return;
+  const result=pendingSession.exercises;
+  pendingSession=null;
+  document.getElementById('session-preview').style.display='none';
+  st.day=null;st.exercises=result;st.mode='short';st.circuit=result.length>1;
+  st.ex=0;st.set=0;initCircuit();renderWorkout();show('workout');
+  setTimeout(triggerWatchWorkout,300);
+}
+function cancelPreview(){
+  pendingSession=null;
+  document.getElementById('session-preview').style.display='none';
+}
+function goHome(){ clearInterval(restInterval);clearInterval(setTimerInterval);clearInterval(liveCueInterval);clearInterval(breatheInterval);nextExPending=false;st.day=null;cancelPreview();renderHome();show('home'); }
+
+function renderWorkout(){
+  const oefs=st.exercises,o=oefs[st.ex],n=oefs.length;
+  const title=st.mode==='single'?o.naam:`Sessie · ${n} oefeningen`;
+  document.getElementById('wk-title').textContent=title;
+  const maxRounds=st.circuit?Math.max(...oefs.map(x=>x.sets)):0;
+  const subText=st.circuit?`Ronde ${st.set+1} van ${maxRounds} · Oefening ${st.ex+1} van ${n}`
+    :n===1?`${o.sets} sets`:`Oefening ${st.ex+1} van ${n}`;
+  document.getElementById('wk-sub').textContent=subText;
+  document.getElementById('wk-back-btn').innerHTML=ic('chevron-left',16)+' Terug';
+  if(st.circuit){
+    const tot=st.circuitOrder.length;
+    document.getElementById('seg-track').innerHTML=Array.from({length:tot},(_,i)=>`<div class="seg${i<st.step?' done':i===st.step?' active':''}"></div>`).join('');
+  } else {
+    document.getElementById('seg-track').innerHTML=Array.from({length:n},(_,i)=>`<div class="seg${i<st.ex?' done':i===st.ex?' active':''}"></div>`).join('');
+  }
+
+  const isLast=st.circuit?st.step===st.circuitOrder.length-1:false;
+  const isLastSet=st.circuit?isLast:(st.set===o.sets-1);
+  const isLastEx=st.circuit?isLast:(st.ex===oefs.length-1);
+  const perKant=ALTIJD_PER_KANT.includes(o.naam)||o.notitie.toLowerCase().includes('kant')||o.notitie.toLowerCase().includes('been');
+  const pips=Array.from({length:o.sets},(_,i)=>`<div class="pip${i<st.set?' done':i===st.set?' active':''}"></div>`).join('');
+
+  const exCirc=(2*Math.PI*78).toFixed(1);
+  const exTimerHtml=`<div class="ex-timer-card">
+    <div class="ex-timer-eyebrow">${ic('clock',10)} Timer</div>
+    <div class="ex-timer-ring-wrap">
+      <svg viewBox="0 0 180 180" width="180" height="180">
+        <circle class="ring-bg" cx="90" cy="90" r="78"/>
+        <circle class="ring-fill" cx="90" cy="90" r="78" id="ex-ring"
+          stroke-dasharray="${exCirc}" stroke-dashoffset="0"/>
+      </svg>
+      <div class="ex-timer-center">
+        <div class="ex-timer-sec" id="ex-timer-sec">${calcSetDur(o)}</div>
+        <div class="ex-timer-unit">sec</div>
+      </div>
+    </div>
+  </div>
+  <div class="live-cue" id="live-cue"></div>
+  ${o.adem?`<div class="adem-bar"><div class="adem-dot"></div>${o.adem}</div>`:''}
+  <div class="pause-wrap">
+    <button id="pause-btn" class="btn-ghost btn-sm" onclick="togglePauseTimer()"></button>
+  </div>`;
+
+  let videoHtml='';
+  if(o.type==='yt') videoHtml=`<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${o.vid}?rel=0&modestbranding=1" allow="accelerometer;autoplay;encrypted-media" allowfullscreen></iframe></div>`;
+  else if(o.type==='vimeo') videoHtml=`<div class="video-wrap"><iframe src="https://player.vimeo.com/video/${o.vid}?color=7b68ff&title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+  let media='';
+  if(videoHtml) media=`<button class="video-toggle" onclick="toggleVideo()"><span class="video-toggle-left">${ic('play',12)} Bekijk video</span><span id="video-chev" class="video-toggle-chevron">${ic('chevron-right',13)}</span></button><div id="video-content" class="video-collapsible">${videoHtml}</div>`;
+  else if(o.type==='link') media=`<a href="${o.url}" target="_blank" class="ref-card"><div class="ref-icon">${ic('play',13)}</div><div><div class="ref-title">Bekijk uitleg</div><div class="ref-sub">opent in nieuwe tab</div></div></a>`;
+  if(o.desc) media+=`<div class="desc-card">${o.desc}</div>`;
+
+  const cuesHtml=o.cues?`<div class="cues-card">
+    <div class="cues-header">${ic('info',13)} Aandachtspunten</div>
+    ${o.cues.map(c=>`<div class="cue-row"><div class="cue-icon">${ic('check',13)}</div><div>${c}</div></div>`).join('')}
+  </div>`:'';
+
+  const btnLabel=isLastSet&&isLastEx?'Training afronden'
+    :st.circuit?'Volgende'
+    :isLastSet?'Volgende oefening'
+    :`Set ${st.set+1} gedaan`;
+  const gearTag=o.gear
+    ?`<span class="gear-tag gear-tag-need">${o.gear}</span>`
+    :`<span class="gear-tag gear-tag-free">Geen spullen</span>`;
+  const exLabels=[
+    o.notitie?`<span class="ex-label ex-label-blue">${ic('info',10)} ${o.notitie}</span>`:'',
+    `<span class="ex-label ex-label-gray">${o.sets}×${o.reps}</span>`,
+    perKant?`<span class="ex-label ex-label-orange">per kant</span>`:'',
+    gearTag,
+  ].filter(Boolean).join('');
+
+  document.getElementById('wk-body').innerHTML=`
+    <div class="ex-card">
+      <div class="ex-eyebrow">${ic('activity',11)} Oefening ${st.ex+1} van ${oefs.length}</div>
+      <div class="ex-name">${o.naam}</div>
+      <div class="ex-labels">${exLabels}</div>
+    </div>
+    ${exTimerHtml}
+    ${media}
+    ${cuesHtml}
+    <div class="set-card">
+      <div class="set-card-top">
+        <span class="set-card-label">${ic('activity',12)} Set ${st.set+1} van ${o.sets}</span>
+        <span class="set-card-detail">${o.reps}${o.reps.includes('s')?'':' herh.'}${perKant?' per kant':''}</span>
+      </div>
+      <div class="pips">${pips}</div>
+      <div class="reps-block">
+        <div class="reps-big">${o.reps.replace('s','')}</div>
+        <div class="reps-unit">${o.reps.includes('s')?'seconden vasthouden':'herhalingen'}${perKant?' per kant':''}</div>
+      </div>
+      <div class="set-card-actions">
+        <button class="btn-primary${isLastSet&&isLastEx?' finish':''}" onclick="completeSet()">
+          ${ic('check',15)} ${btnLabel}
+        </button>
+        <button class="btn-ghost" onclick="skipEx()">
+          ${ic('skip',13)} Oefening overslaan
+        </button>
+      </div>
+    </div>`;
+  startSetTimer(calcSetDur(o));
+  startLiveCues(o.cues);
+}
+
+function completeSet(){
+  clearInterval(setTimerInterval);
+  if(st.circuit){
+    if(!advanceCircuit()){finish();return;}
+    showRest('exercise');
+  } else {
+    const oefs=st.exercises,o=oefs[st.ex];
+    if(st.set<o.sets-1){st.set++;showRest('set');}
+    else if(st.ex<oefs.length-1){nextExPending=true;showRest('exercise');}
+    else finish();
+  }
+}
+function skipEx(){
+  clearInterval(setTimerInterval);nextExPending=false;clearInterval(restInterval);
+  if(st.circuit){
+    const skipIdx=st.ex;
+    st.circuitOrder=st.circuitOrder.filter((s,i)=>i<=st.step||s.ex!==skipIdx);
+    if(!advanceCircuit()){finish();return;}
+  } else {
+    st.ex++;st.set=0;if(st.ex>=st.exercises.length){finish();return;}
+  }
+  renderWorkout();window.scrollTo(0,0);
+}
+
+function showRest(type){
+  clearInterval(setTimerInterval);
+  clearInterval(restInterval);
+  let secs=REST_SECS;
+  const circ=2*Math.PI*80;
+  const msg=COACH[Math.floor(Math.random()*COACH.length)];
+  let nextName=null;
+  if(st.circuit&&st.step<st.circuitOrder.length) nextName=st.exercises[st.circuitOrder[st.step].ex].naam;
+  else if(!st.circuit&&type==='exercise'&&st.ex+1<st.exercises.length) nextName=st.exercises[st.ex+1].naam;
+
+  function draw(s){
+    const offset=circ*(1-s/REST_SECS),urgent=s<=10;
+    document.getElementById('wk-body').innerHTML=`
+      <div class="rest-view">
+        <div class="rest-eyebrow">${ic('clock',12)} Rust</div>
+        <div class="rest-ring-wrap">
+          <svg viewBox="0 0 180 180" width="180" height="180">
+            <circle class="ring-bg"   cx="90" cy="90" r="80"/>
+            <circle class="ring-fill${urgent?' urgent':''}" cx="90" cy="90" r="80"
+              stroke-dasharray="${circ}" stroke-dashoffset="${offset}" id="rest-ring"/>
+          </svg>
+          <div class="breathe-circle" id="breathe-label">Adem in...</div>
+          <div class="rest-center">
+            <div class="rest-sec" id="rest-num">${s}</div>
+            <div class="rest-unit">sec</div>
+          </div>
+        </div>
+        <div class="rest-msg">${msg}</div>
+        ${nextName?`<div class="rest-next">${ic('arrow-right',12)} Volgende: ${nextName}</div>`:''}
+        <div class="rest-btns">
+          <button class="rest-skip" onclick="skipRest()">${ic('check',15)} Ik ben klaar</button>
+          <button class="rest-add"  onclick="addRest()">${ic('plus',12)} 15 seconden extra rust</button>
+        </div>
+      </div>`;
+  }
+  draw(secs);
+  clearInterval(breatheInterval);
+  let breathePhase=0;
+  const breatheLabels=['Adem in...','Adem uit...'];
+  breatheInterval=setInterval(()=>{
+    const bl=document.getElementById('breathe-label');
+    if(bl){breathePhase=(breathePhase+1)%2;bl.textContent=breatheLabels[breathePhase];}
+  },4000);
+  restInterval=setInterval(()=>{
+    secs--;
+    const n=document.getElementById('rest-num'),r=document.getElementById('rest-ring');
+    if(!n){clearInterval(restInterval);return;}
+    n.textContent=secs;r.style.strokeDashoffset=circ*(1-secs/REST_SECS);
+    if(secs<=10)r.classList.add('urgent');
+    if(secs<=0){clearInterval(restInterval);playBeep();skipRest();}
+  },1000);
+}
+
+function skipRest(){ clearInterval(restInterval);if(!st.circuit&&nextExPending){nextExPending=false;st.ex++;st.set=0;}renderWorkout();window.scrollTo(0,0); }
+function addRest(){
+  const n=document.getElementById('rest-num');if(!n)return;
+  let secs=(parseInt(n.textContent)||0)+15;clearInterval(restInterval);
+  const circ=2*Math.PI*80;
+  const tick=()=>{const n=document.getElementById('rest-num'),r=document.getElementById('rest-ring');if(!n){clearInterval(restInterval);return;}n.textContent=secs;r.style.strokeDashoffset=circ*(1-Math.min(secs,REST_SECS)/REST_SECS);if(secs<=10)r.classList.add('urgent');if(secs<=0){clearInterval(restInterval);playBeep();skipRest();}secs--;};
+  tick();restInterval=setInterval(tick,1000);
+}
+function playBeep(){
+  try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[0,.15,.3].forEach(t=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;o.type='sine';g.gain.setValueAtTime(.25,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.12);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.15);});}catch(e){}
+}
+function launchConfetti(){
+  const c=document.getElementById('confetti-canvas');if(!c)return;
+  c.width=window.innerWidth;c.height=window.innerHeight;
+  const ctx=c.getContext('2d');
+  const colors=['#7b68ff','#34d399','#fbbf24','#f43f5e','#a78bfa','#67e8f9'];
+  const particles=Array.from({length:60},()=>({
+    x:Math.random()*c.width,y:Math.random()*-c.height*0.5,
+    w:Math.random()*6+3,h:Math.random()*4+2,
+    color:colors[Math.floor(Math.random()*colors.length)],
+    vy:Math.random()*3+2,vx:(Math.random()-0.5)*2,
+    rot:Math.random()*360,vr:Math.random()*8-4,
+    opacity:1
+  }));
+  let frame=0;
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    let alive=false;
+    particles.forEach(p=>{
+      p.y+=p.vy;p.x+=p.vx;p.rot+=p.vr;
+      if(frame>60)p.opacity=Math.max(0,p.opacity-0.015);
+      if(p.opacity<=0)return;
+      alive=true;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
+      ctx.globalAlpha=p.opacity;ctx.fillStyle=p.color;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();
+    });
+    frame++;
+    if(alive)requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,c.width,c.height);
+  }
+  draw();
+}
+function finish(){
+  const oefs=st.exercises;
+  st.history.push({datum:today(),count:oefs.length});
+  save();
+  document.getElementById('ds-ex').textContent=oefs.length;
+  document.getElementById('ds-sets').textContent=oefs.reduce((s,o)=>s+o.sets,0);
+  document.getElementById('ds-streak').textContent=getStreak();
+  const msg=oefs.length===1?`${oefs[0].naam} gedaan. Goed bezig!`:`${oefs.length} oefeningen gedaan. Goed bezig!`;
+  document.getElementById('done-p').textContent=msg;
+  st.day=null;st.mode=null;show('done');
+  setTimeout(launchConfetti,200);
+}
+
+load();
+</script>
+</body>
+</html>
