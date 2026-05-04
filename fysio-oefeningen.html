@@ -164,6 +164,30 @@ body::before {
 .day-chev { color: var(--text3); flex-shrink: 0; margin-top: 10px; }
 .day-card.done .day-chev { color: var(--green); }
 
+/* Watch setup banner */
+.watch-banner {
+  margin: 0 20px 12px;
+  background: rgba(88,166,255,0.08);
+  border: 1px solid rgba(88,166,255,0.2);
+  border-top-color: rgba(88,166,255,0.3);
+  border-radius: var(--r-lg);
+  padding: 13px 15px;
+  display: flex; align-items: flex-start; gap: 11px;
+  backdrop-filter: blur(12px);
+}
+.watch-banner-icon {
+  font-size: 20px; flex-shrink: 0; margin-top: 1px;
+}
+.watch-banner-body { flex: 1; }
+.watch-banner-title { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 3px; }
+.watch-banner-text  { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.watch-banner-steps { font-size: 11px; color: var(--text3); margin-top: 6px; line-height: 1.6; }
+.watch-banner-close {
+  background: none; border: none; color: var(--text3);
+  font-size: 18px; cursor: pointer; padding: 0; line-height: 1;
+  flex-shrink: 0; margin-top: -1px;
+}
+
 /* History */
 .home-history { padding: 20px 20px 40px; }
 .hist-empty { font-size: 13px; color: var(--text3); padding: 4px 2px; }
@@ -471,6 +495,20 @@ body::before {
     <div class="home-sub">3-daags herstelschema</div>
     <div class="streak-pill" id="streak-pill"><span id="streak-text"><b>0</b> dagen op rij</span></div>
   </div>
+  <div id="watch-banner" class="watch-banner" style="display:none">
+    <div class="watch-banner-icon">⌚</div>
+    <div class="watch-banner-body">
+      <div class="watch-banner-title">Apple Watch koppelen</div>
+      <div class="watch-banner-text">Maak 1x een Shortcut op je iPhone/Mac om automatisch een Core Training te starten.</div>
+      <div class="watch-banner-steps">
+        1. Open de <b>Shortcuts</b>-app op iPhone of Mac<br>
+        2. Maak een nieuwe shortcut: voeg actie <b>"Start Workout"</b> toe<br>
+        3. Kies <b>Core Training</b> als type<br>
+        4. Noem de shortcut exact: <b>Start Core Workout</b>
+      </div>
+    </div>
+    <button class="watch-banner-close" onclick="dismissWatchBanner()">×</button>
+  </div>
   <div class="home-list">
     <div class="list-label">Trainingen</div>
     <div id="day-cards"></div>
@@ -600,7 +638,17 @@ function renderHome(){
     :recent.map(h=>`<div class="hist-item"><div class="hist-dot"></div><div class="hist-label">Dag ${h.dag} voltooid</div><div class="hist-date">${fmtDate(h.datum)}</div></div>`).join('');
 }
 
-function startDay(d){ st.day=d;st.ex=0;st.set=0;renderWorkout();show('workout'); }
+function triggerWatchWorkout(){
+  try{ window.location.href='shortcuts://run-shortcut?name=Start%20Core%20Workout'; }catch(e){}
+}
+function dismissWatchBanner(){
+  document.getElementById('watch-banner').style.display='none';
+  try{ localStorage.setItem('fysio-watch-banner','1'); }catch(e){}
+}
+function showWatchBannerIfNeeded(){
+  try{ if(!localStorage.getItem('fysio-watch-banner')) document.getElementById('watch-banner').style.display='flex'; }catch(e){}
+}
+function startDay(d){ st.day=d;st.ex=0;st.set=0;triggerWatchWorkout();renderWorkout();show('workout'); }
 function goHome(){ clearInterval(restInterval);nextExPending=false;st.day=null;renderHome();show('home'); }
 
 function renderWorkout(){
@@ -738,6 +786,7 @@ function finish(){
 }
 
 load();
+showWatchBannerIfNeeded();
 </script>
 </body>
 </html>
