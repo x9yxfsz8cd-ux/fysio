@@ -483,6 +483,17 @@ body::before {
   transition: background 0.15s;
 }
 .done-home-btn:active { background: rgba(255,255,255,0.1); }
+
+/* Set timer */
+.set-timer { padding: 12px 16px 4px; }
+.set-timer-bar-wrap { background: rgba(255,255,255,0.07); border-radius: 3px; height: 4px; overflow: hidden; }
+.set-timer-bar { height: 100%; background: var(--accent); border-radius: 3px; transition: width 1s linear; }
+.set-timer-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-top: 5px; font-family: var(--mono); }
+@keyframes pulse-green {
+  0%,100% { box-shadow: 0 2px 12px var(--green-glow), 0 1px 0 rgba(255,255,255,0.1) inset; }
+  50%     { box-shadow: 0 4px 28px rgba(63,185,80,0.65), 0 1px 0 rgba(255,255,255,0.1) inset; }
+}
+.btn-primary.pulse { animation: pulse-green 0.8s ease-in-out infinite; }
 </style>
 </head>
 <body>
@@ -601,9 +612,18 @@ const P={
   ],
 };
 
+const DUR={
+  'Jefferson Curl':35,'Goblet Squat':35,'Pallof Press':30,'Face Pull':35,
+  'Side Bends':60,'Bekkenbodem':35,'Split Squats':60,'Liggende Press':30,'Bruggetjes':40,
+};
+function calcDayDuration(d){
+  const oefs=P[d],totalSets=oefs.reduce((s,o)=>s+o.sets,0);
+  const work=oefs.reduce((s,o)=>s+o.sets*(DUR[o.naam]||30),0);
+  return Math.round((work+(totalSets-1)*REST_SECS)/60);
+}
 let st={day:null,ex:0,set:0,history:[]};
-let nextExPending=false,restInterval=null;
-const REST_SECS=60;
+let nextExPending=false,restInterval=null,setTimerInterval=null;
+const REST_SECS=45;
 const COACH=['Goed gedaan. Even bijkomen.','Sterke set. Haal adem.','Lekker bezig — bijna klaar.','Top! Blijf gefocust.','Geweldig. Nog even.','Knap! Klaar voor de volgende?'];
 
 function load(){ try{const d=localStorage.getItem('fysio-v6');if(d)st.history=JSON.parse(d);}catch(e){} renderHome(); }
@@ -620,7 +640,8 @@ function renderHome(){
   const t=today();
   document.getElementById('day-cards').innerHTML=[1,2,3].map(d=>{
     const done=st.history.some(h=>h.dag===d&&h.datum===t);
-    const tags=EQUIP[d].map(e=>`<span class="day-tag">${ic(e.i,10)} ${e.n.includes('Lichtere')?'Lichtere dumbbell':e.n.split(' of ')[0]}</span>`).join('');
+    const durTag=`<span class="day-tag">${ic('clock',10)} ~${calcDayDuration(d)} min</span>`;
+    const tags=durTag+EQUIP[d].map(e=>`<span class="day-tag">${ic(e.i,10)} ${e.n.includes('Lichtere')?'Lichtere dumbbell':e.n.split(' of ')[0]}</span>`).join('');
     return `<button class="day-card${done?' done':''}" onclick="startDay(${d})">
       <div class="day-badge">${done?ic('check',16):d}</div>
       <div class="day-body">
@@ -648,8 +669,24 @@ function dismissWatchBanner(){
 function showWatchBannerIfNeeded(){
   try{ if(!localStorage.getItem('fysio-watch-banner')) document.getElementById('watch-banner').style.display='flex'; }catch(e){}
 }
+function startSetTimer(dur){
+  clearInterval(setTimerInterval);
+  let secs=dur;
+  const bar=document.getElementById('set-timer-bar'),label=document.getElementById('set-timer-secs');
+  if(!bar)return;
+  bar.style.width='100%';
+  if(label)label.textContent=secs+'s';
+  setTimerInterval=setInterval(()=>{
+    secs--;
+    const b=document.getElementById('set-timer-bar'),l=document.getElementById('set-timer-secs');
+    if(!b){clearInterval(setTimerInterval);return;}
+    b.style.width=Math.max(0,secs/dur*100)+'%';
+    if(l)l.textContent=secs>0?secs+'s':'Klaar!';
+    if(secs<=0){clearInterval(setTimerInterval);playBeep();document.querySelector('#wk-body .btn-primary')?.classList.add('pulse');}
+  },1000);
+}
 function startDay(d){ st.day=d;st.ex=0;st.set=0;triggerWatchWorkout();renderWorkout();show('workout'); }
-function goHome(){ clearInterval(restInterval);nextExPending=false;st.day=null;renderHome();show('home'); }
+function goHome(){ clearInterval(restInterval);clearInterval(setTimerInterval);nextExPending=false;st.day=null;renderHome();show('home'); }
 
 function renderWorkout(){
   const oefs=P[st.day],o=oefs[st.ex],n=oefs.length;
@@ -703,6 +740,10 @@ function renderWorkout(){
         <div class="reps-big">${o.reps}</div>
         <div class="reps-unit">herhalingen${perKant?' per kant':''}</div>
       </div>
+      <div class="set-timer" id="set-timer">
+        <div class="set-timer-bar-wrap"><div class="set-timer-bar" id="set-timer-bar" style="width:100%"></div></div>
+        <div class="set-timer-meta"><span id="set-timer-secs">${DUR[o.naam]||30}s</span><span>~${DUR[o.naam]||30}s</span></div>
+      </div>
       <div class="set-card-actions">
         <button class="btn-primary${isLastSet&&isLastEx?' finish':''}" onclick="completeSet()">
           ${ic('check',15)} ${btnLabel}
@@ -712,17 +753,20 @@ function renderWorkout(){
         </button>
       </div>
     </div>`;
+  startSetTimer(DUR[o.naam]||30);
 }
 
 function completeSet(){
+  clearInterval(setTimerInterval);
   const o=P[st.day][st.ex];
   if(st.set<o.sets-1){st.set++;showRest('set');}
   else if(st.ex<P[st.day].length-1){nextExPending=true;showRest('exercise');}
   else finish();
 }
-function skipEx(){ nextExPending=false;clearInterval(restInterval);st.ex++;st.set=0;renderWorkout();window.scrollTo(0,0); }
+function skipEx(){ clearInterval(setTimerInterval);nextExPending=false;clearInterval(restInterval);st.ex++;st.set=0;renderWorkout();window.scrollTo(0,0); }
 
 function showRest(type){
+  clearInterval(setTimerInterval);
   clearInterval(restInterval);
   let secs=REST_SECS;
   const circ=2*Math.PI*90;
