@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0c0c0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fysio">
 <title>Fysio Oefeningen</title>
 <style>
 :root {
@@ -84,7 +88,7 @@ body::before {
 .streak-pill b { color: var(--orange); }
 
 /* Day cards */
-.home-list { padding: 16px 20px 0; display: flex; flex-direction: column; gap: 6px; }
+.home-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; }
 .list-label {
   font-size: 10px; font-weight: 600; color: var(--text3);
   text-transform: uppercase; letter-spacing: 0.14em;
@@ -391,6 +395,12 @@ body::before {
 }
 .done-home-btn:active { background: var(--surface2); }
 
+/* iPad / desktop: center and constrain width */
+@media (min-width: 600px) {
+  body { display: flex; justify-content: center; background: #000; }
+  .screen { max-width: 500px; width: 100%; background: var(--bg); }
+}
+
 /* Set timer */
 .set-timer { padding: 10px 14px 4px; }
 .set-timer-bar-wrap { background: var(--surface3); height: 3px; overflow: hidden; }
@@ -572,7 +582,7 @@ function startSetTimer(dur){
     if(secs<=0){clearInterval(setTimerInterval);playBeep();document.querySelector('#wk-body .btn-primary')?.classList.add('pulse');}
   },1000);
 }
-function startDay(d){ st.day=d;st.ex=0;st.set=0;triggerWatchWorkout();renderWorkout();show('workout'); }
+function startDay(d){ st.day=d;st.ex=0;st.set=0;renderWorkout();show('workout');setTimeout(triggerWatchWorkout,300); }
 function goHome(){ clearInterval(restInterval);clearInterval(setTimerInterval);nextExPending=false;st.day=null;renderHome();show('home'); }
 
 function renderWorkout(){
@@ -650,7 +660,7 @@ function completeSet(){
   else if(st.ex<P[st.day].length-1){nextExPending=true;showRest('exercise');}
   else finish();
 }
-function skipEx(){ clearInterval(setTimerInterval);nextExPending=false;clearInterval(restInterval);st.ex++;st.set=0;renderWorkout();window.scrollTo(0,0); }
+function skipEx(){ clearInterval(setTimerInterval);nextExPending=false;clearInterval(restInterval);st.ex++;st.set=0;if(st.ex>=P[st.day].length){finish();return;}renderWorkout();window.scrollTo(0,0); }
 
 function showRest(type){
   clearInterval(setTimerInterval);
@@ -698,7 +708,7 @@ function showRest(type){
 function skipRest(){ clearInterval(restInterval);if(nextExPending){nextExPending=false;st.ex++;st.set=0;}renderWorkout();window.scrollTo(0,0); }
 function addRest(){
   const n=document.getElementById('rest-num');if(!n)return;
-  let secs=parseInt(n.textContent)+15;clearInterval(restInterval);
+  let secs=(parseInt(n.textContent)||0)+15;clearInterval(restInterval);
   const circ=2*Math.PI*90;
   const tick=()=>{const n=document.getElementById('rest-num'),r=document.getElementById('rest-ring');if(!n){clearInterval(restInterval);return;}n.textContent=secs;r.style.strokeDashoffset=circ*(1-secs/REST_SECS);if(secs<=10)r.classList.add('urgent');if(secs<=0){clearInterval(restInterval);playBeep();skipRest();}secs--;};
   tick();restInterval=setInterval(tick,1000);
