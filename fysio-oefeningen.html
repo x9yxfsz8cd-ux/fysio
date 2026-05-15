@@ -553,6 +553,7 @@ function renderHome(){
 }
 
 function triggerWatchWorkout(){
+  if(!/iPhone/.test(navigator.userAgent)) return;
   try{ window.location.href='shortcuts://run-shortcut?name=Start%20core%20work-out'; }catch(e){}
 }
 function startSetTimer(dur){
