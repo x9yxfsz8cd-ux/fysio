@@ -538,13 +538,20 @@ const P={
   ],
 };
 
-const DUR={
-  'Jefferson Curl':35,'Goblet Squat':35,'Pallof Press':30,'Face Pull':35,
-  'Side Bends':60,'Bekkenbodem':35,'Split Squats':60,'Liggende Press':30,'Bruggetjes':40,
+const SPR={ // seconden per herhaling
+  'Jefferson Curl':5,'Goblet Squat':3,'Pallof Press':3,'Face Pull':3,
+  'Side Bends':3,'Bekkenbodem':3,'Split Squats':4,'Liggende Press':3,'Bruggetjes':3,
 };
+const ALTIJD_PER_KANT=['Side Bends','Split Squats'];
+function calcSetDur(o){
+  const parts=o.reps.split(/[–\-]/);
+  const avg=parts.length===2?(parseInt(parts[0])+parseInt(parts[1]))/2:parseInt(parts[0]);
+  const perKant=ALTIJD_PER_KANT.includes(o.naam)||o.notitie.toLowerCase().includes('kant');
+  return Math.round(avg*(SPR[o.naam]||3)*(perKant?2:1));
+}
 function calcDayDuration(d){
   const oefs=P[d],totalSets=oefs.reduce((s,o)=>s+o.sets,0);
-  const work=oefs.reduce((s,o)=>s+o.sets*(DUR[o.naam]||30),0);
+  const work=oefs.reduce((s,o)=>s+o.sets*calcSetDur(o),0);
   return Math.round((work+(totalSets-1)*REST_SECS)/60);
 }
 let st={day:null,ex:0,set:0,history:[]};
@@ -642,7 +649,7 @@ function renderWorkout(){
           stroke-dasharray="${exCirc}" stroke-dashoffset="0"/>
       </svg>
       <div class="ex-timer-center">
-        <div class="ex-timer-sec" id="ex-timer-sec">${DUR[o.naam]||30}</div>
+        <div class="ex-timer-sec" id="ex-timer-sec">${calcSetDur(o)}</div>
         <div class="ex-timer-unit">sec</div>
       </div>
     </div>
@@ -697,7 +704,7 @@ function renderWorkout(){
         </button>
       </div>
     </div>`;
-  startSetTimer(DUR[o.naam]||30);
+  startSetTimer(calcSetDur(o));
 }
 
 function completeSet(){
