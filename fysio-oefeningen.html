@@ -401,6 +401,22 @@ body::before {
   .screen { max-width: 500px; width: 100%; background: var(--bg); }
 }
 
+/* Collapsible video */
+.video-toggle {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 11px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; font-family: var(--mono); color: var(--text2);
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+  transition: background 0.12s;
+}
+.video-toggle:active { background: var(--surface2); }
+.video-toggle-left { display: flex; align-items: center; gap: 7px; }
+.video-toggle-chevron { display: inline-flex; transform: rotate(90deg); transition: transform 0.2s; color: var(--accent); }
+.video-toggle-chevron.open { transform: rotate(-90deg); }
+.video-collapsible { display: none; }
+.video-collapsible.open { display: block; }
+
 /* Exercise timer card */
 .ex-timer-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -573,6 +589,12 @@ function triggerWatchWorkout(){
   if(!/iPhone/.test(navigator.userAgent)) return;
   try{ window.location.href='shortcuts://run-shortcut?name=Start%20core%20work-out'; }catch(e){}
 }
+function toggleVideo(){
+  const c=document.getElementById('video-content'),ch=document.getElementById('video-chev');
+  if(!c)return;
+  const open=c.classList.toggle('open');
+  if(ch)ch.classList.toggle('open',open);
+}
 function startSetTimer(dur){
   clearInterval(setTimerInterval);
   const circ=2*Math.PI*70;
@@ -587,7 +609,7 @@ function startSetTimer(dur){
     if(!l){clearInterval(setTimerInterval);return;}
     const pct=Math.max(0,secs/dur);
     if(r){r.style.strokeDashoffset=circ*(1-pct);if(secs<=10)r.classList.add('urgent');}
-    l.textContent=secs>0?secs:'✓';
+    l.textContent=secs>0?secs:'—';
     if(secs<=0){clearInterval(setTimerInterval);playBeep();document.querySelector('#wk-body .btn-primary')?.classList.add('pulse');}
   },1000);
 }
@@ -626,9 +648,11 @@ function renderWorkout(){
     </div>
   </div>`;
 
+  let videoHtml='';
+  if(o.type==='yt') videoHtml=`<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${o.vid}?rel=0&modestbranding=1" allow="accelerometer;autoplay;encrypted-media" allowfullscreen></iframe></div>`;
+  else if(o.type==='vimeo') videoHtml=`<div class="video-wrap"><iframe src="https://player.vimeo.com/video/${o.vid}?color=7b68ff&title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
   let media='';
-  if(o.type==='yt') media=`<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${o.vid}?rel=0&modestbranding=1" allow="accelerometer;autoplay;encrypted-media" allowfullscreen></iframe></div>`;
-  else if(o.type==='vimeo') media=`<div class="video-wrap"><iframe src="https://player.vimeo.com/video/${o.vid}?color=7b68ff&title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+  if(videoHtml) media=`<button class="video-toggle" onclick="toggleVideo()"><span class="video-toggle-left">${ic('play',12)} Bekijk video</span><span id="video-chev" class="video-toggle-chevron">${ic('chevron-right',13)}</span></button><div id="video-content" class="video-collapsible">${videoHtml}</div>`;
   else if(o.type==='link') media=`<a href="${o.url}" target="_blank" class="ref-card"><div class="ref-icon">${ic('play',13)}</div><div><div class="ref-title">Bekijk uitleg</div><div class="ref-sub">opent in nieuwe tab</div></div></a>`;
   if(o.desc) media+=`<div class="desc-card">${o.desc}</div>`;
 
