@@ -401,11 +401,18 @@ body::before {
   .screen { max-width: 500px; width: 100%; background: var(--bg); }
 }
 
-/* Set timer */
-.set-timer { padding: 10px 14px 4px; }
-.set-timer-bar-wrap { background: var(--surface3); height: 3px; overflow: hidden; }
-.set-timer-bar { height: 100%; background: var(--accent); transition: width 1s linear; }
-.set-timer-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+/* Exercise timer card */
+.ex-timer-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 20px 16px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.ex-timer-eyebrow { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+.ex-timer-ring-wrap { position: relative; width: 160px; height: 160px; }
+.ex-timer-ring-wrap svg { transform: rotate(-90deg); display: block; }
+.ex-timer-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ex-timer-sec { font-size: 56px; font-weight: 700; letter-spacing: -2px; line-height: 1; font-family: var(--mono); }
+.ex-timer-unit { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; margin-top: 4px; }
 @keyframes pulse-green {
   0%,100% { box-shadow: 0 0 0 0 rgba(0,230,118,0.5); }
   50%     { box-shadow: 0 0 0 8px rgba(0,230,118,0); }
@@ -491,15 +498,15 @@ const EQUIP={
 const DAY_SUB={1:'Jefferson curl · Goblet squat · Pallof · Face pull · Side bends · Bekkenbodem',2:'Jefferson curl · Split squats · Liggende press · Bruggetjes · Bekkenbodem',3:'Side bends · Goblet squat · Pallof · Face pull · Liggende press · Bekkenbodem'};
 const P={
   1:[
-    {naam:'Jefferson Curl',sets:3,reps:'6–8',  type:'link',url:'https://fysiofabriek.nl/oefeningen/jefferson-curl/',notitie:'',cues:['Rol je wervelkolom op wervel voor wervel — begin bij het hoofd','Houd de knieën licht gebogen gedurende de hele beweging','Houd het gewicht dicht bij je lichaam']},
-    {naam:'Goblet Squat',  sets:3,reps:'10–12',type:'link',url:'https://fysiofabriek.nl/oefeningen/goblet-squat/', notitie:'12 kg',cues:['Houd de kettlebell dicht tegen je borst','Knieën wijzen in de richting van je tenen','Hak blijft volledig op de grond tijdens de beweging']},
+    {naam:'Jefferson Curl',sets:3,reps:'6–8',  type:'vimeo',vid:'236884896',notitie:'',cues:['Rol je wervelkolom op wervel voor wervel — begin bij het hoofd','Houd de knieën licht gebogen gedurende de hele beweging','Houd het gewicht dicht bij je lichaam']},
+    {naam:'Goblet Squat',  sets:3,reps:'10–12',type:'vimeo',vid:'169669956',notitie:'12 kg',cues:['Houd de kettlebell dicht tegen je borst','Knieën wijzen in de richting van je tenen','Hak blijft volledig op de grond tijdens de beweging']},
     {naam:'Pallof Press',  sets:3,reps:'10',   type:'yt',  vid:'Y0e2w0aKOXw',notitie:'',cues:['Houd je kern actief en je rug recht','Strek de armen langzaam en gecontroleerd uit','Laat je romp niet mee draaien bij het uitstrekken']},
     {naam:'Face Pull',     sets:3,reps:'12',   type:'yt',  vid:'0GRycI5CXnM',notitie:'',cues:['Trek naar je voorhoofd — ellebogen omhoog','Schouderbladen naar elkaar toe in de eindpositie','Langzame, gecontroleerde beweging terug']},
     {naam:'Side Bends',    sets:3,reps:'10',   type:'yt',  vid:'mjRUPpMh988',notitie:'',cues:['Beweeg recht naar opzij — niet naar voren of achteren','Houd beide heupen op dezelfde hoogte','Voel de rek aan de zijkant van je romp']},
     {naam:'Bekkenbodem',   sets:3,reps:'12',   type:'text',notitie:'Op buik met bal',desc:'Ga op je buik liggen met de bal tussen je enkels. Bekken plat op de grond, voorhoofd op je handen. Adem uit: buig je benen, druk op de bal en til je benen 1 cm op — echt maar een heel klein beetje.',cues:['Houd je bekken plat op de grond tijdens de hele oefening','Adem volledig uit voordat je de benen optilt','De beweging is klein — kwaliteit boven kwantiteit']},
   ],
   2:[
-    {naam:'Jefferson Curl',sets:3,reps:'6–8',  type:'link',url:'https://fysiofabriek.nl/oefeningen/jefferson-curl/',notitie:'',cues:['Rol je wervelkolom op wervel voor wervel — begin bij het hoofd','Houd de knieën licht gebogen gedurende de hele beweging','Houd het gewicht dicht bij je lichaam']},
+    {naam:'Jefferson Curl',sets:3,reps:'6–8',  type:'vimeo',vid:'236884896',notitie:'',cues:['Rol je wervelkolom op wervel voor wervel — begin bij het hoofd','Houd de knieën licht gebogen gedurende de hele beweging','Houd het gewicht dicht bij je lichaam']},
     {naam:'Split Squats',  sets:3,reps:'8',    type:'yt',  vid:'SGHnCftrZkA',notitie:'Per kant',cues:['Houd je voorste knie boven je voet — niet te ver naar voren','Romp blijft recht omhoog, niet naar voren leunen','Achterste knie rustig en gecontroleerd naar de grond']},
     {naam:'Liggende Press',sets:3,reps:'8–10', type:'yt',  vid:'NubSSALIqsU',notitie:'7 kg',cues:['Houd je onderrug plat op de onderlaag','Ellebogen licht naar binnen tijdens de beweging','Gecontroleerd zakken, krachtig omhoog duwen']},
     {naam:'Bruggetjes',    sets:3,reps:'12–15',type:'text',notitie:'',desc:'Lig op je rug met gebogen knieën, voeten op de grond. Duw je heupen omhoog tot een rechte lijn van knieën tot schouders. Houd even vast en laat langzaam zakken.',cues:['Duw via je hielen omhoog — niet via je tenen','Span je bilspieren actief aan in de bovenste positie','Houd je bekken horizontaal — niet scheef laten zakken']},
@@ -507,7 +514,7 @@ const P={
   ],
   3:[
     {naam:'Side Bends',    sets:3,reps:'10',   type:'yt',  vid:'mjRUPpMh988',notitie:'Per kant',cues:['Beweeg recht naar opzij — niet naar voren of achteren','Houd beide heupen op dezelfde hoogte','Voel de rek aan de zijkant van je romp']},
-    {naam:'Goblet Squat',  sets:3,reps:'12',   type:'link',url:'https://fysiofabriek.nl/oefeningen/goblet-squat/', notitie:'',cues:['Houd de kettlebell dicht tegen je borst','Knieën wijzen in de richting van je tenen','Hak blijft volledig op de grond tijdens de beweging']},
+    {naam:'Goblet Squat',  sets:3,reps:'12',   type:'vimeo',vid:'169669956',notitie:'',cues:['Houd de kettlebell dicht tegen je borst','Knieën wijzen in de richting van je tenen','Hak blijft volledig op de grond tijdens de beweging']},
     {naam:'Pallof Press',  sets:3,reps:'10',   type:'yt',  vid:'Y0e2w0aKOXw',notitie:'',cues:['Houd je kern actief en je rug recht','Strek de armen langzaam en gecontroleerd uit','Laat je romp niet mee draaien bij het uitstrekken']},
     {naam:'Face Pull',     sets:3,reps:'10–12',type:'yt',  vid:'0GRycI5CXnM',notitie:'',cues:['Trek naar je voorhoofd — ellebogen omhoog','Schouderbladen naar elkaar toe in de eindpositie','Langzame, gecontroleerde beweging terug']},
     {naam:'Liggende Press',sets:3,reps:'8–10', type:'yt',  vid:'NubSSALIqsU',notitie:'',cues:['Houd je onderrug plat op de onderlaag','Ellebogen licht naar binnen tijdens de beweging','Gecontroleerd zakken, krachtig omhoog duwen']},
@@ -544,7 +551,7 @@ function renderHome(){
   document.getElementById('day-cards').innerHTML=[1,2,3].map(d=>{
     const done=st.history.some(h=>h.dag===d&&h.datum===t);
     const durTag=`<span class="day-tag">${ic('clock',10)} ~${calcDayDuration(d)} min</span>`;
-    const tags=durTag+EQUIP[d].map(e=>`<span class="day-tag">${ic(e.i,10)} ${e.n.includes('Lichtere')?'Lichtere dumbbell':e.n.split(' of ')[0]}</span>`).join('');
+    const tags=durTag+P[d].map(o=>`<span class="day-tag">${o.naam}</span>`).join('');
     return `<button class="day-card${done?' done':''}" onclick="startDay(${d})">
       <div class="day-badge">${done?ic('check',16):d}</div>
       <div class="day-body">
@@ -568,17 +575,19 @@ function triggerWatchWorkout(){
 }
 function startSetTimer(dur){
   clearInterval(setTimerInterval);
+  const circ=2*Math.PI*70;
   let secs=dur;
-  const bar=document.getElementById('set-timer-bar'),label=document.getElementById('set-timer-secs');
-  if(!bar)return;
-  bar.style.width='100%';
-  if(label)label.textContent=secs+'s';
+  const ring=document.getElementById('ex-ring'),label=document.getElementById('ex-timer-sec');
+  if(!label)return;
+  if(ring){ring.style.strokeDasharray=circ;ring.style.strokeDashoffset=0;ring.classList.remove('urgent');}
+  label.textContent=secs;
   setTimerInterval=setInterval(()=>{
     secs--;
-    const b=document.getElementById('set-timer-bar'),l=document.getElementById('set-timer-secs');
-    if(!b){clearInterval(setTimerInterval);return;}
-    b.style.width=Math.max(0,secs/dur*100)+'%';
-    if(l)l.textContent=secs>0?secs+'s':'Klaar!';
+    const r=document.getElementById('ex-ring'),l=document.getElementById('ex-timer-sec');
+    if(!l){clearInterval(setTimerInterval);return;}
+    const pct=Math.max(0,secs/dur);
+    if(r){r.style.strokeDashoffset=circ*(1-pct);if(secs<=10)r.classList.add('urgent');}
+    l.textContent=secs>0?secs:'✓';
     if(secs<=0){clearInterval(setTimerInterval);playBeep();document.querySelector('#wk-body .btn-primary')?.classList.add('pulse');}
   },1000);
 }
@@ -601,9 +610,26 @@ function renderWorkout(){
     ${EQUIP[st.day].map(e=>`<div class="equip-item"><div class="equip-item-icon">${ic(e.i,13)}</div><div><div>${e.n}</div><div class="equip-item-sub">${e.s}</div></div></div>`).join('')}
   </div>`:'';
 
+  const exCirc=(2*Math.PI*70).toFixed(1);
+  const exTimerHtml=`<div class="ex-timer-card">
+    <div class="ex-timer-eyebrow">${ic('clock',10)} Timer</div>
+    <div class="ex-timer-ring-wrap">
+      <svg viewBox="0 0 160 160" width="160" height="160">
+        <circle class="ring-bg" cx="80" cy="80" r="70"/>
+        <circle class="ring-fill" cx="80" cy="80" r="70" id="ex-ring"
+          stroke-dasharray="${exCirc}" stroke-dashoffset="0"/>
+      </svg>
+      <div class="ex-timer-center">
+        <div class="ex-timer-sec" id="ex-timer-sec">${DUR[o.naam]||30}</div>
+        <div class="ex-timer-unit">sec</div>
+      </div>
+    </div>
+  </div>`;
+
   let media='';
   if(o.type==='yt') media=`<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${o.vid}?rel=0&modestbranding=1" allow="accelerometer;autoplay;encrypted-media" allowfullscreen></iframe></div>`;
-  else if(o.type==='link') media=`<a href="${o.url}" target="_blank" class="ref-card"><div class="ref-icon">${ic('play',13)}</div><div><div class="ref-title">Bekijk uitleg</div><div class="ref-sub">fysiofabriek.nl — opent in nieuwe tab</div></div></a>`;
+  else if(o.type==='vimeo') media=`<div class="video-wrap"><iframe src="https://player.vimeo.com/video/${o.vid}?color=7b68ff&title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+  else if(o.type==='link') media=`<a href="${o.url}" target="_blank" class="ref-card"><div class="ref-icon">${ic('play',13)}</div><div><div class="ref-title">Bekijk uitleg</div><div class="ref-sub">opent in nieuwe tab</div></div></a>`;
   if(o.desc) media+=`<div class="desc-card">${o.desc}</div>`;
 
   const cuesHtml=o.cues?`<div class="cues-card">
@@ -625,6 +651,7 @@ function renderWorkout(){
       <div class="ex-name">${o.naam}</div>
       <div class="ex-labels">${exLabels}</div>
     </div>
+    ${exTimerHtml}
     ${media}
     ${cuesHtml}
     <div class="set-card">
@@ -636,10 +663,6 @@ function renderWorkout(){
       <div class="reps-block">
         <div class="reps-big">${o.reps}</div>
         <div class="reps-unit">herhalingen${perKant?' per kant':''}</div>
-      </div>
-      <div class="set-timer" id="set-timer">
-        <div class="set-timer-bar-wrap"><div class="set-timer-bar" id="set-timer-bar" style="width:100%"></div></div>
-        <div class="set-timer-meta"><span id="set-timer-secs">${DUR[o.naam]||30}s</span><span>~${DUR[o.naam]||30}s</span></div>
       </div>
       <div class="set-card-actions">
         <button class="btn-primary${isLastSet&&isLastEx?' finish':''}" onclick="completeSet()">
