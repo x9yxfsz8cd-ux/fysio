@@ -328,6 +328,7 @@ body::before {
   transition: background 0.12s;
 }
 .btn-ghost:active { background: var(--surface3); }
+.btn-sm { width: auto; padding: 8px 16px; font-size: 10px; }
 
 /* REST TIMER */
 .rest-view {
@@ -499,6 +500,7 @@ const PATHS={
   'link2':        `<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>`,
   'circle':       `<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>`,
   'play':         `<polygon points="5 3 19 12 5 21 5 3"/>`,
+  'pause':        `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`,
   'info':         `<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>`,
   'bag':          `<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>`,
   'skip':         `<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>`,
@@ -603,23 +605,41 @@ function toggleVideo(){
   const open=c.classList.toggle('open');
   if(ch)ch.classList.toggle('open',open);
 }
+let setTimerPaused=false;
+let setTimerSecs=0;
+let setTimerDur=0;
 function startSetTimer(dur){
   clearInterval(setTimerInterval);
+  setTimerPaused=false;
+  setTimerDur=dur;
+  setTimerSecs=dur;
   const circ=2*Math.PI*70;
-  let secs=dur;
   const ring=document.getElementById('ex-ring'),label=document.getElementById('ex-timer-sec');
   if(!label)return;
   if(ring){ring.style.strokeDasharray=circ;ring.style.strokeDashoffset=0;ring.classList.remove('urgent');}
-  label.textContent=secs;
+  label.textContent=dur;
+  updatePauseBtn();
   setTimerInterval=setInterval(()=>{
-    secs--;
+    if(setTimerPaused)return;
+    setTimerSecs--;
     const r=document.getElementById('ex-ring'),l=document.getElementById('ex-timer-sec');
     if(!l){clearInterval(setTimerInterval);return;}
-    const pct=Math.max(0,secs/dur);
-    if(r){r.style.strokeDashoffset=circ*(1-pct);if(secs<=10)r.classList.add('urgent');}
-    l.textContent=secs>0?secs:'—';
-    if(secs<=0){clearInterval(setTimerInterval);playBeep();document.querySelector('#wk-body .btn-primary')?.classList.add('pulse');}
+    const pct=Math.max(0,setTimerSecs/setTimerDur);
+    if(r){r.style.strokeDashoffset=circ*(1-pct);if(setTimerSecs<=10)r.classList.add('urgent');}
+    l.textContent=setTimerSecs>0?setTimerSecs:'—';
+    if(setTimerSecs<=0){clearInterval(setTimerInterval);playBeep();document.querySelector('#wk-body .btn-primary')?.classList.add('pulse');}
   },1000);
+}
+function togglePauseTimer(){
+  setTimerPaused=!setTimerPaused;
+  updatePauseBtn();
+}
+function updatePauseBtn(){
+  const btn=document.getElementById('pause-btn');
+  if(!btn)return;
+  btn.innerHTML=setTimerPaused
+    ?`${ic('play',13)} Hervat`
+    :`${ic('pause',13)} Pauze`;
 }
 function startDay(d){ st.day=d;st.ex=0;st.set=0;renderWorkout();show('workout');setTimeout(triggerWatchWorkout,300); }
 function goHome(){ clearInterval(restInterval);clearInterval(setTimerInterval);nextExPending=false;st.day=null;renderHome();show('home'); }
@@ -654,6 +674,9 @@ function renderWorkout(){
         <div class="ex-timer-unit">sec</div>
       </div>
     </div>
+  </div>
+  <div style="text-align:center;margin-top:-8px;margin-bottom:4px;">
+    <button id="pause-btn" class="btn-ghost btn-sm" onclick="togglePauseTimer()" style="min-width:96px;"></button>
   </div>`;
 
   let videoHtml='';
