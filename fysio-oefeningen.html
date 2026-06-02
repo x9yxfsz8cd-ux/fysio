@@ -514,7 +514,7 @@ const EQUIP={
   2:[{i:'dumbbell',n:'Dumbbell',s:'7 kg — liggende press'},{i:'circle',n:'Bekkenbodembal',s:'Vloeroefening'}],
   3:[{i:'dumbbell',n:'Kettlebell of dumbbell',s:'12 kg — goblet squat'},{i:'dumbbell',n:'Lichtere dumbbell',s:'Side bends & liggende press'},{i:'link2',n:'Kabelstation of band',s:'Pallof press & face pull'},{i:'circle',n:'Bekkenbodembal',s:'Vloeroefening'}],
 };
-const DAY_SUB={1:'Jefferson curl · Goblet squat · Pallof · Face pull · Side bends · Bekkenbodem',2:'Jefferson curl · Split squats · Liggende press · Bruggetjes · Bekkenbodem',3:'Side bends · Goblet squat · Pallof · Face pull · Liggende press · Bekkenbodem'};
+const DAY_SUB={1:'Jefferson curl · Goblet squat · Pallof · Face pull · Side bends · Been zijwaarts heffen · Bekkenbodem',2:'Jefferson curl · Split squats · Curtsy lunge · Liggende press · Bruggetjes · Bekkenbodem',3:'Side bends · Goblet squat · Pallof · Face pull · Liggende press · Been zijwaarts heffen · Bekkenbodem'};
 const P={
   1:[
     {naam:'Jefferson Curl',sets:3,reps:'6–8',  type:'vimeo',vid:'236884896',notitie:'',cues:['Rol je wervelkolom op wervel voor wervel — begin bij het hoofd','Houd de knieën licht gebogen gedurende de hele beweging','Houd het gewicht dicht bij je lichaam']},
@@ -522,12 +522,14 @@ const P={
     {naam:'Pallof Press',  sets:3,reps:'10',   type:'yt',  vid:'Y0e2w0aKOXw',notitie:'',cues:['Houd je kern actief en je rug recht','Strek de armen langzaam en gecontroleerd uit','Laat je romp niet mee draaien bij het uitstrekken']},
     {naam:'Face Pull',     sets:3,reps:'12',   type:'yt',  vid:'0GRycI5CXnM',notitie:'',cues:['Trek naar je voorhoofd — ellebogen omhoog','Schouderbladen naar elkaar toe in de eindpositie','Langzame, gecontroleerde beweging terug']},
     {naam:'Side Bends',    sets:3,reps:'10',   type:'yt',  vid:'mjRUPpMh988',notitie:'',cues:['Beweeg recht naar opzij — niet naar voren of achteren','Houd beide heupen op dezelfde hoogte','Voel de rek aan de zijkant van je romp']},
+    {naam:'Been zijwaarts heffen',sets:3,reps:'12',type:'vimeo',vid:'183702383',notitie:'Per kant',cues:['Houd je romp stabiel — niet scheef zakken','Beweeg langzaam en gecontroleerd omhoog en omlaag','Houd een lichte spanning in je bilspier gedurende de beweging']},
     {naam:'Bekkenbodem',   sets:3,reps:'12',   type:'text',notitie:'Op buik met bal',desc:'Ga op je buik liggen met de bal tussen je enkels. Bekken plat op de grond, voorhoofd op je handen. Adem uit: buig je benen, druk op de bal en til je benen 1 cm op — echt maar een heel klein beetje.',cues:['Houd je bekken plat op de grond tijdens de hele oefening','Adem volledig uit voordat je de benen optilt','De beweging is klein — kwaliteit boven kwantiteit']},
   ],
   2:[
     {naam:'Jefferson Curl',sets:3,reps:'6–8',  type:'vimeo',vid:'236884896',notitie:'',cues:['Rol je wervelkolom op wervel voor wervel — begin bij het hoofd','Houd de knieën licht gebogen gedurende de hele beweging','Houd het gewicht dicht bij je lichaam']},
     {naam:'Split Squats',  sets:3,reps:'8',    type:'yt',  vid:'SGHnCftrZkA',notitie:'Per kant',cues:['Houd je voorste knie boven je voet — niet te ver naar voren','Romp blijft recht omhoog, niet naar voren leunen','Achterste knie rustig en gecontroleerd naar de grond']},
     {naam:'Liggende Press',sets:3,reps:'8–10', type:'yt',  vid:'NubSSALIqsU',notitie:'7 kg',cues:['Houd je onderrug plat op de onderlaag','Ellebogen licht naar binnen tijdens de beweging','Gecontroleerd zakken, krachtig omhoog duwen']},
+    {naam:'Curtsy lunge',  sets:3,reps:'8–10', type:'yt',  vid:'WAW-2ehQ1GM',notitie:'Per been',cues:['Stap achterwaarts en kruis het been achter je standbeen','Houd je voorste knie boven je voet — niet naar binnen zakken','Romp rechtop — niet naar voren leunen']},
     {naam:'Bruggetjes',    sets:3,reps:'12–15',type:'text',notitie:'',desc:'Lig op je rug met gebogen knieën, voeten op de grond. Duw je heupen omhoog tot een rechte lijn van knieën tot schouders. Houd even vast en laat langzaam zakken.',cues:['Duw via je hielen omhoog — niet via je tenen','Span je bilspieren actief aan in de bovenste positie','Houd je bekken horizontaal — niet scheef laten zakken']},
     {naam:'Bekkenbodem',   sets:3,reps:'12',   type:'text',notitie:'Tafelpositie',desc:'Plaats de bal onder je heiligbeen. Breng je benen in tafelpositie. Plak de binnenkant van je voeten tegen elkaar. Adem uit: spreid je knieën zo ver mogelijk uit elkaar terwijl je voeten bij elkaar blijven.',cues:['Houd de bal stabiel onder je heiligbeen','Beweeg rustig en gecontroleerd vanuit je heupen','Adem bewust uit bij het spreiden van de knieën']},
   ],
@@ -537,6 +539,7 @@ const P={
     {naam:'Pallof Press',  sets:3,reps:'10',   type:'yt',  vid:'Y0e2w0aKOXw',notitie:'',cues:['Houd je kern actief en je rug recht','Strek de armen langzaam en gecontroleerd uit','Laat je romp niet mee draaien bij het uitstrekken']},
     {naam:'Face Pull',     sets:3,reps:'10–12',type:'yt',  vid:'0GRycI5CXnM',notitie:'',cues:['Trek naar je voorhoofd — ellebogen omhoog','Schouderbladen naar elkaar toe in de eindpositie','Langzame, gecontroleerde beweging terug']},
     {naam:'Liggende Press',sets:3,reps:'8–10', type:'yt',  vid:'NubSSALIqsU',notitie:'',cues:['Houd je onderrug plat op de onderlaag','Ellebogen licht naar binnen tijdens de beweging','Gecontroleerd zakken, krachtig omhoog duwen']},
+    {naam:'Been zijwaarts heffen',sets:3,reps:'12',type:'vimeo',vid:'183702383',notitie:'Per kant',cues:['Houd je romp stabiel — niet scheef zakken','Beweeg langzaam en gecontroleerd omhoog en omlaag','Houd een lichte spanning in je bilspier gedurende de beweging']},
     {naam:'Bekkenbodem',   sets:3,reps:'12',   type:'text',notitie:'Zijligging · per kant',desc:'In zijligging: laat het bovenste been langs het andere been glijden en breng het omhoog. Druk tegelijkertijd met een gestrekte arm in de bal. Adem in — laat met een uitademing het been zakken.',cues:['Houd je romp stabiel — niet naar voren of achteren kantelen','Druk bewust en gelijkmatig met je arm in de bal','De beweging komt vanuit je heup, niet je rug']},
   ],
 };
@@ -544,8 +547,9 @@ const P={
 const SPR={ // seconden per herhaling
   'Jefferson Curl':5,'Goblet Squat':3,'Pallof Press':3,'Face Pull':3,
   'Side Bends':3,'Bekkenbodem':3,'Split Squats':4,'Liggende Press':3,'Bruggetjes':3,
+  'Been zijwaarts heffen':3,'Curtsy lunge':4,
 };
-const ALTIJD_PER_KANT=['Side Bends','Split Squats'];
+const ALTIJD_PER_KANT=['Side Bends','Split Squats','Been zijwaarts heffen','Curtsy lunge'];
 function calcSetDur(o){
   const parts=o.reps.split(/[–\-]/);
   const avg=parts.length===2?(parseInt(parts[0])+parseInt(parts[1]))/2:parseInt(parts[0]);
