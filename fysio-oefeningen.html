@@ -656,7 +656,7 @@ function renderWorkout(){
   document.getElementById('seg-track').innerHTML=Array.from({length:n},(_,i)=>`<div class="seg${i<st.ex?' done':i===st.ex?' active':''}"></div>`).join('');
 
   const isLastSet=st.set===o.sets-1,isLastEx=st.ex===oefs.length-1;
-  const perKant=o.notitie.toLowerCase().includes('kant');
+  const perKant=ALTIJD_PER_KANT.includes(o.naam)||o.notitie.toLowerCase().includes('kant')||o.notitie.toLowerCase().includes('been');
   const pips=Array.from({length:o.sets},(_,i)=>`<div class="pip${i<st.set?' done':i===st.set?' active':''}"></div>`).join('');
 
   const equipHtml=st.ex===0?`<div class="equip-card">
@@ -792,7 +792,7 @@ function addRest(){
   const n=document.getElementById('rest-num');if(!n)return;
   let secs=(parseInt(n.textContent)||0)+15;clearInterval(restInterval);
   const circ=2*Math.PI*90;
-  const tick=()=>{const n=document.getElementById('rest-num'),r=document.getElementById('rest-ring');if(!n){clearInterval(restInterval);return;}n.textContent=secs;r.style.strokeDashoffset=circ*(1-secs/REST_SECS);if(secs<=10)r.classList.add('urgent');if(secs<=0){clearInterval(restInterval);playBeep();skipRest();}secs--;};
+  const tick=()=>{const n=document.getElementById('rest-num'),r=document.getElementById('rest-ring');if(!n){clearInterval(restInterval);return;}n.textContent=secs;r.style.strokeDashoffset=circ*(1-Math.min(secs,REST_SECS)/REST_SECS);if(secs<=10)r.classList.add('urgent');if(secs<=0){clearInterval(restInterval);playBeep();skipRest();}secs--;};
   tick();restInterval=setInterval(tick,1000);
 }
 function playBeep(){
