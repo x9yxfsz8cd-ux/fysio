@@ -154,7 +154,17 @@ body {
 .wk-nav-center { flex: 1; text-align: center; }
 .wk-nav-title  { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--mono); }
 .wk-nav-sub    { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
-.wk-nav-spacer { width: 64px; }
+.wk-nav-side { width: 64px; display: flex; justify-content: flex-end; flex-shrink: 0; }
+.wk-pause-btn {
+  display: none;
+  width: 34px; height: 34px; border-radius: 50%; padding: 0;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.2s;
+}
+.wk-pause-btn.visible { display: inline-flex; }
+.wk-pause-btn:active { background: var(--surface3); transform: scale(0.92); }
 .wk-hud {
   display: flex; justify-content: center; gap: 20px;
   padding: 0 24px 12px; font-family: var(--mono); font-size: 11px; color: var(--text3);
@@ -439,12 +449,44 @@ body {
   background: linear-gradient(transparent, var(--bg) 20%);
 }
 
-/* Exercise steps overlay (shown on pause) */
-.steps-overlay {
-  display: none; padding: 8px 0;
-  animation: fadeIn 0.25s ease-out;
+/* Exercise steps — uitklapbaar via de Uitleg-knop */
+.steps-toggle {
+  width: 100%; background: none; border: 1px solid var(--border2);
+  color: var(--text2); border-radius: 100px; padding: 12px;
+  font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--sans);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.steps-overlay.visible { display: block; }
+.steps-toggle:active { background: var(--surface); }
+.steps-toggle[aria-expanded="true"] { color: var(--text); border-color: rgba(255,107,53,0.35); }
+.steps-toggle .chev { display: flex; transition: transform 0.25s ease; }
+.steps-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.steps-panel { display: none; padding: 8px 0 0; }
+.steps-panel.open { display: block; animation: fadeIn 0.25s ease-out; }
+
+/* Bewegingsfiguur */
+.ex-fig {
+  background: var(--surface); border-radius: var(--r-lg);
+  padding: 8px 0 12px; margin-bottom: 8px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.ex-fig svg { width: 168px; height: 168px; display: block; }
+.fig-ground { stroke: var(--text3); stroke-width: 1.5; opacity: 0.35; }
+.fig-pose   { fill: none; stroke: var(--text); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.fig-pose .gear { stroke: var(--accent); fill: var(--accent-dim); stroke-width: 3; }
+.fig-pose .band { stroke: var(--accent); stroke-width: 2.2; opacity: 0.8; }
+.fig-a { animation: figA 3s ease-in-out infinite; }
+.fig-b { animation: figB 3s ease-in-out infinite; }
+@keyframes figA { 0%,36% { opacity: 1; } 50%,86% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes figB { 0%,36% { opacity: 0; } 50%,86% { opacity: 1; } 100% { opacity: 0; } }
+.fig-cap {
+  font-size: 11px; color: var(--text3); font-family: var(--mono);
+  letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fig-a, .fig-b { animation: none; }
+  .fig-b { opacity: 0.3; }
+}
 .steps-flow {
   display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch; padding: 4px 0;
@@ -478,6 +520,31 @@ body {
   font-size: 11px; color: var(--text3); text-align: center;
   margin-top: 4px; font-family: var(--mono);
   opacity: 0.6;
+}
+
+/* Pause overlay */
+.pause-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0,0,0,0.82);
+  -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px 28px;
+  padding-bottom: max(32px, calc(env(safe-area-inset-bottom) + 20px));
+  text-align: center;
+}
+.pause-overlay.visible { display: flex; animation: fadeIn 0.2s ease-out; }
+.pause-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--accent);
+  font-family: var(--mono); margin-bottom: 28px;
+}
+.pause-num  { font-size: 84px; font-weight: 800; letter-spacing: -4px; line-height: 1; font-family: var(--mono); }
+.pause-unit { font-size: 11px; font-weight: 600; color: var(--text3); margin-top: 8px; text-transform: uppercase; letter-spacing: 0.12em; font-family: var(--mono); }
+.pause-meta { font-size: 12px; color: var(--text3); font-family: var(--mono); margin-top: 26px; }
+.pause-actions {
+  width: 100%; max-width: 340px; margin-top: 38px;
+  display: flex; flex-direction: column; gap: 8px;
 }
 
 /* Superset transition */
@@ -566,7 +633,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       <div class="wk-nav-title">Oefeningen</div>
       <div class="wk-nav-sub">Bouw of kies een sessie</div>
     </div>
-    <div class="wk-nav-spacer"></div>
+    <div class="wk-nav-side"></div>
   </div>
   <div class="home-section"><div class="list-label">Stel zelf samen</div></div>
   <div id="pick-filter"></div>
@@ -584,11 +651,25 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       <div class="wk-nav-title" id="wk-title"></div>
       <div class="wk-nav-sub"   id="wk-sub"></div>
     </div>
-    <div class="wk-nav-spacer"></div>
+    <div class="wk-nav-side">
+      <button class="wk-pause-btn" id="wk-pause-btn" onclick="togglePause()" aria-label="Training pauzeren"></button>
+    </div>
   </div>
   <div class="seg-track" id="seg-track"></div>
   <div class="wk-hud" id="wk-hud"></div>
   <div class="wk-body"   id="wk-body"></div>
+</div>
+
+<!-- PAUSE -->
+<div class="pause-overlay" id="pause-overlay" role="dialog" aria-modal="true" aria-label="Training gepauzeerd">
+  <div class="pause-eyebrow">Gepauzeerd</div>
+  <div class="pause-num" id="pause-num">—</div>
+  <div class="pause-unit" id="pause-unit">sec</div>
+  <div class="pause-meta" id="pause-meta"></div>
+  <div class="pause-actions">
+    <button class="btn-primary" id="pause-resume-btn" onclick="togglePause()">Hervatten</button>
+    <button class="btn-ghost" onclick="stopVanuitPauze()">Training afbreken</button>
+  </div>
 </div>
 
 <!-- DONE -->
@@ -611,6 +692,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 const PATHS={
   'chevron-right':`<polyline points="9 18 15 12 9 6"/>`,
   'chevron-left': `<polyline points="15 18 9 12 15 6"/>`,
+  'chevron-down': `<polyline points="6 9 12 15 18 9"/>`,
   'arrow-right':  `<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>`,
   'check':        `<polyline points="20 6 9 17 4 12"/>`,
   'check-circle': `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,
@@ -706,6 +788,339 @@ const SESSIONS={
       steps:['Sta rechtop met zware kettlebell in één hand','Marcheer op de plaats, knieën hoog','Houd romp recht — niet naar opzij leunen']},
   ]},
 };
+// Bewegingsfiguren — twee houdingen die afwisselen. Zijaanzicht, 120x120.
+const FIG={
+  'Goblet Squat':{
+    cap:'staan → zakken',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="58" cy="18" r="8"/><path d="M58 26 L58 58"/>
+       <path d="M58 58 L57 80 L56 103"/><path d="M48 103 L66 103"/>
+       <path d="M58 34 L50 46 L56 50"/><circle class="gear" cx="57" cy="53" r="5"/>`,
+    b:`<circle cx="48" cy="32" r="8"/><path d="M50 40 L62 66"/>
+       <path d="M62 66 L46 78 L52 103"/><path d="M44 103 L62 103"/>
+       <path d="M52 46 L44 56 L50 60"/><circle class="gear" cx="51" cy="63" r="5"/>`,
+  },
+  'Floor Press':{
+    cap:'zakken → duwen',
+    ground:`<line x1="18" y1="104" x2="102" y2="104"/>`,
+    a:`<circle cx="29" cy="94" r="7"/><path d="M36 96 L68 96"/>
+       <path d="M68 96 L82 80 L93 100"/><path d="M93 100 L100 100"/>
+       <path d="M48 94 L41 84 L52 80"/><circle class="gear" cx="53" cy="76" r="4.5"/>`,
+    b:`<circle cx="29" cy="94" r="7"/><path d="M36 96 L68 96"/>
+       <path d="M68 96 L82 80 L93 100"/><path d="M93 100 L100 100"/>
+       <path d="M48 94 L50 80 L52 68"/><circle class="gear" cx="53" cy="63" r="4.5"/>`,
+  },
+  'Pallof Press':{
+    cap:'borst → strekken',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="46" cy="20" r="8"/><path d="M46 28 L46 62"/>
+       <path d="M46 62 L39 105"/><path d="M46 62 L54 105"/>
+       <path d="M33 105 L44 105"/><path d="M49 105 L60 105"/>
+       <path d="M46 38 L55 45 L52 50"/>
+       <path class="band" d="M53 49 L70 47 L86 49 L100 47"/>
+       <line class="band" x1="100" y1="34" x2="100" y2="62"/>`,
+    b:`<circle cx="46" cy="20" r="8"/><path d="M46 28 L46 62"/>
+       <path d="M46 62 L39 105"/><path d="M46 62 L54 105"/>
+       <path d="M33 105 L44 105"/><path d="M49 105 L60 105"/>
+       <path d="M46 38 L61 42 L76 44"/>
+       <path class="band" d="M77 44 L86 45 L100 44"/>
+       <line class="band" x1="100" y1="34" x2="100" y2="62"/>`,
+  },
+  'Jefferson Curl':{
+    cap:'staan → afrollen',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="58" cy="18" r="8"/><path d="M58 26 L58 60"/>
+       <path d="M58 60 L57 82 L56 105"/><path d="M48 105 L66 105"/>
+       <path d="M58 34 L50 48 L48 58"/><circle class="gear" cx="48" cy="64" r="5"/>`,
+    b:`<circle cx="40" cy="82" r="7.5"/><path d="M64 54 Q60 76 47 79"/>
+       <path d="M64 54 L61 80 L60 105"/><path d="M52 105 L70 105"/>
+       <path d="M49 77 L48 90"/><circle class="gear" cx="48" cy="95" r="5"/>`,
+  },
+  'Side Bends':{
+    cap:'recht → zijwaarts',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="60" cy="18" r="8"/><path d="M60 26 L60 60"/>
+       <path d="M60 60 L53 105"/><path d="M60 60 L67 105"/>
+       <path d="M47 105 L58 105"/><path d="M62 105 L73 105"/>
+       <path d="M60 34 L74 54"/><circle class="gear" cx="75" cy="60" r="5"/>
+       <path d="M60 34 L47 52"/>`,
+    b:`<circle cx="48" cy="24" r="8"/><path d="M50 32 Q57 46 62 60"/>
+       <path d="M62 60 L55 105"/><path d="M62 60 L69 105"/>
+       <path d="M49 105 L60 105"/><path d="M64 105 L75 105"/>
+       <path d="M54 38 L78 56"/><circle class="gear" cx="79" cy="62" r="5"/>
+       <path d="M54 38 L46 52"/>`,
+  },
+  'Face Pull':{
+    cap:'strekken → trekken',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="44" cy="20" r="8"/><path d="M44 28 L44 62"/>
+       <path d="M44 62 L37 105"/><path d="M44 62 L52 105"/>
+       <path d="M31 105 L42 105"/><path d="M47 105 L58 105"/>
+       <path d="M44 36 L60 33 L74 31"/>
+       <path class="band" d="M75 31 L88 30 L100 31"/>
+       <line class="band" x1="100" y1="18" x2="100" y2="46"/>`,
+    b:`<circle cx="44" cy="20" r="8"/><path d="M44 28 L44 62"/>
+       <path d="M44 62 L37 105"/><path d="M44 62 L52 105"/>
+       <path d="M31 105 L42 105"/><path d="M47 105 L58 105"/>
+       <path d="M44 36 L58 24 L50 19"/>
+       <path class="band" d="M51 19 L74 26 L100 31"/>
+       <line class="band" x1="100" y1="18" x2="100" y2="46"/>`,
+  },
+  'Bruggetjes':{
+    cap:'zakken → heup omhoog',
+    ground:`<line x1="18" y1="104" x2="102" y2="104"/>`,
+    a:`<circle cx="28" cy="96" r="7"/><path d="M35 98 L62 98"/>
+       <path d="M62 98 L79 88 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M42 100 L58 102"/>`,
+    b:`<circle cx="28" cy="96" r="7"/><path d="M35 98 L62 82"/>
+       <path d="M62 82 L80 78 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M42 99 L58 101"/>`,
+  },
+  'Bekkenbodem':{
+    cap:'knieën spreiden',
+    a:`<circle cx="60" cy="16" r="7"/><path d="M60 23 L60 54"/>
+       <circle class="gear" cx="60" cy="60" r="6"/>
+       <path d="M60 56 L54 76 L54 94"/><path d="M60 56 L66 76 L66 94"/>
+       <path d="M53 96 L67 96"/>`,
+    b:`<circle cx="60" cy="16" r="7"/><path d="M60 23 L60 54"/>
+       <circle class="gear" cx="60" cy="60" r="6"/>
+       <path d="M60 56 L42 78 L50 94"/><path d="M60 56 L78 78 L70 94"/>
+       <path d="M53 96 L67 96"/>`,
+  },
+  'Half Kneeling Wood Choppers':{
+    cap:'heup → diagonaal omhoog',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="52" cy="26" r="8"/><path d="M52 34 L52 62"/>
+       <path d="M52 62 L38 80 L38 100"/><path d="M32 100 L46 100"/>
+       <path d="M52 62 L64 100"/><path d="M64 100 L80 97"/>
+       <path d="M52 40 L64 56 L70 66"/><circle class="gear" cx="72" cy="70" r="5"/>`,
+    b:`<circle cx="54" cy="26" r="8"/><path d="M54 34 L52 62"/>
+       <path d="M52 62 L38 80 L38 100"/><path d="M32 100 L46 100"/>
+       <path d="M52 62 L64 100"/><path d="M64 100 L80 97"/>
+       <path d="M53 40 L44 28 L36 18"/><circle class="gear" cx="33" cy="14" r="5"/>`,
+  },
+  'Bear Hold KB Slides':{
+    cap:'schuiven hand → hand',
+    ground:`<line x1="20" y1="100" x2="100" y2="100"/>`,
+    a:`<circle cx="36" cy="64" r="7"/><path d="M43 68 L74 68"/>
+       <path d="M44 70 L44 97"/><path d="M74 68 L74 88 L86 97"/>
+       <circle class="gear" cx="58" cy="94" r="5"/>`,
+    b:`<circle cx="36" cy="64" r="7"/><path d="M43 68 L74 68"/>
+       <path d="M44 70 L44 97"/><path d="M74 68 L74 88 L86 97"/>
+       <circle class="gear" cx="70" cy="94" r="5"/>`,
+  },
+  'Reverse Lunges met Twist':{
+    cap:'staan → stap terug + draai',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="56" cy="18" r="8"/><path d="M56 26 L56 58"/>
+       <path d="M56 58 L50 100"/><path d="M56 58 L62 100"/>
+       <path d="M44 100 L55 100"/><path d="M57 100 L68 100"/>
+       <path d="M56 34 L48 44 L54 48"/><circle class="gear" cx="55" cy="52" r="5"/>`,
+    b:`<circle cx="48" cy="26" r="8"/><path d="M48 34 L52 62"/>
+       <path d="M52 62 L42 80 L42 100"/><path d="M36 100 L50 100"/>
+       <path d="M52 62 L72 84 L84 98"/>
+       <path d="M50 40 L38 46 L30 50"/><circle class="gear" cx="27" cy="53" r="5"/>`,
+  },
+  'Half Kneeling Press':{
+    cap:'schouder → boven hoofd',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="52" cy="26" r="8"/><path d="M52 34 L52 62"/>
+       <path d="M52 62 L38 80 L38 100"/><path d="M32 100 L46 100"/>
+       <path d="M52 62 L64 100"/><path d="M64 100 L80 97"/>
+       <path d="M52 40 L44 46 L47 37"/><circle class="gear" cx="47" cy="32" r="4.5"/>`,
+    b:`<circle cx="52" cy="26" r="8"/><path d="M52 34 L52 62"/>
+       <path d="M52 62 L38 80 L38 100"/><path d="M32 100 L46 100"/>
+       <path d="M52 62 L64 100"/><path d="M64 100 L80 97"/>
+       <path d="M52 40 L50 26 L49 14"/><circle class="gear" cx="49" cy="9" r="4.5"/>`,
+  },
+  'Good Mornings':{
+    cap:'staan → heup naar achter',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="58" cy="18" r="8"/><path d="M58 26 L58 60"/>
+       <path d="M58 60 L57 82 L56 105"/><path d="M48 105 L66 105"/>
+       <path d="M58 32 L66 26"/><circle class="gear" cx="70" cy="24" r="5"/>`,
+    b:`<circle cx="36" cy="46" r="8"/><path d="M43 50 L64 64"/>
+       <path d="M64 64 L60 84 L58 105"/><path d="M50 105 L68 105"/>
+       <path d="M44 48 L50 40"/><circle class="gear" cx="52" cy="36" r="5"/>`,
+  },
+  'KB Kneeling Stand-up':{
+    cap:'knielen → opstaan',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="54" cy="28" r="8"/><path d="M54 36 L54 66"/>
+       <path d="M54 66 L52 100"/><path d="M52 100 L72 100"/>
+       <path d="M54 42 L44 52 L50 56"/><circle class="gear" cx="51" cy="60" r="5"/>`,
+    b:`<circle cx="56" cy="18" r="8"/><path d="M56 26 L56 58"/>
+       <path d="M56 58 L50 100"/><path d="M56 58 L62 100"/>
+       <path d="M44 100 L55 100"/><path d="M57 100 L68 100"/>
+       <path d="M56 34 L48 44 L54 48"/><circle class="gear" cx="55" cy="51" r="5"/>`,
+  },
+  'Big Ball Squeeze':{
+    cap:'knijpen',
+    a:`<circle cx="60" cy="16" r="7"/><path d="M60 23 L60 54"/>
+       <path d="M60 54 L46 76 L46 96"/><path d="M60 54 L74 76 L74 96"/>
+       <circle class="gear" cx="60" cy="76" r="10"/>`,
+    b:`<circle cx="60" cy="16" r="7"/><path d="M60 23 L60 54"/>
+       <path d="M60 54 L52 78 L50 96"/><path d="M60 54 L68 78 L70 96"/>
+       <circle class="gear" cx="60" cy="78" r="7"/>`,
+  },
+  'Bridges Arms Moving':{
+    cap:'armen naar achter',
+    ground:`<line x1="14" y1="104" x2="102" y2="104"/>`,
+    a:`<circle cx="30" cy="96" r="7"/><path d="M37 98 L62 82"/>
+       <path d="M62 82 L80 78 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M42 94 L56 98"/>`,
+    b:`<circle cx="30" cy="96" r="7"/><path d="M37 98 L62 82"/>
+       <path d="M62 82 L80 78 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M42 94 L26 86"/>`,
+  },
+  'Split Squat':{
+    cap:'staan → zakken',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="54" cy="18" r="8"/><path d="M54 26 L54 58"/>
+       <path d="M54 58 L44 80 L44 100"/><path d="M38 100 L50 100"/>
+       <path d="M54 58 L66 80 L74 100"/><path d="M70 100 L82 100"/>
+       <path d="M54 34 L58 52"/><circle class="gear" cx="59" cy="57" r="4.5"/>`,
+    b:`<circle cx="54" cy="34" r="8"/><path d="M54 42 L54 70"/>
+       <path d="M54 70 L42 84 L44 100"/><path d="M38 100 L50 100"/>
+       <path d="M54 70 L66 86 L74 98"/><path d="M70 98 L82 98"/>
+       <path d="M54 48 L58 66"/><circle class="gear" cx="59" cy="71" r="4.5"/>`,
+  },
+  'KB March':{
+    cap:'knie omhoog',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="50" cy="18" r="8"/><path d="M50 26 L50 60"/>
+       <path d="M50 60 L44 100"/><path d="M50 60 L56 100"/>
+       <path d="M38 100 L49 100"/><path d="M51 100 L62 100"/>
+       <path d="M50 34 L64 40 L76 44"/><circle class="gear" cx="79" cy="48" r="5"/>`,
+    b:`<circle cx="50" cy="18" r="8"/><path d="M50 26 L50 60"/>
+       <path d="M50 60 L38 74 L44 88"/><path d="M50 60 L56 100"/>
+       <path d="M51 100 L62 100"/>
+       <path d="M50 34 L64 40 L76 44"/><circle class="gear" cx="79" cy="48" r="5"/>`,
+  },
+  'Step Ups':{
+    cap:'stap omhoog',
+    ground:`<line x1="14" y1="101" x2="104" y2="101"/>`,
+    a:`<path class="band" d="M64 101 L64 78 L98 78 L98 101"/>
+       <circle cx="34" cy="28" r="8"/><path d="M34 36 L34 66"/>
+       <path d="M34 66 L32 100"/><path d="M26 100 L40 100"/>
+       <path d="M34 66 L50 72 L62 78"/><path d="M58 78 L72 78"/>`,
+    b:`<path class="band" d="M64 101 L64 78 L98 78 L98 101"/>
+       <circle cx="80" cy="20" r="8"/><path d="M80 28 L80 54"/>
+       <path d="M80 54 L75 77"/><path d="M80 54 L85 77"/>
+       <path d="M69 77 L91 77"/>`,
+  },
+  'TRX Row':{
+    cap:'hangen → trekken',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<line class="band" x1="88" y1="8" x2="88" y2="14"/>
+       <circle cx="28" cy="52" r="8"/><path d="M34 57 L64 88"/>
+       <path d="M64 88 L78 100"/><path d="M74 100 L88 100"/>
+       <path d="M36 60 L56 52"/>
+       <path class="band" d="M57 51 L74 32 L88 14"/>`,
+    b:`<line class="band" x1="88" y1="8" x2="88" y2="14"/>
+       <circle cx="36" cy="42" r="8"/><path d="M42 47 L68 86"/>
+       <path d="M68 86 L80 100"/><path d="M76 100 L90 100"/>
+       <path d="M44 50 L56 62 L62 50"/>
+       <path class="band" d="M63 49 L76 31 L88 14"/>`,
+  },
+  'Bridges on Ball':{
+    cap:'heup omhoog',
+    ground:`<line x1="14" y1="104" x2="104" y2="104"/>`,
+    a:`<circle cx="26" cy="96" r="7"/><path d="M33 98 L58 98"/>
+       <path d="M58 98 L72 92 L82 90"/>
+       <circle class="gear" cx="90" cy="94" r="10"/>
+       <path d="M38 100 L52 101"/>`,
+    b:`<circle cx="26" cy="96" r="7"/><path d="M33 98 L58 84"/>
+       <path d="M58 84 L72 86 L82 90"/>
+       <circle class="gear" cx="90" cy="94" r="10"/>
+       <path d="M38 99 L52 100"/>`,
+  },
+  'ISO Split Squat Hold':{
+    cap:'30 sec vasthouden',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<line class="band" x1="30" y1="41" x2="90" y2="41"/>
+       <line class="band" x1="88" y1="41" x2="88" y2="100"/>
+       <circle cx="52" cy="26" r="8"/><path d="M52 34 L52 66"/>
+       <path d="M52 66 L40 80 L42 100"/><path d="M36 100 L48 100"/>
+       <path d="M52 66 L64 82 L72 98"/><path d="M68 98 L80 98"/>`,
+    b:`<line class="band" x1="30" y1="41" x2="90" y2="41"/>
+       <line class="band" x1="88" y1="41" x2="88" y2="100"/>
+       <circle cx="52" cy="26" r="8"/><path d="M52 34 L52 66"/>
+       <path d="M52 66 L40 80 L42 100"/><path d="M36 100 L48 100"/>
+       <path d="M52 66 L64 82 L72 98"/><path d="M68 98 L80 98"/>`,
+  },
+  'Glute Marches KB':{
+    cap:'brug + knie omhoog',
+    ground:`<line x1="14" y1="104" x2="102" y2="104"/>`,
+    a:`<circle cx="28" cy="98" r="7"/><path d="M35 100 L60 84"/>
+       <path d="M60 84 L78 80 L80 102"/><path d="M74 102 L90 102"/>
+       <path d="M42 95 L44 78"/><circle class="gear" cx="44" cy="73" r="5"/>`,
+    b:`<circle cx="28" cy="98" r="7"/><path d="M35 100 L60 84"/>
+       <path d="M60 84 L76 66 L86 74"/>
+       <path d="M60 84 L74 84 L76 102"/><path d="M70 102 L86 102"/>
+       <path d="M42 95 L44 78"/><circle class="gear" cx="44" cy="73" r="5"/>`,
+  },
+  'Z Press':{
+    cap:'schouder → boven hoofd',
+    ground:`<line x1="30" y1="84" x2="98" y2="84"/>`,
+    a:`<circle cx="48" cy="30" r="8"/><path d="M48 38 L48 78"/>
+       <path d="M50 80 L86 80"/><path d="M86 80 L86 72"/>
+       <path d="M48 44 L55 52 L59 44"/><circle class="gear" cx="60" cy="39" r="4.5"/>`,
+    b:`<circle cx="48" cy="30" r="8"/><path d="M48 38 L48 78"/>
+       <path d="M50 80 L86 80"/><path d="M86 80 L86 72"/>
+       <path d="M48 44 L46 32 L45 20"/><circle class="gear" cx="45" cy="15" r="4.5"/>`,
+  },
+  'Side Plank':{
+    cap:'heup omhoog',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="40" cy="64" r="7"/><path d="M40 71 L40 76"/>
+       <path d="M40 76 L66 99 L94 100"/><path d="M88 100 L100 100"/>
+       <path d="M40 76 L30 100"/><path d="M24 100 L44 100"/>`,
+    b:`<circle cx="40" cy="64" r="7"/><path d="M40 71 L40 76"/>
+       <path d="M40 76 L66 86 L94 100"/><path d="M88 100 L100 100"/>
+       <path d="M40 76 L30 100"/><path d="M24 100 L44 100"/>`,
+  },
+  'Single Arm Row':{
+    cap:'zakken → trekken',
+    ground:`<line x1="14" y1="101" x2="104" y2="101"/>`,
+    a:`<path class="band" d="M56 84 L98 84"/><line class="band" x1="60" y1="84" x2="60" y2="100"/>
+       <line class="band" x1="94" y1="84" x2="94" y2="100"/>
+       <circle cx="24" cy="60" r="7"/><path d="M31 64 L62 76"/>
+       <path d="M58 74 L62 84"/><path d="M62 76 L66 100"/><path d="M60 100 L74 100"/>
+       <path d="M38 68 L38 92"/><circle class="gear" cx="38" cy="96" r="4.5"/>`,
+    b:`<path class="band" d="M56 84 L98 84"/><line class="band" x1="60" y1="84" x2="60" y2="100"/>
+       <line class="band" x1="94" y1="84" x2="94" y2="100"/>
+       <circle cx="24" cy="60" r="7"/><path d="M31 64 L62 76"/>
+       <path d="M58 74 L62 84"/><path d="M62 76 L66 100"/><path d="M60 100 L74 100"/>
+       <path d="M38 68 L32 80 L44 78"/><circle class="gear" cx="47" cy="77" r="4.5"/>`,
+  },
+  'Farmer March':{
+    cap:'knie omhoog',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="52" cy="18" r="8"/><path d="M52 26 L52 60"/>
+       <path d="M52 60 L46 100"/><path d="M52 60 L58 100"/>
+       <path d="M40 100 L51 100"/><path d="M53 100 L64 100"/>
+       <path d="M52 34 L64 58"/><circle class="gear" cx="66" cy="64" r="5.5"/>
+       <path d="M52 34 L42 56"/>`,
+    b:`<circle cx="52" cy="18" r="8"/><path d="M52 26 L52 60"/>
+       <path d="M52 60 L40 74 L46 88"/><path d="M52 60 L58 100"/>
+       <path d="M53 100 L64 100"/>
+       <path d="M52 34 L64 58"/><circle class="gear" cx="66" cy="64" r="5.5"/>
+       <path d="M52 34 L42 56"/>`,
+  },
+};
+function figSvg(naam){
+  const f=FIG[naam];
+  if(!f) return '';
+  return `<div class="ex-fig">
+    <svg viewBox="0 0 120 120" role="img" aria-label="Beweging bij ${naam}">
+      <g class="fig-ground">${f.ground||''}</g>
+      <g class="fig-pose fig-a">${f.a}</g>
+      <g class="fig-pose fig-b">${f.b}</g>
+    </svg>
+    <div class="fig-cap">${f.cap||''}</div>
+  </div>`;
+}
 const EXERCISES=SESSIONS.basis.exercises;
 const ALL_EXERCISES=Object.values(SESSIONS).flatMap(s=>s.exercises);
 const P={1:EXERCISES};
@@ -721,6 +1136,11 @@ const SPR={
   'Single Arm Row':3,'Farmer March':3,
 };
 const ALTIJD_PER_KANT=['Side Bends','KB March','Step Ups','Farmer March','ISO Split Squat Hold'];
+// Het gewicht zit in `notitie`, soms samen met 'per kant'. Haal alleen de kg eruit.
+function gewichtVan(o){
+  const m=(o.notitie||'').match(/\d+(?:[.,]\d+)?\s*kg/i);
+  return m?m[0].replace(/\s+/g,' '):null;
+}
 function calcSetDur(o){
   const parts=o.reps.split(/[–\-]/);
   const avg=parts.length===2?(parseInt(parts[0])+parseInt(parts[1]))/2:parseInt(parts[0]);
@@ -777,7 +1197,9 @@ function advanceCircuit(){
   st.ex=st.circuitOrder[st.step].ex;st.set=st.circuitOrder[st.step].set;
   return true;
 }
-const REST_SECS=50;
+const REST_SECS=75;
+const REST_CIRC=2*Math.PI*80;
+let restSecs=0;
 function getCoachMsg(){
   if(!st.circuit) return 'Goed gedaan. Even bijkomen.';
   const pct=st.step/st.circuitOrder.length;
@@ -867,11 +1289,54 @@ function triggerWatchWorkout(){
   if(!/iPhone/.test(navigator.userAgent)) return;
   try{ window.location.href='shortcuts://run-shortcut?name=Start%20core%20work-out'; }catch(e){}
 }
-let setTimerPaused=false;
 let setTimerSecs=0;
 let setTimerDur=0;
+
+// Globale pauze — bevriest set-timer, rusttimer en de sessieklok
+let workoutPaused=false,pauseStartedAt=0,activeTimer=null;
+function setPauseBtn(on){
+  const b=document.getElementById('wk-pause-btn');
+  if(b) b.classList.toggle('visible',!!on);
+}
+function paintPauseBtn(){
+  const b=document.getElementById('wk-pause-btn');
+  if(!b)return;
+  b.innerHTML=ic(workoutPaused?'play':'pause',15);
+  b.setAttribute('aria-label',workoutPaused?'Training hervatten':'Training pauzeren');
+}
+function togglePause(){ workoutPaused?resumeWorkout():pauseWorkout(); }
+function pauseWorkout(){
+  if(workoutPaused||!activeTimer)return;
+  workoutPaused=true;pauseStartedAt=Date.now();
+  releaseWakeLock();
+  const secs=Math.max(0,activeTimer==='rest'?restSecs:setTimerSecs);
+  document.getElementById('pause-num').textContent=secs;
+  document.getElementById('pause-meta').textContent=`sessie ${fmtTimer(sessionElapsed())} · gepauzeerd`;
+  document.getElementById('pause-overlay').classList.add('visible');
+  paintPauseBtn();updateHud();
+}
+function resumeWorkout(){
+  if(!workoutPaused)return;
+  if(sessionStartTime) sessionStartTime+=Date.now()-pauseStartedAt;
+  workoutPaused=false;pauseStartedAt=0;
+  requestWakeLock();
+  document.getElementById('pause-overlay').classList.remove('visible');
+  paintPauseBtn();updateHud();
+}
+// De overlay dekt ook de Terug-knop af, dus afbreken moet vanuit de overlay kunnen
+function stopVanuitPauze(){
+  resumeWorkout();
+  goHome();
+}
+function clearPause(){
+  workoutPaused=false;pauseStartedAt=0;activeTimer=null;
+  const o=document.getElementById('pause-overlay');if(o)o.classList.remove('visible');
+  setPauseBtn(false);paintPauseBtn();
+}
+
 function startSetTimer(dur){
-  clearInterval(setTimerInterval);  setTimerPaused=false;
+  clearInterval(setTimerInterval);
+  activeTimer='set';
   setTimerDur=dur;
   setTimerSecs=dur;
   const circ=2*Math.PI*78;
@@ -880,7 +1345,7 @@ function startSetTimer(dur){
   if(ring){ring.style.strokeDasharray=circ;ring.style.strokeDashoffset=0;ring.classList.remove('urgent');}
   label.textContent=dur;
   setTimerInterval=setInterval(()=>{
-    if(setTimerPaused)return;
+    if(workoutPaused)return;
     setTimerSecs--;
     const r=document.getElementById('ex-ring'),l=document.getElementById('ex-timer-sec');
     if(!l){clearInterval(setTimerInterval);return;}
@@ -893,12 +1358,13 @@ function startSetTimer(dur){
     if(setTimerSecs<=0){clearInterval(setTimerInterval);playBeep();const btn=document.querySelector('#wk-body .btn-primary');if(btn){btn.classList.add('pulse');btn.scrollIntoView({behavior:'smooth',block:'center'});}}
   },1000);
 }
-function togglePauseTimer(){
-  setTimerPaused=!setTimerPaused;
-  const overlay=document.getElementById('steps-overlay');
-  const hint=document.getElementById('tap-hint');
-  if(overlay) overlay.classList.toggle('visible',setTimerPaused);
-  if(hint) hint.textContent=setTimerPaused?'tik om te hervatten':'tik om te pauzeren';
+// Uitleg open/dicht — keuze blijft staan bij de volgende oefening
+let stepsOpen=false;
+function toggleSteps(){
+  stepsOpen=!stepsOpen;
+  const p=document.getElementById('steps-panel'),b=document.getElementById('steps-toggle');
+  if(p) p.classList.toggle('open',stepsOpen);
+  if(b) b.setAttribute('aria-expanded',stepsOpen);
 }
 function getQuickPick(){
   const seen=new Set();
@@ -927,6 +1393,7 @@ function showSessionOverview(){
   document.getElementById('wk-sub').textContent=`${exs.length} oefeningen · ~${dur} min`;
   document.getElementById('wk-back-btn').innerHTML=ic('chevron-left',16)+' Terug';
   swipeEnabled=false;
+  clearPause();
   document.getElementById('seg-track').innerHTML='';
   document.getElementById('wk-hud').innerHTML='';
   document.getElementById('wk-body').innerHTML=`
@@ -942,7 +1409,7 @@ function showSessionOverview(){
         return p.map(o=>`<div class="overview-pair">
           <div class="overview-pair-label">${o.super}</div>
           <div class="overview-pair-name">${o.naam}</div>
-          <div class="overview-pair-reps">${o.sets}×${o.reps}</div>
+          <div class="overview-pair-reps">${o.sets}×${o.reps}${gewichtVan(o)?' · '+gewichtVan(o):''}</div>
         </div>`).join('');
       }).join('')}
     </div>
@@ -1005,7 +1472,7 @@ function showPicker(filter){
     const esc=o.naam.replace(/'/g,"\\'");
     return `<button class="pick-item" data-naam="${o.naam}" onclick="togglePick('${esc}',this)">
       <div class="pick-check"></div>
-      <div class="pick-body"><div class="pick-item-name">${o.naam}</div><div class="pick-item-sub">${o.sets}×${o.reps}${pk?' · per kant':''} · <span class="${gearClass}">${gearLabel}</span></div></div>
+      <div class="pick-body"><div class="pick-item-name">${o.naam}</div><div class="pick-item-sub">${o.sets}×${o.reps}${gewichtVan(o)?' · '+gewichtVan(o):''}${pk?' · per kant':''} · <span class="${gearClass}">${gearLabel}</span></div></div>
     </button>`;
   }).join('');
   show('pick');
@@ -1045,7 +1512,7 @@ function showSessionPreview(){
       </div>
       <div class="preview-list">${s.exercises.map(o=>{
         const pk=ALTIJD_PER_KANT.includes(o.naam);
-        return `<div class="preview-item"><span class="preview-name">${o.naam}</span><span class="preview-meta">${o.sets}×${o.reps}${pk?' per kant':''}</span></div>`;
+        return `<div class="preview-item"><span class="preview-name">${o.naam}</span><span class="preview-meta">${o.sets}×${o.reps}${gewichtVan(o)?' · '+gewichtVan(o):''}${pk?' · per kant':''}</span></div>`;
       }).join('')}</div>
       <button class="btn-primary preview-action" onclick="startPendingSession()">${ic('zap',15)} Start sessie</button>
       <button class="btn-ghost preview-action-secondary" onclick="cancelPreview()">Annuleer</button>
@@ -1070,7 +1537,7 @@ function cancelPreview(){
   pendingSession=null;
   document.getElementById('session-preview').style.display='none';
 }
-function goHome(){ clearInterval(restInterval);clearInterval(setTimerInterval);stopSessionTimer();releaseWakeLock();nextExPending=false;st.day=null;cancelPreview();renderHome();show('home'); }
+function goHome(){ clearInterval(restInterval);clearInterval(setTimerInterval);clearPause();stopSessionTimer();releaseWakeLock();nextExPending=false;st.day=null;cancelPreview();renderHome();show('home'); }
 
 function renderWorkout(){
   const oefs=st.exercises,o=oefs[st.ex],n=oefs.length;
@@ -1101,12 +1568,21 @@ function renderWorkout(){
 
   // Timer
   const exCirc=(2*Math.PI*78).toFixed(1);
-  const stepLabels=['Startpositie','Beweging','Terug'];
-  const stepsHtml=o.steps?`<div class="steps-flow">${o.steps.map((s,i)=>`<div class="step-card">
-    <div class="step-header"><div class="step-num">${i+1}</div><div class="step-label">${stepLabels[i]||'Stap '+(i+1)}</div></div>
+  // Derde stap is niet altijd een terugbeweging — soms vasthouden, soms de beweging zelf
+  const stepLabel=(i,tekst)=>{
+    if(i===0) return 'Startpositie';
+    if(i===1) return 'Beweging';
+    if(/^houd\b/i.test(tekst)) return 'Vasthouden';
+    if(/terug|zakken|los\b/i.test(tekst)) return 'Terug';
+    return 'Uitvoering';
+  };
+  const figHtml=figSvg(o.naam);
+  const cardsHtml=o.steps?`<div class="steps-flow">${o.steps.map((s,i)=>`<div class="step-card">
+    <div class="step-header"><div class="step-num">${i+1}</div><div class="step-label">${stepLabel(i,s)}</div></div>
     <div class="step-text">${s}</div>
   </div>`).join('')}</div><div class="step-scroll-hint">← swipe voor stappen</div>`:'';
-  const meta=[o.sets+'×'+o.reps, perKant?'per kant':null, o.gear||'geen spullen'].filter(Boolean).join(' · ');
+  const stepsHtml=figHtml+cardsHtml;
+  const meta=[o.sets+'×'+o.reps, gewichtVan(o), perKant?'per kant':null, o.gear||'geen spullen'].filter(Boolean).join(' · ');
 
   // Superset banner
   const superBanner=st.supersetTransition?`<div class="superset-banner">${ic('zap',14)} Superset — direct door!</div>`:'';
@@ -1119,7 +1595,7 @@ function renderWorkout(){
       <div class="ex-name">${o.naam}</div>
       <div class="ex-meta">${meta}</div>
     </div>
-    <div class="ex-timer-card" onclick="togglePauseTimer()" role="button" aria-label="Tik om te pauzeren">
+    <div class="ex-timer-card" onclick="togglePause()" role="button" aria-label="Tik om te pauzeren">
       <div class="ex-timer-ring-wrap">
         <svg viewBox="0 0 180 180" width="180" height="180">
           <circle class="ring-bg" cx="90" cy="90" r="78"/>
@@ -1131,10 +1607,14 @@ function renderWorkout(){
           <div class="ex-timer-unit">sec</div>
         </div>
       </div>
-      <div class="timer-tap-hint" id="tap-hint">tik om te pauzeren</div>
+      <div class="timer-tap-hint">tik om te pauzeren</div>
     </div>
     ${o.adem?`<div class="adem-bar"><div class="adem-dot"></div>${o.adem}</div>`:''}
-    <div class="steps-overlay" id="steps-overlay">${stepsHtml}</div>
+    ${stepsHtml?`
+    <button class="steps-toggle" id="steps-toggle" onclick="toggleSteps()" aria-expanded="${stepsOpen}" aria-controls="steps-panel">
+      ${ic('info',14)} Uitleg <span class="chev">${ic('chevron-down',14)}</span>
+    </button>
+    <div class="steps-panel${stepsOpen?' open':''}" id="steps-panel">${stepsHtml}</div>`:''}
     <div class="wk-actions">
       <button class="btn-primary${isLastSet&&isLastEx?' finish':''}" onclick="completeSet()">
         ${btnLabel}
@@ -1143,6 +1623,7 @@ function renderWorkout(){
     </div>`;
   startSetTimer(calcSetDur(o));
   swipeEnabled=true;
+  setPauseBtn(true);
   updateHud();
 }
 
@@ -1185,8 +1666,9 @@ function showRest(type){
   swipeEnabled=false;
   clearInterval(setTimerInterval);
   clearInterval(restInterval);
-  let secs=REST_SECS;
-  const circ=2*Math.PI*80;
+  activeTimer='rest';setPauseBtn(true);
+  restSecs=REST_SECS;
+  const circ=REST_CIRC;
   const msg=getCoachMsg();
   let nextName=null;
   if(st.circuit&&st.step<st.circuitOrder.length) nextName=st.exercises[st.circuitOrder[st.step].ex].naam;
@@ -1216,24 +1698,32 @@ function showRest(type){
         </div>
       </div>`;
   }
-  draw(secs);
-  restInterval=setInterval(()=>{
-    secs--;
-    const n=document.getElementById('rest-num'),r=document.getElementById('rest-ring');
-    if(!n){clearInterval(restInterval);return;}
-    n.textContent=secs;r.style.strokeDashoffset=circ*(1-secs/REST_SECS);
-    if(secs<=10)r.classList.add('urgent');
-    if(secs<=0){clearInterval(restInterval);playBeep();skipRest();}
-  },1000);
+  draw(restSecs);
+  restInterval=setInterval(restTick,1000);
+}
+function restTick(){
+  if(workoutPaused)return;
+  restSecs--;
+  drawRest();
+  if(restSecs<=0){clearInterval(restInterval);playBeep();skipRest();}
+}
+function drawRest(){
+  const n=document.getElementById('rest-num'),r=document.getElementById('rest-ring');
+  if(!n){clearInterval(restInterval);return;}
+  n.textContent=restSecs;
+  if(r){
+    r.style.strokeDashoffset=REST_CIRC*(1-Math.min(restSecs,REST_SECS)/REST_SECS);
+    r.classList.toggle('urgent',restSecs<=10);
+  }
 }
 
 function skipRest(){ clearInterval(restInterval);if(!st.circuit&&nextExPending){nextExPending=false;st.ex++;st.set=0;}renderWorkout();window.scrollTo(0,0); }
 function addRest(){
-  const n=document.getElementById('rest-num');if(!n)return;
-  let secs=(parseInt(n.textContent)||0)+15;clearInterval(restInterval);
-  const circ=2*Math.PI*80;
-  const tick=()=>{const n=document.getElementById('rest-num'),r=document.getElementById('rest-ring');if(!n){clearInterval(restInterval);return;}n.textContent=secs;r.style.strokeDashoffset=circ*(1-Math.min(secs,REST_SECS)/REST_SECS);if(secs<=10)r.classList.add('urgent');if(secs<=0){clearInterval(restInterval);playBeep();skipRest();}secs--;};
-  tick();restInterval=setInterval(tick,1000);
+  if(!document.getElementById('rest-num'))return;
+  clearInterval(restInterval);
+  restSecs+=15;
+  drawRest();
+  restInterval=setInterval(restTick,1000);
 }
 function playBeep(){
   try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[0,.15,.3].forEach(t=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;o.type='sine';g.gain.setValueAtTime(.25,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.12);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.15);});}catch(e){}
@@ -1257,17 +1747,21 @@ function startSessionTimer(){
   updateHud();
 }
 function stopSessionTimer(){clearInterval(sessionTimerInterval);sessionStartTime=null;}
+function sessionElapsed(){
+  if(!sessionStartTime)return 0;
+  return (workoutPaused?pauseStartedAt:Date.now())-sessionStartTime;
+}
 function fmtTimer(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60);return `${m}:${String(s%60).padStart(2,'0')}`;}
 function updateHud(){
   const hud=document.getElementById('wk-hud');if(!hud||!sessionStartTime)return;
-  const elapsed=Date.now()-sessionStartTime;
+  const elapsed=sessionElapsed();
   const totalDur=calcExsDuration(st.exercises)*60*1000;
   const remaining=Math.max(0,totalDur-elapsed);
   const pct=st.circuit?Math.round(st.step/(st.circuitOrder.length||1)*100):Math.round(st.set/(st.exercises[st.ex]?.sets||1)*100);
   hud.innerHTML=`
     <div class="wk-hud-item">ELAPSED <span class="wk-hud-val">${fmtTimer(elapsed)}</span></div>
     <div class="wk-hud-item">REMAINING <span class="wk-hud-val">~${fmtTimer(remaining)}</span></div>
-    <div class="wk-hud-item">${pct}%</div>`;
+    <div class="wk-hud-item">${workoutPaused?'GEPAUZEERD':pct+'%'}</div>`;
 }
 function launchConfetti(){
   const c=document.getElementById('confetti-canvas');if(!c)return;
@@ -1302,7 +1796,9 @@ function launchConfetti(){
   draw();
 }
 function finish(){
-  const elapsed=sessionStartTime?Date.now()-sessionStartTime:0;
+  const elapsed=sessionElapsed();
+  clearPause();
+  clearInterval(setTimerInterval);clearInterval(restInterval);
   stopSessionTimer();releaseWakeLock();
   const oefs=st.exercises;
   st.history.push({datum:today(),count:oefs.length});
@@ -1324,12 +1820,14 @@ document.getElementById('screen-workout').addEventListener('touchstart',e=>{
   swipeStartX=e.touches[0].clientX;swipeStartY=e.touches[0].clientY;
 },{passive:true});
 document.getElementById('screen-workout').addEventListener('touchend',e=>{
-  if(!swipeEnabled)return;
+  if(!swipeEnabled||workoutPaused)return;
   const dx=swipeStartX-e.changedTouches[0].clientX;
   const dy=Math.abs(swipeStartY-e.changedTouches[0].clientY);
   if(dx>80&&dy<60) completeSet();
 },{passive:true});
 
+paintPauseBtn();
+document.getElementById('pause-resume-btn').innerHTML=ic('play',15)+' Hervatten';
 load();
 </script>
 </body>
