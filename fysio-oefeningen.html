@@ -464,40 +464,30 @@ body {
 .steps-panel { display: none; padding: 8px 0 0; }
 .steps-panel.open { display: block; animation: fadeIn 0.25s ease-out; }
 
-/* Bewegingsfiguur */
-.ex-fig {
-  background: var(--surface); border-radius: var(--r-lg);
-  padding: 8px 0 12px; margin-bottom: 8px;
-  display: flex; flex-direction: column; align-items: center;
-}
-.ex-fig svg { width: 168px; height: 168px; display: block; }
+/* Bewegingsfiguren */
 .fig-ground { stroke: var(--text3); stroke-width: 1.5; opacity: 0.35; }
 .fig-pose   { fill: none; stroke: var(--text); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
 .fig-pose .gear { stroke: var(--accent); fill: var(--accent-dim); stroke-width: 3; }
 .fig-pose .band { stroke: var(--accent); stroke-width: 2.2; opacity: 0.8; }
-.fig-a { animation: figA 3s ease-in-out infinite; }
-.fig-b { animation: figB 3s ease-in-out infinite; }
-@keyframes figA { 0%,36% { opacity: 1; } 50%,86% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes figB { 0%,36% { opacity: 0; } 50%,86% { opacity: 1; } 100% { opacity: 0; } }
-.fig-cap {
+
+/* Uitleg: beeld per stap, onder elkaar */
+.steps-samenvatting {
   font-size: 11px; color: var(--text3); font-family: var(--mono);
-  letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  text-align: center; margin-bottom: 10px;
 }
-@media (prefers-reduced-motion: reduce) {
-  .fig-a, .fig-b { animation: none; }
-  .fig-b { opacity: 0.3; }
-}
-.steps-flow {
-  display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch; padding: 4px 0;
-}
-.steps-flow::-webkit-scrollbar { display: none; }
-.step-card {
-  flex: 0 0 85%; scroll-snap-align: start;
+.steps-list { display: flex; flex-direction: column; gap: 8px; }
+.step-row {
   background: var(--surface); border-radius: var(--r-lg);
-  padding: 20px; min-height: 120px;
-  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px;
 }
+.step-row-body { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+.step-fig {
+  flex: 0 0 108px; width: 108px; height: 108px;
+  background: rgba(255,255,255,0.04); border-radius: var(--r);
+  padding: 4px;
+}
+.step-fig svg { width: 100%; height: 100%; display: block; }
 .step-header {
   display: flex; align-items: center; gap: 10px;
 }
@@ -511,11 +501,7 @@ body {
   font-size: 11px; color: var(--accent); font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--mono);
 }
-.step-text { font-size: 17px; color: var(--text); line-height: 1.5; font-weight: 500; }
-.step-scroll-hint {
-  text-align: center; font-size: 11px; color: var(--text3);
-  margin-top: 6px; font-family: var(--mono);
-}
+.step-text { font-size: 15px; color: var(--text); line-height: 1.45; font-weight: 500; }
 .timer-tap-hint {
   font-size: 11px; color: var(--text3); text-align: center;
   margin-top: 4px; font-family: var(--mono);
@@ -1109,17 +1095,14 @@ const FIG={
        <path d="M52 34 L42 56"/>`,
   },
 };
-function figSvg(naam){
+function figPose(naam,welke){
   const f=FIG[naam];
   if(!f) return '';
-  return `<div class="ex-fig">
-    <svg viewBox="0 0 120 120" role="img" aria-label="Beweging bij ${naam}">
-      <g class="fig-ground">${f.ground||''}</g>
-      <g class="fig-pose fig-a">${f.a}</g>
-      <g class="fig-pose fig-b">${f.b}</g>
-    </svg>
-    <div class="fig-cap">${f.cap||''}</div>
-  </div>`;
+  // Krap uitgesneden zodat het figuurtje het vakje vult
+  return `<svg viewBox="10 2 100 108" role="img" aria-label="${welke==='a'?'Beginhouding':'Eindhouding'} bij ${naam}">
+    <g class="fig-ground">${f.ground||''}</g>
+    <g class="fig-pose">${f[welke]}</g>
+  </svg>`;
 }
 const EXERCISES=SESSIONS.basis.exercises;
 const ALL_EXERCISES=Object.values(SESSIONS).flatMap(s=>s.exercises);
@@ -1285,9 +1268,13 @@ function renderHome(){
     }).join('');
 }
 
+// Naam van de Opdracht op je iPhone. Moet exact overeenkomen, anders opent
+// Opdrachten met "bestaat niet". Pas deze regel aan als je hem anders noemt.
+const WATCH_SHORTCUT='Start core work-out';
+function opIPhone(){ return /iPhone|iPad|iPod/.test(navigator.userAgent); }
 function triggerWatchWorkout(){
-  if(!/iPhone/.test(navigator.userAgent)) return;
-  try{ window.location.href='shortcuts://run-shortcut?name=Start%20core%20work-out'; }catch(e){}
+  if(!opIPhone()) return;
+  try{ window.location.href='shortcuts://run-shortcut?name='+encodeURIComponent(WATCH_SHORTCUT); }catch(e){}
 }
 let setTimerSecs=0;
 let setTimerDur=0;
@@ -1413,14 +1400,14 @@ function showSessionOverview(){
         </div>`).join('');
       }).join('')}
     </div>
-    <button class="btn-primary" onclick="beginWorkout()">${ic('zap',15)} Start training</button>`;
+    <button class="btn-primary" onclick="beginWorkout()">${ic('zap',15)} Start training</button>
+    ${opIPhone()?`<button class="btn-ghost" onclick="triggerWatchWorkout()">${ic('activity',14)} Start op Apple Watch</button>`:''}`;
   show('workout');
 }
 function beginWorkout(){
   requestWakeLock();
   startSessionTimer();
   renderWorkout();
-  setTimeout(triggerWatchWorkout,300);
 }
 function togglePick(naam,el){
   if(pickSelected.has(naam)){pickSelected.delete(naam);el.classList.remove('selected');el.querySelector('.pick-check').innerHTML='';}
@@ -1531,7 +1518,6 @@ function startPendingSession(){
   document.getElementById('session-preview').style.display='none';
   st.day=null;st.exercises=result;st.mode='short';st.circuit=result.length>1;
   st.ex=0;st.set=0;initCircuit();requestWakeLock();startSessionTimer();renderWorkout();show('workout');
-  setTimeout(triggerWatchWorkout,300);
 }
 function cancelPreview(){
   pendingSession=null;
@@ -1576,12 +1562,19 @@ function renderWorkout(){
     if(/terug|zakken|los\b/i.test(tekst)) return 'Terug';
     return 'Uitvoering';
   };
-  const figHtml=figSvg(o.naam);
-  const cardsHtml=o.steps?`<div class="steps-flow">${o.steps.map((s,i)=>`<div class="step-card">
-    <div class="step-header"><div class="step-num">${i+1}</div><div class="step-label">${stepLabel(i,s)}</div></div>
-    <div class="step-text">${s}</div>
-  </div>`).join('')}</div><div class="step-scroll-hint">← swipe voor stappen</div>`:'';
-  const stepsHtml=figHtml+cardsHtml;
+  const samenvatting=FIG[o.naam]?.cap?`<div class="steps-samenvatting">${FIG[o.naam].cap}</div>`:'';
+  const stepsHtml=o.steps?samenvatting+`<div class="steps-list">${o.steps.map((s,i)=>{
+    const lab=stepLabel(i,s);
+    // Stap 1 is de beginhouding; stap 3 alleen als je echt terugkomt
+    const pose=(i===0||(i===2&&lab==='Terug'))?'a':'b';
+    return `<div class="step-row">
+      <div class="step-header"><div class="step-num">${i+1}</div><div class="step-label">${lab}</div></div>
+      <div class="step-row-body">
+        <div class="step-fig">${figPose(o.naam,pose)}</div>
+        <div class="step-text">${s}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`:'';
   const meta=[o.sets+'×'+o.reps, gewichtVan(o), perKant?'per kant':null, o.gear||'geen spullen'].filter(Boolean).join(' · ');
 
   // Superset banner
@@ -1815,12 +1808,14 @@ function finish(){
 }
 
 // Swipe navigation (only during active exercise, not during rest/overview)
-let swipeStartX=0,swipeStartY=0,swipeEnabled=false;
+let swipeStartX=0,swipeStartY=0,swipeEnabled=false,swipeInUitleg=false;
 document.getElementById('screen-workout').addEventListener('touchstart',e=>{
   swipeStartX=e.touches[0].clientX;swipeStartY=e.touches[0].clientY;
+  // Door de stappen bladeren is ook een horizontale veeg — die mag de set niet afronden
+  swipeInUitleg=!!(e.target.closest && e.target.closest('.steps-panel'));
 },{passive:true});
 document.getElementById('screen-workout').addEventListener('touchend',e=>{
-  if(!swipeEnabled||workoutPaused)return;
+  if(!swipeEnabled||workoutPaused||swipeInUitleg)return;
   const dx=swipeStartX-e.changedTouches[0].clientX;
   const dy=Math.abs(swipeStartY-e.changedTouches[0].clientY);
   if(dx>80&&dy<60) completeSet();
