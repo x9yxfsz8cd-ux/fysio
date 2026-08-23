@@ -157,7 +157,8 @@ body {
 .wk-nav-side { width: 64px; display: flex; justify-content: flex-end; flex-shrink: 0; }
 .wk-pause-btn {
   display: none;
-  width: 34px; height: 34px; border-radius: 50%; padding: 0;
+  /* 44x44 = Apple's minimum tikdoel; met zweethanden wil je niet missen */
+  width: 44px; height: 44px; border-radius: 50%; padding: 0;
   background: var(--surface2); border: 1px solid var(--border2);
   color: var(--text); align-items: center; justify-content: center;
   cursor: pointer;
@@ -560,7 +561,7 @@ body {
 .timer-knop {
   background: none; border: 1px solid var(--border2);
   color: var(--text2); border-radius: 100px;
-  padding: 8px 14px; font-size: 12px; font-weight: 600;
+  padding: 11px 16px; min-height: 42px; font-size: 12px; font-weight: 600;
   cursor: pointer; font-family: var(--mono);
   display: inline-flex; align-items: center; gap: 5px;
   transition: background 0.15s;
@@ -1467,7 +1468,19 @@ function toggleSteps(){
   const p=document.getElementById('steps-panel'),b=document.getElementById('steps-toggle');
   if(p) p.classList.toggle('open',stepsOpen);
   if(b) b.setAttribute('aria-expanded',stepsOpen);
-  if(stepsOpen){ if(!workoutPaused) pauseWorkout('uitleg'); }
+  if(stepsOpen){
+    if(!workoutPaused) pauseWorkout('uitleg');
+    // Schuif de uitleg onder de balk in beeld; anders staat de kop half
+    // achter de vastgezette Klaar-knop
+    if(p){
+      // let op: er staat ook een .wk-nav in het kiesscherm — pak die van de training
+      const nav=document.querySelector('#screen-workout .wk-nav');
+      const marge=(nav?nav.getBoundingClientRect().height:0)+8;
+      const doel=p.getBoundingClientRect().top+window.scrollY-marge;
+      const zacht=!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({top:Math.max(0,doel),behavior:zacht?'smooth':'auto'});
+    }
+  }
   else if(pauseBron==='uitleg') resumeWorkout();
 }
 function getQuickPick(){
