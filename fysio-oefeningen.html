@@ -197,11 +197,30 @@ body {
 }
 .ex-name { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.05; margin-bottom: 14px; color: var(--text); text-transform: uppercase; }
 
+/* Wat je nodig hebt — zelfde chips op elk scherm */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-size: 12px; font-weight: 600; font-family: var(--mono);
+  padding: 5px 10px; border-radius: 100px;
+  background: var(--surface2); color: var(--text2);
+  border: 1px solid transparent; white-space: nowrap;
+}
+.chip--reps { background: rgba(255,255,255,0.14); color: var(--text); }
+.chip--kg   { background: var(--accent-dim); color: var(--accent); border-color: rgba(255,107,53,0.28); }
+.chip--gear { background: none; border-color: var(--border2); }
 
 
-/* Workout actions */
-.wk-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-.ex-meta { font-size: 13px; color: var(--text3); font-family: var(--mono); margin-bottom: 4px; }
+
+/* Workout actions — blijft onderaan plakken, ook met de uitleg open,
+   zodat je nooit hoeft te scrollen om verder te gaan */
+.wk-actions {
+  display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
+  position: sticky; bottom: 0; z-index: 20;
+  padding-top: 14px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 74%, transparent);
+}
+.ex-meta { margin-bottom: 4px; }
 
 /* Buttons */
 .btn-primary {
@@ -253,7 +272,19 @@ body {
 .rest-unit { font-size: 11px; font-weight: 600; color: var(--text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.12em; font-family: var(--mono); }
 
 .rest-msg  { font-size: 16px; font-weight: 600; color: var(--text2); text-align: center; line-height: 1.5; margin-bottom: 8px; }
-.rest-next { font-size: 13px; color: var(--text3); margin-bottom: 32px; display: flex; align-items: center; gap: 6px; font-family: var(--mono); }
+.rest-volgende {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 28px;
+}
+.rest-volgende-kop {
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.14em; font-family: var(--mono);
+  display: flex; align-items: center; gap: 5px; margin-bottom: 6px;
+}
+.rest-volgende-naam {
+  font-size: 18px; font-weight: 800; letter-spacing: -0.3px;
+  margin-bottom: 10px; line-height: 1.15;
+}
 .rest-btns { display: flex; flex-direction: column; gap: 6px; width: 100%; }
 .rest-skip {
   width: 100%; background: #fff;
@@ -472,22 +503,13 @@ body {
 
 /* Uitleg: beeld per stap, onder elkaar */
 .steps-kop {
-  display: flex; align-items: center; gap: 14px;
-  background: var(--accent-dim); border: 1px solid rgba(255,107,53,0.18);
+  background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r-lg); padding: 12px 16px; margin-bottom: 8px;
 }
-.steps-kop-reps {
-  font-size: 24px; font-weight: 800; color: var(--accent);
-  font-family: var(--mono); letter-spacing: -1px; line-height: 1;
-  flex-shrink: 0;
-}
-.steps-kop-info { min-width: 0; }
 .steps-kop-set {
-  font-size: 13px; font-weight: 600; color: var(--text);
-}
-.steps-kop-extra {
-  font-size: 12px; color: var(--text2); font-family: var(--mono);
-  margin-top: 2px;
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.12em; font-family: var(--mono);
+  margin-bottom: 8px;
 }
 .steps-samenvatting {
   font-size: 11px; color: var(--text3); font-family: var(--mono);
@@ -1164,6 +1186,20 @@ function gewichtVan(o){
   const m=(o.notitie||'').match(/\d+(?:[.,]\d+)?\s*kg/i);
   return m?m[0].replace(/\s+/g,' '):null;
 }
+function perKantVan(o){
+  const nt=(o.notitie||'').toLowerCase();
+  return ALTIJD_PER_KANT.includes(o.naam)||nt.includes('kant')||nt.includes('been');
+}
+// Wat je nodig hebt, in één oogopslag. Overal dezelfde volgorde:
+// hoeveel · hoe zwaar · welke kant · welk materiaal.
+function benodigdChips(o){
+  return [
+    `<span class="chip chip--reps">${o.sets}×${o.reps}</span>`,
+    gewichtVan(o)?`<span class="chip chip--kg">${gewichtVan(o)}</span>`:'',
+    perKantVan(o)?`<span class="chip">per kant</span>`:'',
+    `<span class="chip chip--gear">${o.gear||'geen spullen'}</span>`,
+  ].filter(Boolean).join('');
+}
 function calcSetDur(o){
   const parts=o.reps.split(/[–\-]/);
   const avg=parts.length===2?(parseInt(parts[0])+parseInt(parts[1]))/2:parseInt(parts[0]);
@@ -1477,7 +1513,7 @@ function showSessionOverview(){
         return p.map(o=>`<div class="overview-pair">
           <div class="overview-pair-label">${o.super}</div>
           <div class="overview-pair-name">${o.naam}</div>
-          <div class="overview-pair-reps">${o.sets}×${o.reps}${gewichtVan(o)?' · '+gewichtVan(o):''}</div>
+          <div class="overview-pair-reps">${o.sets}×${o.reps}${gewichtVan(o)?' · '+gewichtVan(o):''}${perKantVan(o)?' · p/k':''}</div>
         </div>`).join('');
       }).join('')}
     </div>
@@ -1608,8 +1644,6 @@ function goHome(){ clearInterval(restInterval);clearInterval(setTimerInterval);c
 
 function renderWorkout(){
   const oefs=st.exercises,o=oefs[st.ex],n=oefs.length;
-  const nt=(o.notitie||'').toLowerCase();
-  const perKant=ALTIJD_PER_KANT.includes(o.naam)||nt.includes('kant')||nt.includes('been');
   const isLast=st.circuit?st.step===st.circuitOrder.length-1:false;
   const isLastSet=st.circuit?isLast:(st.set===o.sets-1);
   const isLastEx=st.circuit?isLast:(st.ex===oefs.length-1);
@@ -1645,13 +1679,9 @@ function renderWorkout(){
   };
   // Kop in de uitleg: wat je moet doen staat bovenaan de oefening, maar dat
   // scrollt weg zodra de uitleg openstaat. Daarom hier herhaald.
-  const extra=[gewichtVan(o), perKant?'per kant':null, o.gear||'geen spullen'].filter(Boolean).join(' · ');
   const kop=`<div class="steps-kop">
-    <div class="steps-kop-reps">${o.sets}×${o.reps}</div>
-    <div class="steps-kop-info">
-      <div class="steps-kop-set">Set ${st.set+1} van ${o.sets}</div>
-      <div class="steps-kop-extra">${extra}</div>
-    </div>
+    <div class="steps-kop-set">Set ${st.set+1} van ${o.sets}</div>
+    <div class="chips">${benodigdChips(o)}</div>
   </div>
   ${FIG[o.naam]?.cap?`<div class="steps-samenvatting">${FIG[o.naam].cap}</div>`:''}`;
   const stepsHtml=o.steps?kop+`<div class="steps-list">${o.steps.map((s,i)=>{
@@ -1666,7 +1696,6 @@ function renderWorkout(){
       </div>
     </div>`;
   }).join('')}</div>`:'';
-  const meta=[o.sets+'×'+o.reps, gewichtVan(o), perKant?'per kant':null, o.gear||'geen spullen'].filter(Boolean).join(' · ');
 
   // Superset banner
   const superBanner=st.supersetTransition?`<div class="superset-banner">${ic('zap',14)} Superset — direct door!</div>`:'';
@@ -1677,7 +1706,7 @@ function renderWorkout(){
     <div class="ex-card">
       <div class="ex-eyebrow">${o.super?o.super+' · ':''}SET ${st.set+1}/${o.sets}</div>
       <div class="ex-name">${o.naam}</div>
-      <div class="ex-meta">${meta}</div>
+      <div class="chips ex-meta">${benodigdChips(o)}</div>
     </div>
     <div class="ex-timer-card" onclick="togglePause()" role="button" aria-label="Tik om te pauzeren">
       <div class="ex-timer-ring-wrap">
@@ -1763,9 +1792,17 @@ function showRest(type){
   restSecs=REST_SECS;
   const circ=REST_CIRC;
   const msg=getCoachMsg();
-  let nextName=null;
-  if(st.circuit&&st.step<st.circuitOrder.length) nextName=st.exercises[st.circuitOrder[st.step].ex].naam;
-  else if(!st.circuit&&type==='exercise'&&st.ex+1<st.exercises.length) nextName=st.exercises[st.ex+1].naam;
+  // Tijdens de rust wil je zien wat je straks nodig hebt — niet alleen de naam
+  let volgende=null;
+  if(st.circuit&&st.step<st.circuitOrder.length) volgende=st.exercises[st.circuitOrder[st.step].ex];
+  else if(!st.circuit&&type==='exercise'&&st.ex+1<st.exercises.length) volgende=st.exercises[st.ex+1];
+  else if(!st.circuit&&type==='set') volgende=st.exercises[st.ex];
+  const volgendeKaart=volgende?`
+    <div class="rest-volgende">
+      <div class="rest-volgende-kop">${ic('arrow-right',12)} Straks</div>
+      <div class="rest-volgende-naam">${volgende.naam}</div>
+      <div class="chips">${benodigdChips(volgende)}</div>
+    </div>`:'';
 
   function draw(s){
     const offset=circ*(1-s/REST_SECS),urgent=s<=10;
@@ -1784,7 +1821,7 @@ function showRest(type){
           </div>
         </div>
         <div class="rest-msg">${msg}</div>
-        ${nextName?`<div class="rest-next">${ic('arrow-right',12)} Volgende: ${nextName}</div>`:''}
+        ${volgendeKaart}
         <div class="rest-btns">
           <button class="rest-skip" onclick="skipRest()">${ic('check',15)} Ik ben klaar</button>
           <button class="rest-add"  onclick="addRest()">${ic('plus',12)} 15 seconden extra rust</button>
