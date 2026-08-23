@@ -507,6 +507,26 @@ body {
   margin-top: 4px; font-family: var(--mono);
   opacity: 0.6;
 }
+/* Stille pauze: timers staan stil maar het scherm blijft leesbaar */
+.ex-timer-card.gepauzeerd .ex-timer-sec { color: var(--text3); }
+.ex-timer-card.gepauzeerd .ring-fill { stroke: var(--text3); }
+.ex-timer-card.gepauzeerd .timer-tap-hint { color: var(--accent); opacity: 1; }
+
+/* Tijd bijsturen */
+.timer-knoppen {
+  display: flex; gap: 6px; justify-content: center;
+  margin-top: 2px;
+}
+.timer-knop {
+  background: none; border: 1px solid var(--border2);
+  color: var(--text2); border-radius: 100px;
+  padding: 8px 14px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--mono);
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: background 0.15s;
+}
+.timer-knop:active { background: var(--surface); }
+.timer-knop--herstart { color: var(--text); }
 
 /* Pause overlay */
 .pause-overlay {
@@ -693,6 +713,8 @@ const PATHS={
   'bag':          `<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>`,
   'skip':         `<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>`,
   'plus':         `<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
+  'minus':        `<line x1="5" y1="12" x2="19" y2="12"/>`,
+  'rotate':       `<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>`,
   'activity':     `<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>`,
   'zap':          `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`,
 };
@@ -1280,7 +1302,15 @@ let setTimerSecs=0;
 let setTimerDur=0;
 
 // Globale pauze — bevriest set-timer, rusttimer en de sessieklok
-let workoutPaused=false,pauseStartedAt=0,activeTimer=null;
+// pauseBron 'knop' toont het pauzescherm; 'uitleg' bevriest stilletjes door,
+// zodat je de uitleg kunt lezen zonder dat er een overlay overheen valt
+let workoutPaused=false,pauseStartedAt=0,activeTimer=null,pauseBron=null;
+function markeerTimerPauze(){
+  const kaart=document.querySelector('.ex-timer-card');
+  const hint=document.querySelector('.timer-tap-hint');
+  if(kaart) kaart.classList.toggle('gepauzeerd',workoutPaused);
+  if(hint) hint.textContent=workoutPaused?'gepauzeerd — tik om te hervatten':'tik om te pauzeren';
+}
 function setPauseBtn(on){
   const b=document.getElementById('wk-pause-btn');
   if(b) b.classList.toggle('visible',!!on);
@@ -1291,24 +1321,26 @@ function paintPauseBtn(){
   b.innerHTML=ic(workoutPaused?'play':'pause',15);
   b.setAttribute('aria-label',workoutPaused?'Training hervatten':'Training pauzeren');
 }
-function togglePause(){ workoutPaused?resumeWorkout():pauseWorkout(); }
-function pauseWorkout(){
+function togglePause(){ workoutPaused?resumeWorkout():pauseWorkout('knop'); }
+function pauseWorkout(bron='knop'){
   if(workoutPaused||!activeTimer)return;
-  workoutPaused=true;pauseStartedAt=Date.now();
+  workoutPaused=true;pauseStartedAt=Date.now();pauseBron=bron;
   releaseWakeLock();
-  const secs=Math.max(0,activeTimer==='rest'?restSecs:setTimerSecs);
-  document.getElementById('pause-num').textContent=secs;
-  document.getElementById('pause-meta').textContent=`sessie ${fmtTimer(sessionElapsed())} · gepauzeerd`;
-  document.getElementById('pause-overlay').classList.add('visible');
-  paintPauseBtn();updateHud();
+  if(bron==='knop'){
+    const secs=Math.max(0,activeTimer==='rest'?restSecs:setTimerSecs);
+    document.getElementById('pause-num').textContent=secs;
+    document.getElementById('pause-meta').textContent=`sessie ${fmtTimer(sessionElapsed())} · gepauzeerd`;
+    document.getElementById('pause-overlay').classList.add('visible');
+  }
+  paintPauseBtn();markeerTimerPauze();updateHud();
 }
 function resumeWorkout(){
   if(!workoutPaused)return;
   if(sessionStartTime) sessionStartTime+=Date.now()-pauseStartedAt;
-  workoutPaused=false;pauseStartedAt=0;
+  workoutPaused=false;pauseStartedAt=0;pauseBron=null;
   requestWakeLock();
   document.getElementById('pause-overlay').classList.remove('visible');
-  paintPauseBtn();updateHud();
+  paintPauseBtn();markeerTimerPauze();updateHud();
 }
 // De overlay dekt ook de Terug-knop af, dus afbreken moet vanuit de overlay kunnen
 function stopVanuitPauze(){
@@ -1316,42 +1348,73 @@ function stopVanuitPauze(){
   goHome();
 }
 function clearPause(){
-  workoutPaused=false;pauseStartedAt=0;activeTimer=null;
+  workoutPaused=false;pauseStartedAt=0;activeTimer=null;pauseBron=null;
   const o=document.getElementById('pause-overlay');if(o)o.classList.remove('visible');
   setPauseBtn(false);paintPauseBtn();
 }
 
-function startSetTimer(dur){
+const SET_CIRC=2*Math.PI*78;
+function tekenSetTimer(){
+  const r=document.getElementById('ex-ring'),l=document.getElementById('ex-timer-sec');
+  if(!l) return false;
+  const pct=setTimerDur>0?Math.max(0,Math.min(1,setTimerSecs/setTimerDur)):0;
+  if(r){
+    r.style.strokeDasharray=SET_CIRC;
+    r.style.strokeDashoffset=SET_CIRC*(1-pct);
+    r.classList.toggle('urgent',setTimerSecs<=10&&setTimerSecs>0);
+  }
+  l.textContent=setTimerSecs>0?setTimerSecs:'—';
+  return true;
+}
+function tikSetTimer(){
   clearInterval(setTimerInterval);
-  activeTimer='set';
-  setTimerDur=dur;
-  setTimerSecs=dur;
-  const circ=2*Math.PI*78;
-  const ring=document.getElementById('ex-ring'),label=document.getElementById('ex-timer-sec');
-  if(!label)return;
-  if(ring){ring.style.strokeDasharray=circ;ring.style.strokeDashoffset=0;ring.classList.remove('urgent');}
-  label.textContent=dur;
   setTimerInterval=setInterval(()=>{
     if(workoutPaused)return;
     setTimerSecs--;
-    const r=document.getElementById('ex-ring'),l=document.getElementById('ex-timer-sec');
-    if(!l){clearInterval(setTimerInterval);return;}
-    const pct=Math.max(0,setTimerSecs/setTimerDur);
-    if(r){
-      r.style.strokeDashoffset=circ*(1-pct);
-      if(setTimerSecs<=10) r.classList.add('urgent');
+    if(!tekenSetTimer()){clearInterval(setTimerInterval);return;}
+    if(setTimerSecs<=0){
+      clearInterval(setTimerInterval);playBeep();
+      const btn=document.querySelector('#wk-body .btn-primary');
+      if(btn){btn.classList.add('pulse');btn.scrollIntoView({behavior:'smooth',block:'center'});}
     }
-    l.textContent=setTimerSecs>0?setTimerSecs:'—';
-    if(setTimerSecs<=0){clearInterval(setTimerInterval);playBeep();const btn=document.querySelector('#wk-body .btn-primary');if(btn){btn.classList.add('pulse');btn.scrollIntoView({behavior:'smooth',block:'center'});}}
   },1000);
 }
-// Uitleg open/dicht — keuze blijft staan bij de volgende oefening
+function startSetTimer(dur){
+  clearInterval(setTimerInterval);
+  activeTimer='set';
+  setTimerDur=dur;setTimerSecs=dur;
+  if(!tekenSetTimer())return;
+  tikSetTimer();
+}
+// Tijd bijsturen tijdens de set
+function setTimerBij(delta){
+  if(activeTimer!=='set')return;
+  setTimerSecs=Math.max(0,setTimerSecs+delta);
+  if(setTimerSecs>setTimerDur) setTimerDur=setTimerSecs;
+  const btn=document.querySelector('#wk-body .btn-primary');
+  if(btn) btn.classList.remove('pulse');
+  tekenSetTimer();
+  if(setTimerSecs>0) tikSetTimer(); else clearInterval(setTimerInterval);
+}
+function herstartSetTimer(){
+  if(activeTimer!=='set')return;
+  const o=st.exercises[st.ex];
+  if(!o)return;
+  if(pauseBron==='uitleg') resumeWorkout();
+  startSetTimer(calcSetDur(o));
+  const btn=document.querySelector('#wk-body .btn-primary');
+  if(btn) btn.classList.remove('pulse');
+}
+// Uitleg open/dicht — keuze blijft staan bij de volgende oefening.
+// Openen pauzeert stilletjes, sluiten hervat weer.
 let stepsOpen=false;
 function toggleSteps(){
   stepsOpen=!stepsOpen;
   const p=document.getElementById('steps-panel'),b=document.getElementById('steps-toggle');
   if(p) p.classList.toggle('open',stepsOpen);
   if(b) b.setAttribute('aria-expanded',stepsOpen);
+  if(stepsOpen){ if(!workoutPaused) pauseWorkout('uitleg'); }
+  else if(pauseBron==='uitleg') resumeWorkout();
 }
 function getQuickPick(){
   const seen=new Set();
@@ -1602,6 +1665,11 @@ function renderWorkout(){
       </div>
       <div class="timer-tap-hint">tik om te pauzeren</div>
     </div>
+    <div class="timer-knoppen">
+      <button class="timer-knop" onclick="setTimerBij(-15)" aria-label="Vijftien seconden eraf">${ic('minus',12)} 15s</button>
+      <button class="timer-knop timer-knop--herstart" onclick="herstartSetTimer()" aria-label="Timer opnieuw starten">${ic('rotate',12)} Opnieuw</button>
+      <button class="timer-knop" onclick="setTimerBij(15)" aria-label="Vijftien seconden erbij">${ic('plus',12)} 15s</button>
+    </div>
     ${o.adem?`<div class="adem-bar"><div class="adem-dot"></div>${o.adem}</div>`:''}
     ${stepsHtml?`
     <button class="steps-toggle" id="steps-toggle" onclick="toggleSteps()" aria-expanded="${stepsOpen}" aria-controls="steps-panel">
@@ -1617,6 +1685,7 @@ function renderWorkout(){
   startSetTimer(calcSetDur(o));
   swipeEnabled=true;
   setPauseBtn(true);
+  markeerTimerPauze();
   updateHud();
 }
 
@@ -1625,6 +1694,8 @@ function sameSuperset(a,b){
   return a.super.replace(/[AB]/,'')=== b.super.replace(/[AB]/,'');
 }
 function completeSet(){
+  // Een stille uitleg-pauze mag doorgaan niet blokkeren
+  if(pauseBron==='uitleg') resumeWorkout();
   clearInterval(setTimerInterval);  if(st.circuit){
     const prev=st.exercises[st.ex];
     if(!advanceCircuit()){finish();return;}
@@ -1644,6 +1715,7 @@ function completeSet(){
   }
 }
 function skipEx(){
+  if(pauseBron==='uitleg') resumeWorkout();
   clearInterval(setTimerInterval);nextExPending=false;clearInterval(restInterval);
   if(st.circuit){
     const skipIdx=st.ex;
