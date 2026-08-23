@@ -471,6 +471,24 @@ body {
 .fig-pose .band { stroke: var(--accent); stroke-width: 2.2; opacity: 0.8; }
 
 /* Uitleg: beeld per stap, onder elkaar */
+.steps-kop {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--accent-dim); border: 1px solid rgba(255,107,53,0.18);
+  border-radius: var(--r-lg); padding: 12px 16px; margin-bottom: 8px;
+}
+.steps-kop-reps {
+  font-size: 24px; font-weight: 800; color: var(--accent);
+  font-family: var(--mono); letter-spacing: -1px; line-height: 1;
+  flex-shrink: 0;
+}
+.steps-kop-info { min-width: 0; }
+.steps-kop-set {
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.steps-kop-extra {
+  font-size: 12px; color: var(--text2); font-family: var(--mono);
+  margin-top: 2px;
+}
 .steps-samenvatting {
   font-size: 11px; color: var(--text3); font-family: var(--mono);
   letter-spacing: 0.08em; text-transform: uppercase;
@@ -1625,8 +1643,18 @@ function renderWorkout(){
     if(/terug|zakken|los\b/i.test(tekst)) return 'Terug';
     return 'Uitvoering';
   };
-  const samenvatting=FIG[o.naam]?.cap?`<div class="steps-samenvatting">${FIG[o.naam].cap}</div>`:'';
-  const stepsHtml=o.steps?samenvatting+`<div class="steps-list">${o.steps.map((s,i)=>{
+  // Kop in de uitleg: wat je moet doen staat bovenaan de oefening, maar dat
+  // scrollt weg zodra de uitleg openstaat. Daarom hier herhaald.
+  const extra=[gewichtVan(o), perKant?'per kant':null, o.gear||'geen spullen'].filter(Boolean).join(' · ');
+  const kop=`<div class="steps-kop">
+    <div class="steps-kop-reps">${o.sets}×${o.reps}</div>
+    <div class="steps-kop-info">
+      <div class="steps-kop-set">Set ${st.set+1} van ${o.sets}</div>
+      <div class="steps-kop-extra">${extra}</div>
+    </div>
+  </div>
+  ${FIG[o.naam]?.cap?`<div class="steps-samenvatting">${FIG[o.naam].cap}</div>`:''}`;
+  const stepsHtml=o.steps?kop+`<div class="steps-list">${o.steps.map((s,i)=>{
     const lab=stepLabel(i,s);
     // Stap 1 is de beginhouding; stap 3 alleen als je echt terugkomt
     const pose=(i===0||(i===2&&lab==='Terug'))?'a':'b';
