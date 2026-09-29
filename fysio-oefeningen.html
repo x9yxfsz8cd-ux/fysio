@@ -28,13 +28,14 @@
   --red-glow:    rgba(244,63,94,0.3);
   --orange:      #fbbf24;
   --text:        #ffffff;
-  --text2:       rgba(255,255,255,0.6);
-  --text3:       rgba(255,255,255,0.35);
+  --text2:       rgba(255,255,255,0.7);
+  --text3:       rgba(255,255,255,0.5);
   --sans:        -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   --mono:        'SF Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
   --r:           8px;
   --r-lg:        12px;
   --r-xl:        16px;
+  --ring:        min(180px, 23vh);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -86,7 +87,7 @@ body {
 /* Picker */
 .pick-trigger {
   width: 100%; background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 16px;
+  border-radius: var(--r); padding: 14px 16px; min-height: 48px;
   display: flex; align-items: center; justify-content: space-between;
   cursor: pointer; font-family: var(--mono); transition: background 0.12s;
   color: var(--text2); font-size: 11px; font-weight: 600;
@@ -149,11 +150,12 @@ body {
   display: inline-flex; align-items: center; gap: 4px;
   background: none; border: none; color: var(--accent);
   font-size: 13px; font-weight: 600; cursor: pointer;
-  font-family: var(--sans); padding: 4px 0; flex-shrink: 0;
+  font-family: var(--sans); padding: 10px 12px 10px 0; min-height: 44px; flex-shrink: 0;
 }
 .wk-nav-center { flex: 1; text-align: center; }
 .wk-nav-title  { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--mono); }
-.wk-nav-sub    { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+.wk-nav-sub    { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk-nav-center { min-width: 0; }
 .wk-nav-side { width: 64px; display: flex; justify-content: flex-end; flex-shrink: 0; }
 .wk-pause-btn {
   display: none;
@@ -190,13 +192,7 @@ body {
   background: none; border: none;
   padding: 8px 0 0;
 }
-.ex-eyebrow {
-  font-size: 12px; font-weight: 600; color: var(--accent);
-  margin-bottom: 8px; letter-spacing: 0.1em; text-transform: uppercase;
-  display: flex; align-items: center; gap: 6px;
-  font-family: var(--mono);
-}
-.ex-name { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.05; margin-bottom: 14px; color: var(--text); text-transform: uppercase; }
+.ex-name { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.05; margin-bottom: 10px; color: var(--text); text-transform: uppercase; }
 
 /* Wat je nodig hebt — zelfde chips op elk scherm */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -222,6 +218,8 @@ body {
   background: linear-gradient(to top, var(--bg) 74%, transparent);
 }
 .ex-meta { margin-bottom: 4px; }
+.wk-actions-rij { display: flex; gap: 8px; }
+.wk-actions-rij > button { flex: 1; min-height: 48px; }
 
 /* Buttons */
 .btn-primary {
@@ -255,27 +253,27 @@ body {
 /* REST TIMER */
 .rest-view {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 24px 22px 28px;
+  padding: 12px 22px 20px;
 }
 .rest-eyebrow {
   font-size: 11px; font-weight: 600; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 20px;
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px;
   display: flex; align-items: center; gap: 6px; font-family: var(--mono);
 }
-.rest-ring-wrap { position: relative; width: 180px; height: 180px; margin-bottom: 18px; }
-.rest-ring-wrap svg { transform: rotate(-90deg); display: block; }
+.rest-ring-wrap { position: relative; width: var(--ring); height: var(--ring); margin-bottom: 14px; }
+.rest-ring-wrap svg { transform: rotate(-90deg); display: block; width: 100%; height: 100%; }
 .ring-bg   { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
 .ring-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round;
   transition: stroke-dashoffset 1s linear, stroke 2s ease, filter 2s ease;
 }
 .rest-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.rest-sec  { font-size: 72px; font-weight: 800; letter-spacing: -3px; line-height: 1; font-family: var(--mono); }
+.rest-sec  { font-size: calc(var(--ring) * 0.4); font-weight: 800; letter-spacing: -3px; line-height: 1; font-family: var(--mono); }
 .rest-unit { font-size: 11px; font-weight: 600; color: var(--text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.12em; font-family: var(--mono); }
 
-.rest-msg  { font-size: 16px; font-weight: 600; color: var(--text2); text-align: center; line-height: 1.5; margin-bottom: 8px; }
+.rest-msg  { font-size: 15px; font-weight: 600; color: var(--text2); text-align: center; line-height: 1.4; margin-bottom: 12px; }
 .rest-volgende {
   width: 100%; background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 28px;
+  border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 16px;
 }
 .rest-volgende-kop {
   font-size: 10px; font-weight: 700; color: var(--text3);
@@ -339,15 +337,16 @@ body {
 /* Exercise timer card */
 .ex-timer-card {
   background: none; border: none;
-  padding: 20px 0 8px;
+  padding: 4px 0 0;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   cursor: pointer;
 }
 .ex-timer-eyebrow { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; font-family: var(--mono); }
-.ex-timer-ring-wrap { position: relative; width: 180px; height: 180px; }
-.ex-timer-ring-wrap svg { transform: rotate(-90deg); display: block; }
+/* Ring krimpt op lage schermen (iPhone SE), zodat de bediening in beeld blijft */
+.ex-timer-ring-wrap { position: relative; width: var(--ring); height: var(--ring); }
+.ex-timer-ring-wrap svg { transform: rotate(-90deg); display: block; width: 100%; height: 100%; }
 .ex-timer-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ex-timer-sec { font-size: 64px; font-weight: 800; letter-spacing: -3px; line-height: 1; font-family: var(--mono); }
+.ex-timer-sec { font-size: calc(var(--ring) * 0.34); font-weight: 800; letter-spacing: -3px; line-height: 1; font-family: var(--mono); }
 .ex-timer-unit { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 6px; font-family: var(--mono); }
 @keyframes pulse-green {
   0%,100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
@@ -484,8 +483,8 @@ body {
 /* Exercise steps — uitklapbaar via de Uitleg-knop */
 .steps-toggle {
   width: 100%; background: none; border: 1px solid var(--border2);
-  color: var(--text2); border-radius: 100px; padding: 12px;
-  font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--sans);
+  color: var(--text2); border-radius: 100px; padding: 12px; min-height: 44px;
+  font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--sans);
   display: flex; align-items: center; justify-content: center; gap: 6px;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
@@ -543,15 +542,14 @@ body {
   text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--mono);
 }
 .step-text { font-size: 15px; color: var(--text); line-height: 1.45; font-weight: 500; }
-.timer-tap-hint {
-  font-size: 11px; color: var(--text3); text-align: center;
-  margin-top: 4px; font-family: var(--mono);
-  opacity: 0.6;
-}
+/* -15s  [ring]  +15s op één rij, Opnieuw eronder */
+.timer-rij { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.timer-rij .timer-knop { min-width: 64px; justify-content: center; }
 /* Stille pauze: timers staan stil maar het scherm blijft leesbaar */
 .ex-timer-card.gepauzeerd .ex-timer-sec { color: var(--text3); }
 .ex-timer-card.gepauzeerd .ring-fill { stroke: var(--text3); }
-.ex-timer-card.gepauzeerd .timer-tap-hint { color: var(--accent); opacity: 1; }
+.ex-timer-card.gepauzeerd .ex-timer-unit { color: var(--accent); }
+.ex-timer-unit.wissel { color: var(--accent); font-weight: 700; letter-spacing: 0.04em; }
 
 /* Tijd bijsturen */
 .timer-knoppen {
@@ -561,7 +559,7 @@ body {
 .timer-knop {
   background: none; border: 1px solid var(--border2);
   color: var(--text2); border-radius: 100px;
-  padding: 11px 16px; min-height: 42px; font-size: 12px; font-weight: 600;
+  padding: 11px 16px; min-height: 44px; font-size: 12px; font-weight: 600;
   cursor: pointer; font-family: var(--mono);
   display: inline-flex; align-items: center; gap: 5px;
   transition: background 0.15s;
@@ -593,6 +591,35 @@ body {
   width: 100%; max-width: 340px; margin-top: 38px;
   display: flex; flex-direction: column; gap: 8px;
 }
+
+/* Ongedaan maken — net onder de balk, zodat hij de knoppen onderaan niet afdekt */
+.undo-toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  top: calc(max(16px, env(safe-area-inset-top) + 8px) + 64px);
+  z-index: 50; display: none; align-items: center; gap: 14px;
+  background: #1c1c1e; border: 1px solid var(--border2); border-radius: 100px;
+  padding: 6px 6px 6px 18px; font-size: 14px; color: var(--text2);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.6); white-space: nowrap;
+}
+/* Eigen animatie: de gewone fadeIn overschrijft de translateX die hem centreert */
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.undo-toast.visible { display: flex; animation: toastIn 0.2s ease-out; }
+.undo-toast button {
+  background: var(--surface3); border: none; color: var(--accent);
+  font: 600 14px var(--sans); border-radius: 100px; padding: 10px 16px; min-height: 40px; cursor: pointer;
+}
+
+/* Onderbroken training op home */
+.hervat-kaart {
+  margin: 0 28px 16px; padding: 16px 18px;
+  background: var(--accent-dim); border: 1px solid rgba(255,107,53,0.3);
+  border-radius: var(--r-lg);
+}
+.hervat-titel { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.hervat-sub { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+.hervat-knoppen { display: flex; gap: 8px; }
+.hervat-knoppen .btn-primary { padding: 13px; font-size: 15px; }
+.hervat-knoppen .btn-ghost { width: auto; padding: 13px 18px; }
 
 /* Superset transition */
 .superset-banner {
@@ -645,6 +672,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <div class="home-title">Fysio</div>
     <div class="streak-pill" id="streak-pill"><span id="streak-text"><b>0</b> dagen op rij</span></div>
   </div>
+  <div id="hervat"></div>
   <section class="quick-section" aria-label="Snelstart">
     <button class="quick-card" id="quick-card" onclick="startQuick()" aria-label="Start een snelle oefening"></button>
   </section>
@@ -693,7 +721,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 <!-- WORKOUT -->
 <div id="screen-workout" class="screen">
   <div class="wk-nav">
-    <button class="wk-back" id="wk-back-btn" onclick="goHome()">Terug</button>
+    <button class="wk-back" id="wk-back-btn" onclick="terugTijdensTraining()">Terug</button>
     <div class="wk-nav-center">
       <div class="wk-nav-title" id="wk-title"></div>
       <div class="wk-nav-sub"   id="wk-sub"></div>
@@ -715,8 +743,13 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="pause-meta" id="pause-meta"></div>
   <div class="pause-actions">
     <button class="btn-primary" id="pause-resume-btn" onclick="togglePause()">Hervatten</button>
-    <button class="btn-ghost" onclick="stopVanuitPauze()">Training afbreken</button>
+    <button class="btn-ghost" onclick="stopVanuitPauze()">Training stoppen</button>
   </div>
+</div>
+
+<div class="undo-toast" id="undo-toast" role="status" aria-live="polite">
+  <span id="undo-tekst"></span>
+  <button onclick="ongedaanMaken()">Ongedaan maken</button>
 </div>
 
 <!-- DONE -->
@@ -1306,6 +1339,7 @@ function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.r
 
 function renderHome(){
   document.getElementById('home-eyebrow').innerHTML=ic('activity',12)+' Herstelschema';
+  renderHervat();
   const streak=getStreak();
   document.getElementById('streak-pill').innerHTML=ic('flame',13)+` <span><b>${streak}</b> dag${streak!==1?'en':''} op rij</span>`;
 
@@ -1384,9 +1418,17 @@ let setTimerDur=0;
 let workoutPaused=false,pauseStartedAt=0,activeTimer=null,pauseBron=null;
 function markeerTimerPauze(){
   const kaart=document.querySelector('.ex-timer-card');
-  const hint=document.querySelector('.timer-tap-hint');
-  if(kaart) kaart.classList.toggle('gepauzeerd',workoutPaused);
-  if(hint) hint.textContent=workoutPaused?'gepauzeerd — tik om te hervatten':'tik om te pauzeren';
+  if(kaart){
+    kaart.classList.toggle('gepauzeerd',workoutPaused);
+    kaart.setAttribute('aria-label',workoutPaused?'Timer gepauzeerd — tik om te hervatten':'Timer — tik om te pauzeren');
+  }
+  tekenEenheid();
+}
+// Onder het getal: 'sec', of bij per-kant-oefeningen welke kant je doet
+function tekenEenheid(){
+  const u=document.getElementById('ex-timer-unit');
+  if(!u||u.classList.contains('wissel'))return;
+  u.textContent=workoutPaused?'gepauzeerd':kantWissel?(gewisseld?'kant 2':'kant 1'):'sec';
 }
 function setPauseBtn(on){
   const b=document.getElementById('wk-pause-btn');
@@ -1422,10 +1464,17 @@ function resumeWorkout(){
   document.getElementById('pause-overlay').classList.remove('visible');
   paintPauseBtn();markeerTimerPauze();updateHud();
 }
-// De overlay dekt ook de Terug-knop af, dus afbreken moet vanuit de overlay kunnen
+// Terug tijdens een training vraagt eerst via het pauzescherm — één
+// verkeerde tik mag je training niet kosten
+function terugTijdensTraining(){
+  if(!activeTimer){goHome();return;}
+  if(workoutPaused&&pauseBron==='uitleg') resumeWorkout();
+  pauseWorkout('knop');
+}
+// Stoppen bewaart wat je al gedaan hebt; zonder afgeronde sets gewoon naar home
 function stopVanuitPauze(){
   resumeWorkout();
-  goHome();
+  if(st.setsGedaan) finish(); else goHome();
 }
 function clearPause(){
   workoutPaused=false;pauseStartedAt=0;activeTimer=null;pauseBron=null;
@@ -1458,6 +1507,7 @@ function tikSetTimer(){
     if(nu===setTimerSecs)return;
     setTimerSecs=nu;
     if(!tekenSetTimer()){clearInterval(setTimerInterval);return;}
+    checkKantWissel();
     if(setTimerSecs<=0){
       clearInterval(setTimerInterval);playBeep();
       const btn=document.querySelector('#wk-body .btn-primary');
@@ -1465,9 +1515,21 @@ function tikSetTimer(){
     }
   },250);
 }
+// Per kant: halverwege een korte piep en 'wissel van kant' in de ring
+let kantWissel=false,gewisseld=false;
+function checkKantWissel(){
+  if(!kantWissel||gewisseld||setTimerSecs<=0||setTimerSecs>Math.ceil(setTimerDur/2))return;
+  gewisseld=true;playBeep(true);
+  const u=document.getElementById('ex-timer-unit');
+  if(!u)return;
+  u.textContent='wissel kant';u.classList.add('wissel');
+  setTimeout(()=>{u.classList.remove('wissel');tekenEenheid();},2500);
+}
 function startSetTimer(dur){
   clearInterval(setTimerInterval);
   activeTimer='set';
+  const o=st.exercises[st.ex];
+  kantWissel=!!o&&perKantVan(o);gewisseld=false;
   setTimerDur=dur;setTimerSecs=dur;
   if(!tekenSetTimer())return;
   tikSetTimer();
@@ -1685,7 +1747,49 @@ function cancelPreview(){
   pendingSession=null;
   document.getElementById('session-preview').style.display='none';
 }
-function goHome(){ clearInterval(restInterval);clearInterval(setTimerInterval);clearPause();stopSessionTimer();releaseWakeLock();nextExPending=false;st.day=null;cancelPreview();renderHome();show('home'); }
+// Lopende training bewaren, zodat je verdergaat als iOS de app afsluit
+// of hij herlaadt. Na 6 uur telt hij niet meer als dezelfde training.
+const LOPEND='fysio-lopend',LOPEND_MAX=6*3600*1000;
+function bewaarVoortgang(){
+  if(!sessionStartTime)return;
+  // In de rust tussen twee oefeningen staat st.ex nog op de vorige
+  const ex=(!st.circuit&&nextExPending)?st.ex+1:st.ex,set=(!st.circuit&&nextExPending)?0:st.set;
+  try{localStorage.setItem(LOPEND,JSON.stringify({t:Date.now(),exercises:st.exercises,circuit:st.circuit,
+    circuitOrder:st.circuitOrder,mode:st.mode,ex,set,step:st.step,gedaan:[...st.gedaan],
+    setsGedaan:st.setsGedaan,elapsed:sessionElapsed()}));}catch(e){}
+}
+function wisVoortgang(){ try{localStorage.removeItem(LOPEND);}catch(e){} }
+function leesVoortgang(){
+  try{
+    const v=JSON.parse(localStorage.getItem(LOPEND)||'null');
+    if(v&&Date.now()-v.t<LOPEND_MAX&&v.exercises?.length) return v;
+  }catch(e){}
+  wisVoortgang();return null;
+}
+function renderHervat(){
+  const el=document.getElementById('hervat');if(!el)return;
+  const v=leesVoortgang();
+  if(!v){el.innerHTML='';return;}
+  const tot=v.circuit?v.circuitOrder.length:v.exercises.reduce((s,o)=>s+o.sets,0);
+  el.innerHTML=`<div class="hervat-kaart">
+    <div class="hervat-titel">Training onderbroken</div>
+    <div class="hervat-sub">${v.setsGedaan} van ${tot} sets gedaan · ${fmtTimer(v.elapsed)} bezig</div>
+    <div class="hervat-knoppen">
+      <button class="btn-primary" onclick="hervatTraining()">${ic('play',14)} Verder</button>
+      <button class="btn-ghost" onclick="wisVoortgang();renderHervat()">Wissen</button>
+    </div>
+  </div>`;
+}
+function hervatTraining(){
+  const v=leesVoortgang();if(!v){renderHervat();return;}
+  st.day=null;st.exercises=v.exercises;st.circuit=v.circuit;st.circuitOrder=v.circuitOrder;
+  st.mode=v.mode;st.ex=v.ex;st.set=v.set;st.step=v.step;nextExPending=false;
+  requestWakeLock();startSessionTimer();
+  st.gedaan=new Set(v.gedaan);st.setsGedaan=v.setsGedaan;
+  sessionStartTime=Date.now()-v.elapsed;
+  renderWorkout();show('workout');
+}
+function goHome(){ verbergOngedaan();wisVoortgang();clearInterval(restInterval);clearInterval(setTimerInterval);clearPause();stopSessionTimer();releaseWakeLock();nextExPending=false;st.day=null;cancelPreview();renderHome();show('home'); }
 
 function renderWorkout(){
   const oefs=st.exercises,o=oefs[st.ex],n=oefs.length;
@@ -1752,40 +1856,41 @@ function renderWorkout(){
   document.getElementById('wk-body').innerHTML=`
     ${superBanner}
     <div class="ex-card">
-      <div class="ex-eyebrow">${o.super?o.super+' · ':''}SET ${st.set+1}/${o.sets}</div>
       <div class="ex-name">${o.naam}</div>
       <div class="chips ex-meta">${benodigdChips(o)}</div>
     </div>
-    <div class="ex-timer-card" onclick="togglePause()" role="button" aria-label="Tik om te pauzeren">
+    <div class="timer-rij">
+    <button class="timer-knop" onclick="setTimerBij(-15)" aria-label="Vijftien seconden eraf">${ic('minus',12)} 15</button>
+    <div class="ex-timer-card" onclick="togglePause()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePause();}" role="button" tabindex="0" aria-label="Timer — tik om te pauzeren">
       <div class="ex-timer-ring-wrap">
-        <svg viewBox="0 0 180 180" width="180" height="180">
+        <svg viewBox="0 0 180 180">
           <circle class="ring-bg" cx="90" cy="90" r="78"/>
           <circle class="ring-fill" cx="90" cy="90" r="78" id="ex-ring"
             stroke-dasharray="${exCirc}" stroke-dashoffset="0"/>
         </svg>
         <div class="ex-timer-center">
           <div class="ex-timer-sec" id="ex-timer-sec">${calcSetDur(o)}</div>
-          <div class="ex-timer-unit">sec</div>
+          <div class="ex-timer-unit" id="ex-timer-unit">sec</div>
         </div>
       </div>
-      <div class="timer-tap-hint">tik om te pauzeren</div>
+    </div>
+    <button class="timer-knop" onclick="setTimerBij(15)" aria-label="Vijftien seconden erbij">${ic('plus',12)} 15</button>
     </div>
     <div class="timer-knoppen">
-      <button class="timer-knop" onclick="setTimerBij(-15)" aria-label="Vijftien seconden eraf">${ic('minus',12)} 15s</button>
       <button class="timer-knop timer-knop--herstart" onclick="herstartSetTimer()" aria-label="Timer opnieuw starten">${ic('rotate',12)} Opnieuw</button>
-      <button class="timer-knop" onclick="setTimerBij(15)" aria-label="Vijftien seconden erbij">${ic('plus',12)} 15s</button>
     </div>
     ${o.adem?`<div class="adem-bar"><div class="adem-dot"></div>${o.adem}</div>`:''}
-    ${stepsHtml?`
-    <button class="steps-toggle" id="steps-toggle" onclick="toggleSteps()" aria-expanded="${stepsOpen}" aria-controls="steps-panel">
-      ${ic('info',14)} Uitleg <span class="chev">${ic('chevron-down',14)}</span>
-    </button>
-    <div class="steps-panel${stepsOpen?' open':''}" id="steps-panel">${stepsHtml}</div>`:''}
+    ${stepsHtml?`<div class="steps-panel${stepsOpen?' open':''}" id="steps-panel">${stepsHtml}</div>`:''}
     <div class="wk-actions">
       <button class="btn-primary${isLastSet&&isLastEx?' finish':''}" onclick="completeSet()">
         ${btnLabel}
       </button>
-      <button class="btn-ghost" onclick="skipEx()">Overslaan</button>
+      <div class="wk-actions-rij">
+        ${stepsHtml?`<button class="steps-toggle" id="steps-toggle" onclick="toggleSteps()" aria-expanded="${stepsOpen}" aria-controls="steps-panel">
+          ${ic('info',14)} Uitleg <span class="chev">${ic('chevron-down',14)}</span>
+        </button>`:''}
+        <button class="btn-ghost" onclick="skipEx()">Overslaan</button>
+      </div>
     </div>`;
   startSetTimer(calcSetDur(o));
   swipeEnabled=true;
@@ -1794,6 +1899,7 @@ function renderWorkout(){
   if(stepsOpen&&!workoutPaused) pauseWorkout('uitleg');
   markeerTimerPauze();
   updateHud();
+  bewaarVoortgang();
 }
 
 // '3A', '3B' en '3C' vormen samen groep '3' — een superset kan ook drie oefeningen hebben
@@ -1802,9 +1908,36 @@ function sameSuperset(a,b){
   if(!a.super||!b.super)return false;
   return supersetGroep(a)===supersetGroep(b);
 }
+// Per ongeluk op Klaar of Overslaan? Vijf seconden om het terug te draaien
+let undoSnap=null,undoTimer=null;
+function maakSnapshot(){
+  return {ex:st.ex,set:st.set,step:st.step,circuitOrder:[...st.circuitOrder],
+    nextExPending,gedaan:[...st.gedaan],setsGedaan:st.setsGedaan};
+}
+function toonOngedaan(tekst,snap){
+  undoSnap=snap;
+  document.getElementById('undo-tekst').textContent=tekst;
+  document.getElementById('undo-toast').classList.add('visible');
+  clearTimeout(undoTimer);undoTimer=setTimeout(verbergOngedaan,5000);
+}
+function verbergOngedaan(){
+  undoSnap=null;clearTimeout(undoTimer);
+  const t=document.getElementById('undo-toast');if(t)t.classList.remove('visible');
+}
+function ongedaanMaken(){
+  const s=undoSnap;if(!s)return;
+  verbergOngedaan();
+  clearInterval(restInterval);clearInterval(setTimerInterval);
+  if(workoutPaused) resumeWorkout();
+  st.ex=s.ex;st.set=s.set;st.step=s.step;st.circuitOrder=s.circuitOrder;
+  nextExPending=s.nextExPending;st.gedaan=new Set(s.gedaan);st.setsGedaan=s.setsGedaan;
+  st.supersetTransition=false;
+  renderWorkout();window.scrollTo(0,0);
+}
 function completeSet(){
   // Een stille uitleg-pauze mag doorgaan niet blokkeren
   if(pauseBron==='uitleg') resumeWorkout();
+  const snap=maakSnapshot();
   st.gedaan.add(st.ex);st.setsGedaan++;
   clearInterval(setTimerInterval);
   if(st.circuit){
@@ -1822,11 +1955,13 @@ function completeSet(){
     const oefs=st.exercises,o=oefs[st.ex];
     if(st.set<o.sets-1){st.set++;showRest('set');}
     else if(st.ex<oefs.length-1){nextExPending=true;showRest('exercise');}
-    else finish();
+    else {finish();return;}
   }
+  toonOngedaan('Set afgerond',snap);
 }
 function skipEx(){
   if(pauseBron==='uitleg') resumeWorkout();
+  const snap=maakSnapshot();
   clearInterval(setTimerInterval);nextExPending=false;clearInterval(restInterval);
   if(st.circuit){
     const skipIdx=st.ex;
@@ -1836,6 +1971,7 @@ function skipEx(){
     st.ex++;st.set=0;if(st.ex>=st.exercises.length){finish();return;}
   }
   renderWorkout();window.scrollTo(0,0);
+  toonOngedaan('Overgeslagen',snap);
 }
 
 function showRest(type){
@@ -1852,7 +1988,7 @@ function showRest(type){
   else if(!st.circuit&&type==='exercise'&&st.ex+1<st.exercises.length) volgende=st.exercises[st.ex+1];
   else if(!st.circuit&&type==='set'){volgende=st.exercises[st.ex];volgendeSet=st.set;}
   document.getElementById('wk-title').textContent='Rust';
-  document.getElementById('wk-sub').textContent=volgende?`straks ${volgende.super?volgende.super+' · ':''}set ${volgendeSet+1}/${volgende.sets}`:'';
+  document.getElementById('wk-sub').textContent=volgende?`straks ${volgende.super?volgende.super+' · ':''}${volgendeSet+1}/${volgende.sets}`:'';
   const volgendeKaart=volgende?`
     <div class="rest-volgende">
       <div class="rest-volgende-kop">${ic('arrow-right',12)} Straks</div>
@@ -1886,6 +2022,7 @@ function showRest(type){
   }
   draw(restSecs);
   restInterval=setInterval(restTick,250);
+  bewaarVoortgang();
 }
 let restEnd=0;
 function restTick(){
@@ -1914,8 +2051,28 @@ function addRest(){
   drawRest();
   restInterval=setInterval(restTick,250);
 }
-function playBeep(){
-  try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[0,.15,.3].forEach(t=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;o.type='sine';g.gain.setValueAtTime(.25,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.12);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.15);});}catch(e){}
+// iOS start geluid alleen na een tik, en staat maar een paar geluidsbronnen
+// toe — dus één bron, aangezet bij de eerste tik en daarna hergebruikt
+let audioCtx=null;
+function ontgrendelGeluid(){
+  try{
+    if(!audioCtx){
+      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      // Een stil geluidje in de tik zelf ontgrendelt oudere iOS-versies
+      const buf=audioCtx.createBuffer(1,1,22050),src=audioCtx.createBufferSource();
+      src.buffer=buf;src.connect(audioCtx.destination);src.start(0);
+    }
+    if(audioCtx.state==='suspended') audioCtx.resume();
+  }catch(e){}
+}
+document.addEventListener('touchend',ontgrendelGeluid,{passive:true});
+document.addEventListener('click',ontgrendelGeluid);
+function playBeep(kort=false){
+  try{
+    const ctx=audioCtx;if(!ctx)return;
+    if(ctx.state==='suspended') ctx.resume();
+    (kort?[0]:[0,.15,.3]).forEach(t=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;o.type='sine';g.gain.setValueAtTime(.25,ctx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.12);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.15);});
+  }catch(e){}
   try{navigator.vibrate&&navigator.vibrate([100,50,100,50,200]);}catch(e){}
 }
 
@@ -1954,11 +2111,12 @@ function updateHud(){
   const elapsed=sessionElapsed();
   const totalDur=calcExsDuration(st.exercises)*60*1000;
   const remaining=Math.max(0,totalDur-elapsed);
-  const pct=st.circuit?Math.round(st.step/(st.circuitOrder.length||1)*100):Math.round(st.set/(st.exercises[st.ex]?.sets||1)*100);
+  const setNu=st.circuit?Math.min(st.step+1,st.circuitOrder.length):st.set+1;
+  const setTot=st.circuit?st.circuitOrder.length:(st.exercises[st.ex]?.sets||1);
   hud.innerHTML=`
     <div class="wk-hud-item">TIJD <span class="wk-hud-val">${fmtTimer(elapsed)}</span></div>
     <div class="wk-hud-item">NOG <span class="wk-hud-val">~${fmtTimer(remaining)}</span></div>
-    <div class="wk-hud-item">${workoutPaused?'GEPAUZEERD':pct+'%'}</div>`;
+    <div class="wk-hud-item">${workoutPaused?'GEPAUZEERD':`SET <span class="wk-hud-val">${setNu}/${setTot}</span>`}</div>`;
 }
 function launchConfetti(){
   const c=document.getElementById('confetti-canvas');if(!c)return;
@@ -1995,6 +2153,7 @@ function launchConfetti(){
 function finish(){
   // Alles overgeslagen: niets om op te slaan of te vieren
   if(!st.setsGedaan){goHome();return;}
+  verbergOngedaan();wisVoortgang();
   const elapsed=sessionElapsed();
   clearPause();
   clearInterval(setTimerInterval);clearInterval(restInterval);
