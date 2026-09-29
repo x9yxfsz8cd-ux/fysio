@@ -405,22 +405,6 @@ body {
 .preview-action { margin-top: 12px; }
 .preview-action-secondary { margin-top: 6px; }
 
-/* Quick start */
-.quick-section { padding: 0 28px 8px; }
-.quick-card {
-  background: var(--accent);
-  border: none;
-  border-radius: var(--r); padding: 16px 20px;
-  cursor: pointer; width: 100%;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: opacity 0.15s, transform 0.2s;
-}
-.quick-card:active { opacity: 0.9; transform: scale(0.98); }
-.quick-icon { display: none; }
-.quick-body { text-align: center; }
-.quick-title { font-size: 14px; font-weight: 700; color: #fff; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
-.quick-sub { font-size: 11px; color: rgba(255,255,255,0.6); font-family: var(--mono); margin-top: 2px; }
-.quick-chev { display: none; }
 
 /* Session buttons */
 .day-nrg-btn {
@@ -435,19 +419,6 @@ body {
 .day-nrg-mid  { background: var(--surface); border: 1px solid var(--border2); color: var(--text2); }
 .day-nrg-high { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); }
 
-/* Featured session button */
-.session-featured {
-  width: 100%; padding: 20px 24px;
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: var(--r-xl); cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between;
-  color: var(--text); font-family: var(--sans);
-  transition: opacity 0.15s, transform 0.2s;
-}
-.session-featured:active { opacity: 0.8; transform: scale(0.98); }
-.session-featured-left { text-align: left; }
-.session-featured-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.session-featured-sub { font-size: 13px; color: var(--text3); }
 
 /* Layout utilities */
 .home-section { padding: 0 28px 16px; }
@@ -609,6 +580,39 @@ body {
   font: 600 14px var(--sans); border-radius: 100px; padding: 10px 16px; min-height: 40px; cursor: pointer;
 }
 
+/* Volgende training — het hoofdkader op home */
+.volgende-kaart {
+  width: 100%; text-align: left; cursor: pointer; border: none;
+  background: var(--accent); color: #fff; border-radius: var(--r-xl);
+  padding: 18px 20px; font-family: var(--sans);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  transition: opacity 0.15s, transform 0.2s;
+}
+.volgende-kaart:active { opacity: 0.9; transform: scale(0.98); }
+.volgende-kop { font: 700 11px var(--mono); letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.8; margin-bottom: 6px; }
+.volgende-naam { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 4px; }
+.volgende-sub { font-size: 13px; opacity: 0.85; }
+.week-kop { display: flex; justify-content: space-between; align-items: baseline; margin: 20px 0 10px; }
+.week-kop .list-label { margin: 0; }
+.week-status { font: 600 12px var(--mono); color: var(--text3); }
+.week-status.gehaald { color: var(--green); }
+.hist-body { flex: 1; min-width: 0; }
+.hist-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* Na de training: hoe voelde het? */
+.score { width: 100%; max-width: 340px; margin-bottom: 24px; text-align: left; }
+.score-vraag { font-size: 14px; font-weight: 600; color: var(--text2); margin: 14px 0 8px; }
+.score-rij { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.score-pijn { grid-template-columns: repeat(6, 1fr); }
+.score-knop {
+  min-height: 44px; border-radius: var(--r); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border2); color: var(--text2);
+  font: 600 14px var(--sans); transition: background 0.12s;
+}
+.score-knop.gekozen { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+.score-hint { font-size: 11px; color: var(--text3); margin-top: 6px; font-family: var(--mono); }
+.score-bevestig { font-size: 12px; color: var(--green); margin-top: 10px; min-height: 16px; font-family: var(--mono); }
+
 /* Onderbroken training op home */
 .hervat-kaart {
   margin: 0 28px 16px; padding: 16px 18px;
@@ -673,11 +677,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <div class="streak-pill" id="streak-pill"><span id="streak-text"><b>0</b> dagen op rij</span></div>
   </div>
   <div id="hervat"></div>
-  <section class="quick-section" aria-label="Snelstart">
-    <button class="quick-card" id="quick-card" onclick="startQuick()" aria-label="Start een snelle oefening"></button>
-  </section>
   <div class="home-list">
-    <div class="list-label">Kies je sessie</div>
     <div id="session-btns"></div>
   </div>
   <div id="session-preview"></div>
@@ -762,8 +762,9 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="done-stats">
     <div class="done-stat"><div class="done-stat-n" id="ds-ex">6</div><div class="done-stat-l">Oefeningen</div></div>
     <div class="done-stat"><div class="done-stat-n" id="ds-sets">18</div><div class="done-stat-l">Sets</div></div>
-    <div class="done-stat"><div class="done-stat-n" id="ds-streak">1</div><div class="done-stat-l">Streak</div></div>
+    <div class="done-stat"><div class="done-stat-n" id="ds-streak">1</div><div class="done-stat-l">Weekreeks</div></div>
   </div>
+  <div class="score" id="score"></div>
   <button class="done-home-btn" onclick="goHome()">Terug naar home</button>
 </div>
 <canvas id="confetti-canvas"></canvas>
@@ -795,7 +796,7 @@ const PATHS={
 function ic(n,s=16){ return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${PATHS[n]||''}</svg>`; }
 
 const SESSIONS={
-  basis:{naam:'Basis Training',exercises:[
+  basis:{naam:'Basis Training',label:'Basis',exercises:[
     {naam:'Jefferson Curl',sets:2,reps:'6–8',super:'1A',type:'vimeo',vid:'236884896',gear:'Dumbbell',adem:'Uit bij afrollen, in bij oprollen',
       steps:['Sta rechtop met gewicht, voeten heupbreedte','Rol wervelkolom langzaam naar beneden, wervel voor wervel','Ga zo ver als comfortabel, rol langzaam terug omhoog']},
     {naam:'Side Bends',sets:2,reps:'8',super:'1B',type:'yt',vid:'mjRUPpMh988',gear:'Dumbbell',adem:'Uit bij buigen, in bij terugkomen',
@@ -813,7 +814,7 @@ const SESSIONS={
     {naam:'Bekkenbodem',sets:3,reps:'12',super:'4B',type:'text',gear:'Bal',adem:'Uit bij spreiden',
       steps:['Bal onder heiligbeen, benen in tafelpositie','Voeten tegen elkaar, adem uit','Spreid knieën zo ver mogelijk, breng terug']},
   ]},
-  '27-07':{naam:'Training 27/07',exercises:[
+  '27-07':{naam:'Training 27/07',label:'Kracht + Rotatie',exercises:[
     {naam:'Half Kneeling Wood Choppers',sets:3,reps:'8',super:'1A',type:'text',notitie:'8 kg',gear:'Kettlebell',adem:'Uit bij de chop, in bij terugkomen',
       steps:['Kniel op één knie, kettlebell bij heup','Draai romp en breng gewicht diagonaal omhoog','Gecontroleerd terug naar startpositie']},
     {naam:'Bear Hold KB Slides',sets:3,reps:'12',super:'1B',type:'text',notitie:'8 kg',gear:'Kettlebell',adem:'Rustig doorademen, kern aanspannen',
@@ -831,7 +832,7 @@ const SESSIONS={
     {naam:'KB Kneeling Stand-up',sets:3,reps:'10',super:'4B',type:'text',notitie:'8 kg',gear:'Kettlebell',adem:'Uit bij opstaan, in bij knielen',
       steps:['Kniel met kettlebell tegen borst','Stap met één voet naar voren en sta op','Kniel gecontroleerd terug, wissel voet']},
   ]},
-  '20-07':{naam:'Training 20/07',exercises:[
+  '20-07':{naam:'Training 20/07',label:'Benen + Core',exercises:[
     {naam:'Big Ball Squeeze',sets:2,reps:'10',super:'0A',type:'text',gear:'Bal',adem:'Uit bij aanspannen',
       steps:['Zit of lig, grote bal tussen knieën','Knijp bal samen met binnenkant bovenbenen','Houd 3 sec vast, laat los']},
     {naam:'Bridges Arms Moving',sets:2,reps:'10',super:'0B',type:'text',gear:'',adem:'Uit bij optillen',
@@ -849,7 +850,7 @@ const SESSIONS={
     {naam:'Bridges on Ball',sets:3,reps:'10',super:'3B',type:'text',gear:'Bal',adem:'Uit bij optillen, in bij zakken',
       steps:['Lig op je rug, voeten op de bal','Duw heupen omhoog tot rechte lijn','Houd even vast, laat gecontroleerd zakken']},
   ]},
-  '13-07':{naam:'Training 13/07',exercises:[
+  '13-07':{naam:'Training 13/07',label:'Stabiliteit + Press',exercises:[
     {naam:'ISO Split Squat Hold',sets:2,reps:'30s',super:'0A',type:'text',notitie:'per kant',gear:'',adem:'Rustig doorademen',
       steps:['Ga in split squat positie tegen een balk/muur','Zak naar beneden, duw knie tegen weerstand','Houd 30 seconden vast per kant']},
     {naam:'Glute Marches KB',sets:2,reps:'16',super:'0B',type:'text',notitie:'4 kg',gear:'Kettlebell',adem:'Uit bij knie optillen',
@@ -1328,31 +1329,44 @@ function save(){ try{localStorage.setItem('fysio-v6',JSON.stringify(st.history))
 function dagKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function today(){ return dagKey(new Date()); }
 function fmtDate(d){ return new Date(d+'T12:00:00').toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'}); }
-function getStreak(){
-  const days=new Set(st.history.map(h=>h.datum));let s=0,d=new Date();
-  // Vandaag nog niet getraind? Dan loopt je reeks gewoon vanaf gisteren door
-  if(!days.has(dagKey(d))) d.setDate(d.getDate()-1);
-  while(days.has(dagKey(d))){s++;d.setDate(d.getDate()-1);}
-  return s;
+// Weekdoel: 1 training per week (Shar's afspraak). Rustdagen tellen niet tegen je.
+const WEEKDOEL=1;
+function weekKey(d){ const m=new Date(d);m.setDate(m.getDate()-(m.getDay()+6)%7);return dagKey(m); }
+function datumVan(k){ return new Date(k+'T12:00:00'); }
+function trainingenDezeWeek(){ const w=weekKey(new Date());return st.history.filter(h=>weekKey(datumVan(h.datum))===w).length; }
+function weekReeks(){
+  const weken=new Set(st.history.map(h=>weekKey(datumVan(h.datum))));
+  let n=0;const d=new Date();
+  // Deze week nog niet getraind? Dan loopt de reeks vanaf vorige week door
+  if(!weken.has(weekKey(d))) d.setDate(d.getDate()-7);
+  while(weken.has(weekKey(d))){n++;d.setDate(d.getDate()-7);}
+  return n;
 }
 function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0); }
 
+const TRAININGEN=['27-07','20-07','13-07','basis'];
+// Volgende training = de training die het langst geleden is (of nog nooit gedaan)
+function laatstGedaan(key){ const h=[...st.history].reverse().find(h=>h.key===key);return h?h.datum:''; }
+function volgendeTraining(){ return [...TRAININGEN].sort((a,b)=>laatstGedaan(a).localeCompare(laatstGedaan(b)))[0]; }
+function geledenTekst(datum){
+  if(!datum) return 'nog niet gedaan';
+  const dagen=Math.round((datumVan(today())-datumVan(datum))/86400000);
+  if(dagen<=0) return 'vandaag gedaan';
+  if(dagen===1) return 'gisteren gedaan';
+  if(dagen<14) return `${dagen} dagen geleden`;
+  return `${Math.round(dagen/7)} weken geleden`;
+}
+const ZWAAR_LABELS={licht:'licht',goed:'goed',zwaar:'zwaar',tezwaar:'te zwaar'};
 function renderHome(){
   document.getElementById('home-eyebrow').innerHTML=ic('activity',12)+' Herstelschema';
   renderHervat();
-  const streak=getStreak();
-  document.getElementById('streak-pill').innerHTML=ic('flame',13)+` <span><b>${streak}</b> dag${streak!==1?'en':''} op rij</span>`;
+  const deze=trainingenDezeWeek(),reeks=weekReeks();
+  const gehaald=deze>=WEEKDOEL;
+  const reeksTekst=reeks?` · ${reeks} ${reeks===1?'week':'weken'} op rij`:'';
+  document.getElementById('streak-pill').innerHTML=ic('flame',13)+
+    ` <span>${gehaald?'<b>Weekdoel gehaald</b>':'Nog 1 training deze week'}${reeksTekst}</span>`;
 
-  // Quick card
-  const qp=getQuickPick();
-  const quickDur=Math.ceil(calcSetDur(qp)*qp.sets/60);
-  document.getElementById('quick-card').innerHTML=`
-    <div class="quick-body">
-      <div class="quick-title">${qp.naam}</div>
-      <div class="quick-sub">${quickDur} min · ${qp.gear||'geen spullen'}</div>
-    </div>`;
-
-  // Weekly dots
+  const vk=volgendeTraining(),vs=SESSIONS[vk];
   const weekDots=Array.from({length:7},(_,i)=>{
     // Week begint op maandag; getDay() is 0 op zondag
     const d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7+i);
@@ -1363,41 +1377,49 @@ function renderHome(){
     return `<div class="week-dot${done?' done':''}${isToday?' today':''}"><div class="week-dot-circle"></div><div class="week-dot-label">${dayLabel}</div></div>`;
   }).join('');
 
-  // Geen-spullen exercise voor quick start
+  const qp=getQuickPick();
+  const quickDur=Math.ceil(calcSetDur(qp)*qp.sets/60);
   const noGearExs=ALL_EXERCISES.filter(o=>!o.gear);
   const noGearPick=noGearExs[Math.floor(Math.random()*noGearExs.length)];
+  const andere=TRAININGEN.filter(k=>k!==vk);
 
   document.getElementById('session-btns').innerHTML=`
     <div class="session-grid">
-      <div class="week-track">${weekDots}</div>
-      <button class="day-nrg-btn day-nrg-low" onclick="startSingle('${noGearPick.naam.replace(/'/g,"\\'")}')">
-        Geen spullen nodig · ${noGearPick.naam}
-      </button>
-      <div class="list-label list-label--flush">Trainingen</div>
-      <button class="session-featured" onclick="startSession('basis')">
-        <div class="session-featured-left">
-          <div class="session-featured-title">${ic('activity',14)} Basis</div>
-          <div class="session-featured-sub">4 supersets · ~${calcExsDuration(SESSIONS.basis.exercises)} min</div>
+      <button class="volgende-kaart" onclick="startSession('${vk}')">
+        <div>
+          <div class="volgende-kop">Volgende training</div>
+          <div class="volgende-naam">${vs.label}</div>
+          <div class="volgende-sub">${vs.exercises.length} oefeningen · ~${calcExsDuration(vs.exercises)} min · ${geledenTekst(laatstGedaan(vk))}</div>
         </div>
-        ${ic('chevron-right',16)}
+        ${ic('chevron-right',18)}
       </button>
-      <button class="day-nrg-btn day-nrg-mid" onclick="startSession('27-07')">Kracht + Rotatie · ~${calcExsDuration(SESSIONS['27-07'].exercises)} min</button>
-      <button class="day-nrg-btn day-nrg-mid" onclick="startSession('20-07')">Benen + Core · ~${calcExsDuration(SESSIONS['20-07'].exercises)} min</button>
-      <button class="day-nrg-btn day-nrg-mid" onclick="startSession('13-07')">Stabiliteit + Press · ~${calcExsDuration(SESSIONS['13-07'].exercises)} min</button>
+      <div class="week-kop">
+        <div class="list-label">Deze week</div>
+        <div class="week-status${gehaald?' gehaald':''}">${deze} van ${WEEKDOEL}</div>
+      </div>
+      <div class="week-track">${weekDots}</div>
+      <div class="list-label list-label--flush">Andere trainingen</div>
+      ${andere.map(k=>`<button class="day-nrg-btn day-nrg-mid" onclick="startSession('${k}')">${SESSIONS[k].label} · ~${calcExsDuration(SESSIONS[k].exercises)} min</button>`).join('')}
       <div class="list-label list-label--flush">Op tijd</div>
       <div class="session-row">
         <button class="day-nrg-btn day-nrg-low" onclick="buildSession(5,false)">5 min</button>
         <button class="day-nrg-btn day-nrg-low" onclick="buildSession(10,false)">10 min</button>
         <button class="day-nrg-btn day-nrg-mid" onclick="buildSession(20,false)">20 min</button>
       </div>
+      <div class="list-label list-label--flush">Losse oefening</div>
+      <button class="day-nrg-btn day-nrg-low" id="quick-card" onclick="startQuick()">Oefening van de dag · ${qp.naam} · ${quickDur} min</button>
+      <button class="day-nrg-btn day-nrg-low" onclick="startSingle('${noGearPick.naam.replace(/'/g,"\\'")}')">Geen spullen nodig · ${noGearPick.naam}</button>
     </div>`;
 
   const recent=[...st.history].reverse().slice(0,7);
   document.getElementById('history-list').innerHTML=recent.length===0
     ?`<div class="hist-empty">Nog geen sessies — start je eerste training</div>`
     :recent.map(h=>{
-      const label=h.count?`${h.count} oefening${h.count>1?'en':''} gedaan`:h.dag?`Dag ${h.dag} voltooid`:'Sessie voltooid';
-      return `<div class="hist-item"><div class="hist-dot"></div><div class="hist-label">${label}</div><div class="hist-date">${fmtDate(h.datum)}</div></div>`;
+      const naam=h.naam||'Sessie';
+      const delen=[h.count?`${h.count} oefening${h.count>1?'en':''}`:''];
+      if(h.zwaar) delen.push(ZWAAR_LABELS[h.zwaar]||h.zwaar);
+      if(h.pijn!=null) delen.push(`pijn ${h.pijn}`);
+      return `<div class="hist-item"><div class="hist-dot"></div><div class="hist-body"><div class="hist-label">${naam}</div><div class="hist-sub">${delen.filter(Boolean).join(' · ')}</div></div><div class="hist-date">${fmtDate(h.datum)}</div></div>`;
     }).join('');
 }
 
@@ -1584,11 +1606,13 @@ function getQuickPick(){
 }
 function startQuick(){
   const ex=getQuickPick();
+  st.naam=ex.naam;st.key=null;
   st.day=null;st.exercises=[{...ex,super:undefined}];st.mode='single';st.circuit=false;
   st.ex=0;st.set=0;requestWakeLock();startSessionTimer();renderWorkout();show('workout');
 }
 function startSession(key){
   const s=SESSIONS[key];if(!s)return;
+  st.naam=s.label;st.key=key;
   st.day=null;st.exercises=[...s.exercises];st.mode='full';st.circuit=true;
   st.ex=0;st.set=0;initCircuit();
   showSessionOverview();
@@ -1655,6 +1679,7 @@ function getExsByNames(names){
 function startCustom(){
   const exs=getExsByNames([...pickSelected]).map(o=>({...o,super:undefined}));
   if(exs.length===0)return;
+  st.naam=exs.length===1?exs[0].naam:'Eigen selectie';st.key=null;
   st.day=null;st.exercises=exs;st.mode=exs.length===1?'single':'short';
   st.circuit=exs.length>1;
   st.ex=0;st.set=0;initCircuit();
@@ -1662,7 +1687,7 @@ function startCustom(){
 }
 function startSingle(naam){
   const o=ALL_EXERCISES.find(x=>x.naam===naam);
-  if(o){st.day=null;st.exercises=[{...o,super:undefined}];st.mode='single';st.circuit=false;st.ex=0;st.set=0;requestWakeLock();startSessionTimer();renderWorkout();show('workout');}
+  if(o){st.naam=o.naam;st.key=null;st.day=null;st.exercises=[{...o,super:undefined}];st.mode='single';st.circuit=false;st.ex=0;st.set=0;requestWakeLock();startSessionTimer();renderWorkout();show('workout');}
 }
 let pickSelected=new Set();
 function showPicker(filter){
@@ -1738,6 +1763,7 @@ function reshuffleSession(){
 function startPendingSession(){
   if(!pendingSession)return;
   const result=pendingSession.exercises;
+  st.naam=`${pendingSession.minutes} min sessie`;st.key=null;
   pendingSession=null;
   document.getElementById('session-preview').style.display='none';
   st.day=null;st.exercises=result;st.mode='short';st.circuit=result.length>1;
@@ -1755,7 +1781,7 @@ function bewaarVoortgang(){
   // In de rust tussen twee oefeningen staat st.ex nog op de vorige
   const ex=(!st.circuit&&nextExPending)?st.ex+1:st.ex,set=(!st.circuit&&nextExPending)?0:st.set;
   try{localStorage.setItem(LOPEND,JSON.stringify({t:Date.now(),exercises:st.exercises,circuit:st.circuit,
-    circuitOrder:st.circuitOrder,mode:st.mode,ex,set,step:st.step,gedaan:[...st.gedaan],
+    circuitOrder:st.circuitOrder,mode:st.mode,naam:st.naam,key:st.key,ex,set,step:st.step,gedaan:[...st.gedaan],
     setsGedaan:st.setsGedaan,elapsed:sessionElapsed()}));}catch(e){}
 }
 function wisVoortgang(){ try{localStorage.removeItem(LOPEND);}catch(e){} }
@@ -1772,7 +1798,7 @@ function renderHervat(){
   if(!v){el.innerHTML='';return;}
   const tot=v.circuit?v.circuitOrder.length:v.exercises.reduce((s,o)=>s+o.sets,0);
   el.innerHTML=`<div class="hervat-kaart">
-    <div class="hervat-titel">Training onderbroken</div>
+    <div class="hervat-titel">${v.naam?v.naam+' onderbroken':'Training onderbroken'}</div>
     <div class="hervat-sub">${v.setsGedaan} van ${tot} sets gedaan · ${fmtTimer(v.elapsed)} bezig</div>
     <div class="hervat-knoppen">
       <button class="btn-primary" onclick="hervatTraining()">${ic('play',14)} Verder</button>
@@ -1783,7 +1809,7 @@ function renderHervat(){
 function hervatTraining(){
   const v=leesVoortgang();if(!v){renderHervat();return;}
   st.day=null;st.exercises=v.exercises;st.circuit=v.circuit;st.circuitOrder=v.circuitOrder;
-  st.mode=v.mode;st.ex=v.ex;st.set=v.set;st.step=v.step;nextExPending=false;
+  st.mode=v.mode;st.naam=v.naam;st.key=v.key;st.ex=v.ex;st.set=v.set;st.step=v.step;nextExPending=false;
   requestWakeLock();startSessionTimer();
   st.gedaan=new Set(v.gedaan);st.setsGedaan=v.setsGedaan;
   sessionStartTime=Date.now()-v.elapsed;
@@ -2150,6 +2176,22 @@ function launchConfetti(){
   }
   draw();
 }
+// Hoe voelde het? Gaat mee in de geschiedenis, voor jou en je fysio
+function renderScore(){
+  const h=st.history[st.history.length-1]||{};
+  const knop=(veld,waarde,tekst)=>`<button class="score-knop${h[veld]===waarde?' gekozen':''}" onclick="zetScore('${veld}',${typeof waarde==='string'?`'${waarde}'`:waarde})" aria-pressed="${h[veld]===waarde}">${tekst}</button>`;
+  document.getElementById('score').innerHTML=`
+    <div class="score-vraag">Hoe zwaar voelde het?</div>
+    <div class="score-rij">${Object.entries(ZWAAR_LABELS).map(([k,t])=>knop('zwaar',k,t[0].toUpperCase()+t.slice(1))).join('')}</div>
+    <div class="score-vraag">Pijn tijdens het trainen</div>
+    <div class="score-rij score-pijn">${Array.from({length:11},(_,i)=>knop('pijn',i,i)).join('')}</div>
+    <div class="score-hint">0 = geen pijn · 10 = ergste pijn</div>
+    <div class="score-bevestig" id="score-bevestig" role="status">${h.zwaar||h.pijn!=null?'Opgeslagen':''}</div>`;
+}
+function zetScore(veld,waarde){
+  const h=st.history[st.history.length-1];if(!h)return;
+  h[veld]=waarde;save();renderScore();
+}
 function finish(){
   // Alles overgeslagen: niets om op te slaan of te vieren
   if(!st.setsGedaan){goHome();return;}
@@ -2159,14 +2201,17 @@ function finish(){
   clearInterval(setTimerInterval);clearInterval(restInterval);
   stopSessionTimer();releaseWakeLock();
   const gedaan=[...st.gedaan].map(i=>st.exercises[i]);
-  st.history.push({datum:today(),count:gedaan.length});
+  st.history.push({datum:today(),count:gedaan.length,naam:st.naam||null,key:st.key||null,sets:st.setsGedaan});
   save();
   document.getElementById('ds-ex').textContent=gedaan.length;
   document.getElementById('ds-sets').textContent=st.setsGedaan;
-  document.getElementById('ds-streak').textContent=getStreak();
+  const reeks=weekReeks();
+  document.getElementById('ds-streak').textContent=reeks;
+  renderScore();
   const elapsedMin=Math.round(elapsed/60000);
   const duur=elapsedMin<1?'minder dan een minuut':`${elapsedMin} min`;
-  const msg=gedaan.length===1?`${gedaan[0].naam} gedaan in ${duur}.`:`${gedaan.length} oefeningen in ${duur}.`;
+  const aantal=`${gedaan.length} oefening${gedaan.length===1?'':'en'} in ${duur}`;
+  const msg=st.key?`${st.naam} · ${aantal}.`:gedaan.length===1?`${gedaan[0].naam} gedaan in ${duur}.`:`${aantal}.`;
   document.getElementById('done-p').textContent=msg;
   document.getElementById('wk-hud').innerHTML='';
   st.day=null;st.mode=null;show('done');
@@ -2190,6 +2235,10 @@ document.getElementById('screen-workout').addEventListener('touchend',e=>{
 paintPauseBtn();
 document.getElementById('pause-resume-btn').innerHTML=ic('play',15)+' Hervatten';
 load();
+// Offline: de service worker bewaart de app, zodat hij ook zonder bereik opent
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 </script>
 </body>
 </html>
