@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F0F1F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#07070B" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Fysio">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Fysio</title>
+<style>
+/* Fysio — iOS-taal: grouped backgrounds, SF Pro voor tekst, SF Rounded voor cijfers.
+   Grijzig blauw-paars als enige accent; groen alleen voor "gehaald".
+   Alle maten in rem: rem volgt de iOS-tekstgrootte via -apple-system-body. */
+:root{
+  --bg:#F0F1F6; --card:#FFFFFF; --fg:#15161F; --fg2:#5D5F75; --fg3:#6E7087;
+  --sep:rgba(60,62,100,.13); --fill:rgba(100,104,150,.1); --fill2:rgba(100,104,150,.18);
+  --accent:#5B5FB0; --accent-ink:#FFFFFF; --accent-soft:#E7E8F6;
+  --tile-a:#F1F1FA; --tile-b:#DEE0F1; --green:#2A8F60; --green-soft:#DFF2E8;
+  --warn:#B4541A; --warn-soft:#FBEADF; --red:#D6453D;
+  --bar:rgba(248,248,252,.86); --shadow:0 1px 2px rgba(20,20,60,.04),0 6px 20px rgba(20,20,60,.05);
+  --dim:rgba(10,10,30,.34);
+  --text:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,"Segoe UI",Roboto,sans-serif;
+  --round:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#07070B; --card:#16171F; --fg:#F3F3F8; --fg2:#A2A4B8; --fg3:#7A7C92;
+  --sep:rgba(140,142,180,.2); --fill:rgba(140,142,180,.16); --fill2:rgba(140,142,180,.26);
+  --accent:#A5A8EE; --accent-ink:#171845; --accent-soft:rgba(165,168,238,.15);
+  --tile-a:#191A2A; --tile-b:#222439; --green:#56CC90; --green-soft:rgba(86,204,144,.15);
+  --warn:#F2A66E; --warn-soft:rgba(242,166,110,.14); --red:#FF6259;
+  --bar:rgba(18,18,26,.84); --shadow:none; --dim:rgba(0,0,0,.55); color-scheme:dark}}
+
+html{font-size:17px;font:-apple-system-body;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--text);-webkit-font-smoothing:antialiased;
+  min-height:100vh;overscroll-behavior-y:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit;color:inherit}
+button{background:none;border:none;cursor:pointer;padding:0;text-align:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:12px}
+body.vast{overflow:hidden}
+
+/* ---------- schermen ---------- */
+.screen{display:none;max-width:560px;margin:0 auto;
+  padding:calc(env(safe-area-inset-top,0px) + 1rem) 1.2rem calc(env(safe-area-inset-bottom,0px) + 6.5rem)}
+.screen.on{display:block;animation:in .35s cubic-bezier(.2,.8,.2,1)}
+.screen.modal{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 1.2rem)}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.eyebrow{font-size:.78rem;font-weight:600;color:var(--fg2);text-transform:uppercase;letter-spacing:.04em;margin:.4rem 0 .1rem}
+.large{font-size:2rem;font-weight:700;letter-spacing:.01em;margin:0 0 1rem;line-height:1.1}
+.title2{font-size:1.3rem;font-weight:700;letter-spacing:-.01em;margin:0;line-height:1.2;text-wrap:balance}
+.sub{font-size:.9rem;color:var(--fg2);line-height:1.4}
+.section{font-size:1.18rem;font-weight:700;margin:1.7rem 0 .6rem;letter-spacing:-.01em}
+.foot{font-size:.78rem;color:var(--fg3);margin:.5rem .25rem 0;line-height:1.4}
+.card{background:var(--card);border-radius:1.3rem;box-shadow:var(--shadow)}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;min-height:3.2rem;border-radius:999px;
+  background:var(--accent);color:var(--accent-ink);font-size:1rem;font-weight:600;padding:0 1.2rem;transition:transform .15s,opacity .15s}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn.soft{background:var(--fill);color:var(--fg)}
+.btn.klein{min-height:2.6rem;width:auto;font-size:.9rem}
+.btn.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--accent-soft)}50%{box-shadow:0 0 0 .6rem transparent}}
+.link{color:var(--accent);font-size:1rem;font-weight:500;padding:.6rem .3rem;min-height:2.75rem}
+
+/* ---------- Vandaag ---------- */
+.week{display:flex;align-items:center;gap:1rem;padding:1rem 1.1rem;margin-bottom:.8rem}
+.ring{position:relative;flex:0 0 auto}
+.ring>svg{width:100%;height:100%;transform:rotate(-90deg);display:block}
+.ring .trk{fill:none;stroke:var(--fill2)}
+.ring .val{fill:none;stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset 1.1s cubic-bezier(.3,.9,.2,1)}
+.ring.groen .val{stroke:var(--green)}
+.ring .mid{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.week .ring{width:4rem;height:4rem}
+.week .ring .trk,.week .ring .val{stroke-width:9}
+.week .mid b{font:700 1rem var(--round);color:var(--fg2)}
+.week .ring.groen .mid{color:var(--green)}
+.week-txt{min-width:0}
+.week-txt b{display:block;font-size:1rem;font-weight:600;margin-bottom:.1rem}
+.days{display:flex;gap:.3rem;margin-top:.5rem}
+.day{width:1.3rem;text-align:center;font-size:.65rem;color:var(--fg3);font-weight:600}
+.day i{display:block;width:.5rem;height:.5rem;border-radius:50%;background:var(--fill2);margin:0 auto .25rem}
+.day.done i{background:var(--green)}
+.day.nu{color:var(--fg)}
+
+.melding{display:flex;gap:.75rem;align-items:flex-start;padding:.9rem 1rem;margin-bottom:.8rem;border-radius:1.1rem;font-size:.9rem;line-height:1.4}
+.melding svg{flex:0 0 auto;margin-top:.1rem}
+.melding.warn{background:var(--warn-soft);color:var(--fg)}
+.melding.warn svg{color:var(--warn)}
+.melding b{display:block}
+
+.hero{overflow:hidden}
+.hero-art{height:clamp(7rem,19vh,10rem);display:grid;place-items:center;background:linear-gradient(160deg,var(--tile-a),var(--tile-b))}
+.hero-art svg{height:88%}
+.hero-body{padding:1rem 1.1rem 1.1rem}
+.label{font-size:.78rem;font-weight:600;color:var(--accent);margin-bottom:.2rem}
+.meta{display:flex;flex-wrap:wrap;gap:.3rem .9rem;margin:.45rem 0 .5rem;font-size:.9rem;color:var(--fg2)}
+.meta span{display:inline-flex;align-items:center;gap:.3rem}
+.hero-note{font-size:.85rem;color:var(--fg2);margin-bottom:.9rem}
+.hervat{padding:1rem 1.1rem;margin-bottom:.8rem;background:var(--accent-soft);border-radius:1.2rem}
+.hervat .rij{display:flex;gap:.5rem;margin-top:.8rem}
+.hervat .btn.soft{width:auto;background:var(--card)}
+
+/* Grouped list */
+.list{background:var(--card);border-radius:1.1rem;overflow:hidden;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:.85rem;padding:.65rem 1rem;position:relative;width:100%;min-height:3.6rem}
+.row+.row::before{content:"";position:absolute;top:0;left:4.4rem;right:0;height:1px;background:var(--sep)}
+.row.plain+.row.plain::before{left:1rem}
+button.row:active{background:var(--fill)}
+.thumb{flex:0 0 2.75rem;height:2.75rem;border-radius:.75rem;background:linear-gradient(160deg,var(--tile-a),var(--tile-b));display:grid;place-items:center}
+.thumb svg{width:2.4rem;height:2.4rem}
+.row-main{flex:1;min-width:0}
+.row-t{font-size:1rem;line-height:1.25}
+.row-s{font-size:.82rem;color:var(--fg2);margin-top:.1rem}
+.chev{color:var(--fg3);flex:0 0 auto}
+.blok{font-size:.78rem;color:var(--fg2);margin:1.3rem 1rem .45rem;text-transform:uppercase;letter-spacing:.03em;font-weight:500}
+.check{flex:0 0 1.5rem;height:1.5rem;border-radius:50%;border:2px solid var(--fill2);display:grid;place-items:center;color:transparent}
+.gekozen .check{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* Tabbalk */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;display:none;justify-content:center;
+  padding:.45rem 1rem calc(env(safe-area-inset-bottom,0px) + .45rem);background:var(--bar);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:1px solid var(--sep)}
+.tabbar.on{display:flex}
+.tabbar-in{display:flex;justify-content:space-around;width:100%;max-width:560px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:.15rem;font-size:.62rem;font-weight:500;color:var(--fg3);min-width:4.5rem;min-height:2.9rem;justify-content:center}
+.tab.on{color:var(--accent)}
+.kiesbalk{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 4.2rem);z-index:14;padding:0 1.2rem;display:none}
+.kiesbalk.on{display:block}
+.kiesbalk .btn{max-width:520px;margin:0 auto;box-shadow:0 8px 24px rgba(20,20,60,.18)}
+
+/* ---------- Sheets ---------- */
+.dim{position:fixed;inset:0;z-index:25;background:var(--dim);opacity:0;pointer-events:none;transition:opacity .3s}
+.dim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;max-height:92vh;overflow-y:auto;background:var(--bg);
+  border-radius:.9rem .9rem 0 0;padding:.5rem 1.2rem calc(env(safe-area-inset-bottom,0px) + 1.4rem);
+  transform:translateY(105%);transition:transform .42s cubic-bezier(.2,.9,.2,1);max-width:560px;margin:0 auto;overscroll-behavior:contain}
+.sheet.on{transform:none}
+.grab{width:2.2rem;height:.3rem;border-radius:3px;background:var(--fill2);margin:0 auto .85rem}
+.sheet-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.35rem}
+.x{flex:0 0 2.75rem;height:2.75rem;border-radius:50%;display:grid;place-items:center;color:var(--fg2);margin:-.4rem -.4rem 0 0}
+.x span{width:1.8rem;height:1.8rem;border-radius:50%;background:var(--fill);display:grid;place-items:center}
+.need{display:flex;flex-direction:column;gap:0;margin:.9rem 0 .2rem}
+.sheet-cta{position:sticky;bottom:calc(-1 * (env(safe-area-inset-bottom,0px) + 1.4rem));padding:1rem 0 calc(env(safe-area-inset-bottom,0px) + 1.4rem);margin-bottom:calc(-1 * (env(safe-area-inset-bottom,0px) + 1.4rem));background:linear-gradient(to top,var(--bg) 75%,transparent)}
+.segwide{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--fill);border-radius:.6rem;padding:2px;gap:2px;margin:.2rem 0 .9rem}
+.segwide button{min-height:2.2rem;border-radius:.5rem;font-size:.82rem;font-weight:600;text-align:center}
+.segwide button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+
+/* ---------- Training ---------- */
+.wk-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:.6rem;margin:0 -1.2rem .6rem;padding:calc(env(safe-area-inset-top,0px) + .4rem) 1.2rem .5rem;
+  background:var(--bg)}
+#s-oefening,#s-pauze{padding-top:0}
+.prog{flex:1;min-width:0}
+.prog-bar{display:flex;gap:2px;height:.25rem}
+.prog-bar i{flex:1;border-radius:2px;background:var(--fill2)}
+.prog-bar i.d{background:var(--accent)}
+.prog-t{font-size:.72rem;color:var(--fg2);text-align:center;margin-top:.3rem;font-variant-numeric:tabular-nums}
+.rond{flex:0 0 2.75rem;height:2.75rem;border-radius:50%;background:var(--fill);display:grid;place-items:center;color:var(--fg)}
+.art{height:clamp(8.5rem,26vh,17rem);border-radius:1.6rem;background:linear-gradient(160deg,var(--tile-a),var(--tile-b));
+  display:grid;place-items:center;position:relative;overflow:hidden}
+.art svg{height:86%}
+.art .how{position:absolute;right:.7rem;top:.7rem;font-size:.78rem;font-weight:600;color:var(--accent);background:var(--card);padding:.5rem .8rem;border-radius:999px;min-height:2.2rem}
+.banner{display:flex;align-items:center;gap:.5rem;justify-content:center;font-size:.9rem;font-weight:600;color:var(--accent);
+  background:var(--accent-soft);border-radius:999px;padding:.55rem .9rem;margin-bottom:.7rem}
+.wk-when{font-size:.9rem;font-weight:600;color:var(--accent);margin:.95rem 0 .2rem}
+.wk-name{font-size:1.65rem;font-weight:700;letter-spacing:-.01em;line-height:1.12;margin:0 0 .2rem;text-wrap:balance}
+.wk-plain{font-size:.94rem;color:var(--fg2);margin-bottom:.8rem;line-height:1.35}
+.wk-plain span{color:var(--fg3)}
+.reps{display:flex;align-items:center;gap:.9rem;margin-bottom:.8rem}
+.reps .n{font:700 3.4rem/1 var(--round);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.reps-side{display:flex;flex-direction:column;gap:.1rem;font-size:.9rem;color:var(--fg2);min-width:0}
+.reps-side b{font-size:1.18rem;font-weight:600;color:var(--fg)}
+.hold{display:flex;align-items:center;gap:1rem;margin-bottom:.8rem}
+.hold .ring{width:6.2rem;height:6.2rem;cursor:pointer}
+.hold .ring .trk,.hold .ring .val{stroke-width:10}
+.hold .n{font:700 1.9rem/1 var(--round);font-variant-numeric:tabular-nums}
+.hold .l{font-size:.68rem;color:var(--fg2);margin-top:.15rem}
+.hold .l.wissel{color:var(--accent);font-weight:700}
+.cue{display:flex;gap:.6rem;align-items:flex-start;background:var(--card);border-radius:1rem;padding:.75rem .85rem;font-size:.9rem;line-height:1.4;color:var(--fg2);box-shadow:var(--shadow)}
+.cue svg{flex:0 0 auto;color:var(--accent);margin-top:.1rem}
+.wk-foot{position:sticky;bottom:0;margin-top:1rem;padding:.8rem 0 calc(env(safe-area-inset-bottom,0px) + .6rem);background:linear-gradient(to top,var(--bg) 80%,transparent)}
+
+/* Figuren: dikke ronde lijnen, gevuld hoofd — pictogramstijl */
+.fig{fill:none;stroke:var(--fg);stroke-width:6.2;stroke-linecap:round;stroke-linejoin:round}
+.fig circle:not(.gear){fill:var(--fg);stroke-width:2}
+.fig .gear{stroke:var(--accent);fill:var(--accent);stroke-width:2.5}
+.fig .band{stroke:var(--accent);stroke-width:3;opacity:.9}
+.fig-g{fill:none;stroke:var(--fg3);stroke-width:2.5;opacity:.45;stroke-linecap:round}
+.anim .pose-a{animation:poseA 3.4s ease-in-out infinite}
+.anim .pose-b{animation:poseB 3.4s ease-in-out infinite}
+@keyframes poseA{0%,38%{opacity:1}50%,88%{opacity:0}100%{opacity:1}}
+@keyframes poseB{0%,38%{opacity:0}50%,88%{opacity:1}100%{opacity:0}}
+
+/* ---------- Pauze ---------- */
+.rest{display:flex;flex-direction:column;align-items:center;text-align:center}
+.rest .ring{width:min(13rem,30vh);height:min(13rem,30vh);margin:1rem 0 1rem}
+.rest .ring .trk,.rest .ring .val{stroke-width:13}
+.rest .ring .val{transition:stroke-dashoffset .3s linear}
+.rest .n{font:700 min(4.2rem,9vh)/1 var(--round);font-variant-numeric:tabular-nums}
+.rest .l{font-size:.9rem;color:var(--fg2);margin-top:.25rem}
+.next{display:flex;align-items:center;gap:.85rem;width:100%;padding:.75rem .85rem;margin:1.1rem 0}
+.duo{display:flex;gap:.6rem;width:100%}
+.rest .duo{position:sticky;bottom:0;padding:.8rem 0 calc(env(safe-area-inset-bottom,0px) + .6rem);background:linear-gradient(to top,var(--bg) 80%,transparent)}
+.large{overflow-wrap:anywhere}
+
+/* ---------- Klaar ---------- */
+.done{text-align:center}
+.done .ring{width:8rem;height:8rem;margin:1.4rem auto .9rem}
+.done .ring .trk,.done .ring .val{stroke-width:12}
+.done .ring .mid{color:var(--green)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1.1rem 0 .4rem}
+.stat{padding:.85rem}
+.stat .n{font:700 1.75rem/1.1 var(--round);font-variant-numeric:tabular-nums}
+.stat .l{font-size:.78rem;color:var(--fg2);margin-top:.1rem}
+.ask{text-align:left;padding:1rem;margin-top:.8rem}
+.ask h3{font-size:1rem;font-weight:600;margin:0 0 .7rem}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);background:var(--fill);border-radius:.6rem;padding:2px;gap:2px}
+.seg button{min-height:2.4rem;border-radius:.5rem;font-size:.82rem;font-weight:500;text-align:center}
+.seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.14);font-weight:600}
+.pijn-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem}
+.pijn-top b{font:700 1.65rem var(--round);color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent);height:2.2rem;margin:0}
+.scale{display:flex;justify-content:space-between;font-size:.72rem;color:var(--fg3)}
+
+/* ---------- Voortgang ---------- */
+.big{display:flex;align-items:center;gap:1rem;padding:1.1rem}
+.big .ring{width:4rem;height:4rem}
+.big .ring .trk,.big .ring .val{stroke-width:9}
+.big .n{font:700 2.8rem/1 var(--round)}
+.weeks{display:flex;gap:.45rem;margin-top:.85rem;padding:0 .1rem}
+.wkb{flex:1;text-align:center;font-size:.62rem;color:var(--fg3);min-width:0}
+.wkb i{display:block;height:2rem;border-radius:.5rem;background:var(--fill);margin-bottom:.3rem}
+.wkb.on i{background:var(--green)}
+.pill{font-size:.72rem;font-weight:600;border-radius:999px;padding:.2rem .5rem;background:var(--fill);color:var(--fg2);white-space:nowrap}
+.pill.g{background:var(--green-soft);color:var(--green)}
+.pill.w{background:var(--warn-soft);color:var(--warn)}
+.leeg{padding:1.2rem 1rem;text-align:center;color:var(--fg2);font-size:.9rem}
+
+/* ---------- Oefeningen ---------- */
+.navrij{display:flex;justify-content:space-between;align-items:center;min-height:2.75rem;margin-bottom:-.4rem}
+.navrij .link{padding:.5rem 0 .5rem .8rem}
+.search{display:flex;align-items:center;gap:.5rem;height:2.4rem;border-radius:.7rem;background:var(--fill);padding:0 .65rem;color:var(--fg3);margin-bottom:.7rem}
+.search input{flex:1;border:none;background:none;outline:none;font-size:1rem;color:var(--fg);min-width:0}
+.search input::placeholder{color:var(--fg3)}
+
+/* Uitleg */
+.how-art{height:13rem;border-radius:1.4rem;background:linear-gradient(160deg,var(--tile-a),var(--tile-b));display:grid;place-items:center;margin:.7rem 0 1rem}
+.how-art svg{height:11rem}
+.steps{display:flex;flex-direction:column;gap:.6rem}
+.step{display:flex;gap:.8rem;align-items:center;padding:.75rem .85rem}
+.step .num{flex:0 0 1.7rem;height:1.7rem;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:700 .9rem var(--round)}
+.step p{margin:0;font-size:.94rem;line-height:1.4;flex:1;min-width:0}
+.step .thumb{flex-basis:3.1rem;height:3.1rem}
+
+/* Actiemenu */
+.acts{position:fixed;left:.6rem;right:.6rem;bottom:calc(env(safe-area-inset-bottom,0px) + .8rem);z-index:31;display:flex;flex-direction:column;gap:.5rem;
+  transform:translateY(130%);transition:transform .36s cubic-bezier(.2,.9,.2,1);max-width:540px;margin:0 auto}
+.acts.on{transform:none}
+.acts .grp{background:var(--card);border-radius:.85rem;overflow:hidden}
+.acts button{display:block;width:100%;min-height:3.3rem;font-size:1.1rem;color:var(--accent);text-align:center}
+.acts .grp button+button{border-top:1px solid var(--sep)}
+.acts .rood{color:var(--red)}
+.acts .vet{font-weight:600}
+
+/* Pauze-overlay */
+.paus{position:fixed;inset:0;z-index:40;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 1.5rem}
+.paus.on{display:flex;animation:in .25s ease-out}
+.paus .ico{width:4.5rem;height:4.5rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:1.2rem}
+.paus .knoppen{display:flex;flex-direction:column;gap:.5rem;width:100%;max-width:22rem;margin-top:2rem}
+
+/* Ongedaan maken */
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 5.2rem);z-index:35;transform:translate(-50%,.5rem);opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:.8rem;background:var(--fg);color:var(--bg);border-radius:999px;padding:.35rem .35rem .35rem 1.1rem;font-size:.9rem;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);transition:opacity .2s,transform .2s;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{background:rgba(127,127,160,.35);color:inherit;font-weight:600;border-radius:999px;padding:0 .9rem;min-height:2.4rem;font-size:.9rem}
+
+/* Welkom */
+.welcome{display:flex;flex-direction:column;min-height:calc(100vh - 3rem)}
+.w-mark{width:5rem;height:5rem;border-radius:1.3rem;background:linear-gradient(160deg,#8C90DA,#4E52A3);display:grid;place-items:center;margin:2.2rem auto 1.3rem;box-shadow:0 12px 30px rgba(78,82,163,.3)}
+.w-t{font-size:1.9rem;font-weight:700;text-align:center;letter-spacing:-.01em;margin:0 0 1.8rem;line-height:1.15}
+.w-item{display:flex;gap:1rem;align-items:flex-start;margin:0 .4rem 1.4rem}
+.w-item svg{flex:0 0 auto;color:var(--accent)}
+.w-item b{display:block;font-size:1rem;font-weight:600;margin-bottom:.1rem}
+.w-item span{font-size:.9rem;color:var(--fg2);line-height:1.4}
+
+@media (min-width:700px){.screen{padding-top:2.5rem}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.anim .pose-b{opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- WELKOM (alleen de eerste keer) -->
+<section class="screen modal" id="s-welkom">
+  <div class="welcome">
+    <div class="w-mark"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="1.8" fill="#fff"/><path d="M12 8v6M12 14l-3 6M12 14l3.5 5.5M12 10 8 7M12 10l4-3"/></svg></div>
+    <h1 class="w-t">Welkom bij Fysio</h1>
+    <div class="w-item"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <div><b>Eén training per week</b><span>Het schema van je fysiotherapeut, in ongeveer een half uur.</span></div></div>
+    <div class="w-item"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>
+      <div><b>Stap voor stap</b><span>Bij elke oefening zie je hoe het moet. Tik op Klaar en je gaat vanzelf verder.</span></div></div>
+    <div class="w-item"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+      <div><b>Een toon bij de pauze</b><span>Zo hoef je niet op je scherm te kijken. Zet je telefoon niet op stil.</span></div></div>
+    <div style="margin-top:auto;padding-top:1rem"><button class="btn" onclick="welkomKlaar()">Aan de slag</button></div>
+  </div>
+</section>
+
+<section class="screen" id="s-vandaag"></section>
+<section class="screen" id="s-oefeningen"></section>
+<section class="screen" id="s-voortgang"></section>
+<section class="screen modal" id="s-oefening"></section>
+<section class="screen modal" id="s-pauze"></section>
+<section class="screen modal" id="s-klaar"></section>
+
+<nav class="tabbar" id="tabbar" aria-label="Hoofdmenu"><div class="tabbar-in">
+  <button class="tab" data-t="vandaag" onclick="tab('vandaag')"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/></svg>Vandaag</button>
+  <button class="tab" data-t="oefeningen" onclick="tab('oefeningen')"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Oefeningen</button>
+  <button class="tab" data-t="voortgang" onclick="tab('voortgang')"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Voortgang</button>
+</div></nav>
+<div class="kiesbalk" id="kiesbalk"><button class="btn" id="kies-start" onclick="startGekozen()"></button></div>
+
+<div class="dim" id="dim" onclick="sluitAlles()"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="acts" id="acts" role="dialog" aria-label="Opties">
+  <div class="grp">
+    <button onclick="sluitAlles();pauzeer()">Pauzeren</button>
+    <button onclick="sluitAlles();overslaan()">Deze oefening overslaan</button>
+    <button onclick="sluitAlles();afronden()">Training nu afronden</button>
+    <button class="rood" onclick="sluitAlles();stoppenZonderOpslaan()">Stoppen zonder opslaan</button>
+  </div>
+  <div class="grp"><button class="vet" onclick="sluitAlles()">Annuleer</button></div>
+</div>
+<div class="paus" id="paus" role="dialog" aria-modal="true" aria-label="Gepauzeerd">
+  <div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1.5"/><rect x="14" y="4" width="4" height="16" rx="1.5"/></svg></div>
+  <h1 class="large" style="margin:0 0 .3rem">Gepauzeerd</h1>
+  <div class="sub" id="paus-sub"></div>
+  <div class="knoppen">
+    <button class="btn" onclick="hervat()">Verder trainen</button>
+    <button class="btn soft" id="paus-stop" onclick="stopVanuitPauze()">Stoppen</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-t"></span><button id="toast-b" onclick="ongedaan()">Ongedaan maken</button></div>
+
+<script>
+const SESSIONS={
+  basis:{naam:'Basis Training',label:'Basis',exercises:[
+    {naam:'Jefferson Curl',sets:2,reps:'6–8',super:'1A',gear:'Dumbbell',adem:'Uit bij afrollen, in bij oprollen',
+      steps:['Sta rechtop met gewicht, voeten heupbreedte','Rol wervelkolom langzaam naar beneden, wervel voor wervel','Ga zo ver als comfortabel, rol langzaam terug omhoog']},
+    {naam:'Side Bends',sets:2,reps:'8',super:'1B',gear:'Dumbbell',adem:'Uit bij buigen, in bij terugkomen',
+      steps:['Sta rechtop, gewicht in één hand langs je zij','Buig zijwaarts weg van het gewicht','Kom gecontroleerd terug naar rechtop']},
+    {naam:'Goblet Squat',sets:3,reps:'10–12',super:'2A',notitie:'12 kg',gear:'Kettlebell',adem:'In bij zakken, uit bij opstaan',
+      steps:['Houd kettlebell tegen je borst, voeten schouderbreedte','Zak naar beneden, knieën naar buiten','Duw door je hielen terug omhoog']},
+    {naam:'Floor Press',sets:3,reps:'8–10',super:'2B',notitie:'7 kg',gear:'Dumbbell',adem:'Uit bij omhoog duwen, in bij zakken',
+      steps:['Lig op je rug, knieën gebogen, dumbbells boven borst','Laat gewichten zakken tot ellebogen de grond raken','Duw krachtig omhoog tot armen gestrekt']},
+    {naam:'Pallof Press',sets:3,reps:'10',super:'3A',gear:'Band',adem:'Uit bij uitstrekken, in bij terugtrekken',
+      steps:['Sta zijwaarts van de band, handen bij je borst','Strek armen naar voren — houd romp stabiel','Trek langzaam terug naar je borst']},
+    {naam:'Face Pull',sets:3,reps:'10–12',super:'3B',gear:'Band',adem:'Uit bij trekken, in bij loslaten',
+      steps:['Pak de band met beide handen, armen gestrekt','Trek naar je voorhoofd, ellebogen wijd','Knijp schouderbladen samen, laat langzaam terug']},
+    {naam:'Bruggetjes',sets:3,reps:'12–15',super:'4A',gear:'',adem:'Uit bij optillen, in bij zakken',
+      steps:['Lig op je rug, knieën gebogen, voeten plat','Duw heupen omhoog tot rechte lijn knieën-schouders','Houd even vast, laat langzaam zakken']},
+    {naam:'Bekkenbodem',sets:3,reps:'12',super:'4B',gear:'Bal',adem:'Uit bij spreiden',
+      steps:['Bal onder heiligbeen, benen in tafelpositie','Voeten tegen elkaar, adem uit','Spreid knieën zo ver mogelijk, breng terug']},
+  ]},
+  '27-07':{naam:'Training 27/07',label:'Kracht en rotatie',exercises:[
+    {naam:'Half Kneeling Wood Choppers',sets:3,reps:'8',super:'1A',notitie:'8 kg',gear:'Kettlebell',adem:'Uit bij de chop, in bij terugkomen',
+      steps:['Kniel op één knie, kettlebell bij heup','Draai romp en breng gewicht diagonaal omhoog','Gecontroleerd terug naar startpositie']},
+    {naam:'Bear Hold KB Slides',sets:3,reps:'12',super:'1B',notitie:'8 kg',gear:'Kettlebell',adem:'Rustig doorademen, kern aanspannen',
+      steps:['Bear hold positie: handen en voeten, knieën 1cm van grond','Schuif kettlebell van hand naar hand','Houd heupen stabiel — niet draaien']},
+    {naam:'Face Pull',sets:3,reps:'12',super:'2A',gear:'Band',adem:'Uit bij trekken, in bij loslaten',
+      steps:['Pak de band met beide handen, armen gestrekt','Trek naar je voorhoofd, ellebogen wijd','Knijp schouderbladen samen, laat langzaam terug']},
+    {naam:'Reverse Lunges met Twist',sets:3,reps:'8',super:'2B',notitie:'8 kg',gear:'Kettlebell',adem:'In bij stap terug, uit bij draai',
+      steps:['Houd kettlebell voor je borst','Stap naar achteren in een lunge','Draai romp naar de kant van het voorste been, stap terug']},
+    {naam:'Half Kneeling Press',sets:3,reps:'8',super:'3A',notitie:'6 kg',gear:'Dumbbell',adem:'Uit bij omhoog duwen, in bij zakken',
+      steps:['Kniel op één knie, dumbbell bij schouder','Duw recht omhoog tot arm gestrekt','Laat gecontroleerd zakken']},
+    {naam:'Good Mornings',sets:3,reps:'10',super:'3B',notitie:'12 kg',gear:'Kettlebell',adem:'In bij voorover buigen, uit bij terugkomen',
+      steps:['Sta rechtop, kettlebell achter hoofd/nek','Buig vanuit je heupen naar voren, rug recht','Kom terug door bilspieren aan te spannen']},
+    {naam:'Goblet Squat',sets:3,reps:'12',super:'4A',notitie:'8 kg',gear:'Kettlebell',adem:'In bij zakken, uit bij opstaan',
+      steps:['Houd kettlebell tegen je borst, voeten schouderbreedte','Zak naar beneden, knieën naar buiten','Duw door je hielen terug omhoog']},
+    {naam:'KB Kneeling Stand-up',sets:3,reps:'10',super:'4B',notitie:'8 kg',gear:'Kettlebell',adem:'Uit bij opstaan, in bij knielen',
+      steps:['Kniel met kettlebell tegen borst','Stap met één voet naar voren en sta op','Kniel gecontroleerd terug, wissel voet']},
+  ]},
+  '20-07':{naam:'Training 20/07',label:'Benen en core',exercises:[
+    {naam:'Big Ball Squeeze',sets:2,reps:'10',super:'0A',gear:'Bal',adem:'Uit bij aanspannen',
+      steps:['Zit of lig, grote bal tussen knieën','Knijp bal samen met binnenkant bovenbenen','Houd 3 sec vast, laat los']},
+    {naam:'Bridges Arms Moving',sets:2,reps:'10',super:'0B',gear:'',adem:'Uit bij optillen',
+      steps:['Lig op je rug, heupen omhoog in brug','Beweeg armen achter je hoofd terwijl je heupen omhoog houdt','Breng armen terug, laat heupen zakken']},
+    {naam:'Split Squat',sets:3,reps:'8',super:'1A',notitie:'6 kg',gear:'Dumbbell',adem:'In bij zakken, uit bij opstaan',
+      steps:['Eén voet voor, één achter, dumbbell vast','Zak recht naar beneden, beide knieën 90°','Duw omhoog via voorste hiel']},
+    {naam:'Floor Press',sets:3,reps:'8',super:'1B',notitie:'7 kg',gear:'Dumbbell',adem:'Uit bij omhoog duwen, in bij zakken',
+      steps:['Lig op je rug, knieën gebogen, dumbbells boven borst','Laat gewichten zakken tot ellebogen de grond raken','Duw krachtig omhoog tot armen gestrekt']},
+    {naam:'KB March',sets:3,reps:'10',super:'2A',notitie:'16 kg · per kant',gear:'Kettlebell',adem:'Uit bij knie optillen',
+      steps:['Sta rechtop, kettlebell in gestrekte armen voor je','Til afwisselend knieën hoog op (marcheren)','Houd kern stabiel, niet naar opzij leunen']},
+    {naam:'Step Ups',sets:3,reps:'8',super:'2B',notitie:'per been',gear:'',adem:'Uit bij omhoog stappen',
+      steps:['Sta voor een bank of verhoging','Stap omhoog met één been, druk door de hiel','Stap gecontroleerd terug, wissel been']},
+    {naam:'TRX Row',sets:3,reps:'8–10',super:'3A',gear:'TRX',adem:'Uit bij trekken, in bij laten zakken',
+      steps:['Pak TRX vast, leun achterover, armen gestrekt','Trek je borst naar de handvatten','Laat jezelf gecontroleerd terug zakken']},
+    {naam:'Bridges on Ball',sets:3,reps:'10',super:'3B',gear:'Bal',adem:'Uit bij optillen, in bij zakken',
+      steps:['Lig op je rug, voeten op de bal','Duw heupen omhoog tot rechte lijn','Houd even vast, laat gecontroleerd zakken']},
+  ]},
+  '13-07':{naam:'Training 13/07',label:'Stabiliteit en duwen',exercises:[
+    {naam:'ISO Split Squat Hold',sets:2,reps:'30s',super:'0A',notitie:'per kant',gear:'',adem:'Rustig doorademen',
+      steps:['Ga in split squat positie tegen een balk/muur','Zak naar beneden, duw knie tegen weerstand','Houd 30 seconden vast per kant']},
+    {naam:'Glute Marches KB',sets:2,reps:'16',super:'0B',notitie:'4 kg',gear:'Kettlebell',adem:'Uit bij knie optillen',
+      steps:['Lig op rug, kettlebell in gestrekte armen','Heupen omhoog in brug, houd vast','Til afwisselend knieën op (marcheren)']},
+    {naam:'Goblet Squat',sets:2,reps:'10',super:'1A',notitie:'12 kg',gear:'Kettlebell',adem:'In bij zakken, uit bij opstaan',
+      steps:['Houd kettlebell tegen je borst, voeten schouderbreedte','Zak naar beneden, knieën naar buiten','Duw door je hielen terug omhoog']},
+    {naam:'Z Press',sets:2,reps:'8',super:'1B',notitie:'7 kg',gear:'Dumbbell',adem:'Uit bij omhoog duwen, in bij zakken',
+      steps:['Zit op de grond, benen gestrekt voor je','Dumbbell bij schouder, duw recht omhoog','Laat gecontroleerd zakken']},
+    {naam:'Side Plank',sets:2,reps:'10',super:'2A',gear:'',adem:'Rustig doorademen',
+      steps:['Lig op je zij, steun op onderarm','Hef heupen op tot rechte lijn','Houd vast of doe herhalingen op en neer']},
+    {naam:'Single Arm Row',sets:2,reps:'10',super:'2B',notitie:'8 kg',gear:'Dumbbell',adem:'Uit bij trekken, in bij laten zakken',
+      steps:['Steun met één hand op bank, andere hand dumbbell','Trek dumbbell naar heup, elleboog langs lichaam','Laat gecontroleerd zakken']},
+    {naam:'Glute Marches KB',sets:3,reps:'16',super:'3A',notitie:'4 kg',gear:'Kettlebell',adem:'Uit bij knie optillen',
+      steps:['Lig op rug, kettlebell in gestrekte armen','Heupen omhoog in brug, houd vast','Til afwisselend knieën op (marcheren)']},
+    {naam:'Floor Press',sets:3,reps:'8',super:'3B',notitie:'7 kg',gear:'Dumbbell',adem:'Uit bij omhoog duwen, in bij zakken',
+      steps:['Lig op je rug, knieën gebogen, dumbbells boven borst','Laat gewichten zakken tot ellebogen de grond raken','Duw krachtig omhoog tot armen gestrekt']},
+    {naam:'Farmer March',sets:3,reps:'10',super:'3C',notitie:'12 kg · per kant',gear:'Kettlebell',adem:'Rustig doorademen, kern aanspannen',
+      steps:['Sta rechtop met zware kettlebell in één hand','Marcheer op de plaats, knieën hoog','Houd romp recht — niet naar opzij leunen']},
+  ]},
+};
+// Bewegingsfiguren — twee houdingen die afwisselen. Zijaanzicht, 120x120.
+const FIG={
+  'Goblet Squat':{
+    cap:'staan → zakken',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="58" cy="18" r="8"/><path d="M58 26 L58 58"/>
+       <path d="M58 58 L57 80 L56 103"/><path d="M48 103 L66 103"/>
+       <path d="M58 34 L50 46 L56 50"/><circle class="gear" cx="57" cy="53" r="5"/>`,
+    b:`<circle cx="48" cy="32" r="8"/><path d="M50 40 L62 66"/>
+       <path d="M62 66 L46 78 L52 103"/><path d="M44 103 L62 103"/>
+       <path d="M52 46 L44 56 L50 60"/><circle class="gear" cx="51" cy="63" r="5"/>`,
+  },
+  'Floor Press':{
+    cap:'zakken → duwen',
+    stappen:['b','a','b'],
+    ground:`<line x1="18" y1="104" x2="102" y2="104"/>`,
+    a:`<circle cx="29" cy="94" r="7"/><path d="M36 96 L68 96"/>
+       <path d="M68 96 L82 80 L93 100"/><path d="M93 100 L100 100"/>
+       <path d="M48 94 L41 84 L52 80"/><circle class="gear" cx="53" cy="76" r="4.5"/>`,
+    b:`<circle cx="29" cy="94" r="7"/><path d="M36 96 L68 96"/>
+       <path d="M68 96 L82 80 L93 100"/><path d="M93 100 L100 100"/>
+       <path d="M48 94 L50 80 L52 68"/><circle class="gear" cx="53" cy="63" r="4.5"/>`,
+  },
+  'Pallof Press':{
+    cap:'borst → strekken',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="46" cy="20" r="8"/><path d="M46 28 L46 62"/>
+       <path d="M46 62 L39 105"/><path d="M46 62 L54 105"/>
+       <path d="M33 105 L44 105"/><path d="M49 105 L60 105"/>
+       <path d="M46 38 L55 45 L52 50"/>
+       <path class="band" d="M53 49 L70 47 L86 49 L100 47"/>
+       <line class="band" x1="100" y1="34" x2="100" y2="62"/>`,
+    b:`<circle cx="46" cy="20" r="8"/><path d="M46 28 L46 62"/>
+       <path d="M46 62 L39 105"/><path d="M46 62 L54 105"/>
+       <path d="M33 105 L44 105"/><path d="M49 105 L60 105"/>
+       <path d="M46 38 L61 42 L76 44"/>
+       <path class="band" d="M77 44 L86 45 L100 44"/>
+       <line class="band" x1="100" y1="34" x2="100" y2="62"/>`,
+  },
+  'Jefferson Curl':{
+    cap:'staan → afrollen',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="58" cy="18" r="8"/><path d="M58 26 L58 60"/>
+       <path d="M58 60 L57 82 L56 105"/><path d="M48 105 L66 105"/>
+       <path d="M58 34 L50 48 L48 58"/><circle class="gear" cx="48" cy="64" r="5"/>`,
+    b:`<circle cx="40" cy="82" r="7.5"/><path d="M64 54 Q60 76 47 79"/>
+       <path d="M64 54 L61 80 L60 105"/><path d="M52 105 L70 105"/>
+       <path d="M49 77 L48 90"/><circle class="gear" cx="48" cy="95" r="5"/>`,
+  },
+  'Side Bends':{
+    cap:'recht → zijwaarts',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="60" cy="18" r="8"/><path d="M60 26 L60 60"/>
+       <path d="M60 60 L53 105"/><path d="M60 60 L67 105"/>
+       <path d="M47 105 L58 105"/><path d="M62 105 L73 105"/>
+       <path d="M60 34 L74 54"/><circle class="gear" cx="75" cy="60" r="5"/>
+       <path d="M60 34 L47 52"/>`,
+    b:`<circle cx="48" cy="24" r="8"/><path d="M50 32 Q57 46 62 60"/>
+       <path d="M62 60 L55 105"/><path d="M62 60 L69 105"/>
+       <path d="M49 105 L60 105"/><path d="M64 105 L75 105"/>
+       <path d="M54 38 L78 56"/><circle class="gear" cx="79" cy="62" r="5"/>
+       <path d="M54 38 L46 52"/>`,
+  },
+  'Face Pull':{
+    cap:'strekken → trekken',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="44" cy="20" r="8"/><path d="M44 28 L44 62"/>
+       <path d="M44 62 L37 105"/><path d="M44 62 L52 105"/>
+       <path d="M31 105 L42 105"/><path d="M47 105 L58 105"/>
+       <path d="M44 36 L60 33 L74 31"/>
+       <path class="band" d="M75 31 L88 30 L100 31"/>
+       <line class="band" x1="100" y1="18" x2="100" y2="46"/>`,
+    b:`<circle cx="44" cy="20" r="8"/><path d="M44 28 L44 62"/>
+       <path d="M44 62 L37 105"/><path d="M44 62 L52 105"/>
+       <path d="M31 105 L42 105"/><path d="M47 105 L58 105"/>
+       <path d="M44 36 L58 24 L50 19"/>
+       <path class="band" d="M51 19 L74 26 L100 31"/>
+       <line class="band" x1="100" y1="18" x2="100" y2="46"/>`,
+  },
+  'Bruggetjes':{
+    cap:'zakken → heup omhoog',
+    ground:`<line x1="18" y1="104" x2="102" y2="104"/>`,
+    a:`<circle cx="28" cy="96" r="7"/><path d="M35 98 L62 98"/>
+       <path d="M62 98 L79 88 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M42 100 L58 102"/>`,
+    b:`<circle cx="28" cy="96" r="7"/><path d="M35 98 L62 82"/>
+       <path d="M62 82 L80 78 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M42 99 L58 101"/>`,
+  },
+  // Van bovenaf: je ligt op je rug, bal onder het heiligbeen, knieën boven je heupen
+  'Bekkenbodem':{
+    cap:'van boven · knieën spreiden',
+    stappen:['a','a','b'],
+    a:`<circle cx="60" cy="16" r="7"/><path d="M60 23 L60 58"/>
+       <path d="M60 30 L47 56"/><path d="M60 30 L73 56"/>
+       <circle class="gear" cx="60" cy="62" r="7"/>
+       <path d="M57 60 L55 80 L59 92"/><path d="M63 60 L65 80 L61 92"/>`,
+    b:`<circle cx="60" cy="16" r="7"/><path d="M60 23 L60 58"/>
+       <path d="M60 30 L47 56"/><path d="M60 30 L73 56"/>
+       <circle class="gear" cx="60" cy="62" r="7"/>
+       <path d="M57 60 L34 76 L58 92"/><path d="M63 60 L86 76 L62 92"/>`,
+  },
+  'Half Kneeling Wood Choppers':{
+    cap:'heup → diagonaal omhoog',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="52" cy="26" r="8"/><path d="M52 34 L52 62"/>
+       <path d="M52 62 L38 80 L38 100"/><path d="M32 100 L46 100"/>
+       <path d="M52 62 L64 100"/><path d="M64 100 L80 97"/>
+       <path d="M52 40 L64 56 L70 66"/><circle class="gear" cx="72" cy="70" r="5"/>`,
+    b:`<circle cx="54" cy="26" r="8"/><path d="M54 34 L52 62"/>
+       <path d="M52 62 L38 80 L38 100"/><path d="M32 100 L46 100"/>
+       <path d="M52 62 L64 100"/><path d="M64 100 L80 97"/>
+       <path d="M53 40 L44 28 L36 18"/><circle class="gear" cx="33" cy="14" r="5"/>`,
+  },
+  'Bear Hold KB Slides':{
+    cap:'schuiven hand → hand',
+    ground:`<line x1="20" y1="100" x2="100" y2="100"/>`,
+    a:`<circle cx="36" cy="64" r="7"/><path d="M43 68 L74 68"/>
+       <path d="M44 70 L44 97"/><path d="M74 68 L74 88 L86 97"/>
+       <circle class="gear" cx="58" cy="94" r="5"/>`,
+    b:`<circle cx="36" cy="64" r="7"/><path d="M43 68 L74 68"/>
+       <path d="M44 70 L44 97"/><path d="M74 68 L74 88 L86 97"/>
+       <circle class="gear" cx="70" cy="94" r="5"/>`,
+  },
+  'Reverse Lunges met Twist':{
+    cap:'staan → stap terug + draai',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="56" cy="18" r="8"/><path d="M56 26 L56 58"/>
+       <path d="M56 58 L50 100"/><path d="M56 58 L62 100"/>
+       <path d="M44 100 L55 100"/><path d="M57 100 L68 100"/>
+       <path d="M56 34 L48 44 L54 48"/><circle class="gear" cx="55" cy="52" r="5"/>`,
+    b:`<circle cx="48" cy="26" r="8"/><path d="M48 34 L52 62"/>
+       <path d="M52 62 L42 80 L42 100"/><path d="M36 100 L50 100"/>
+       <path d="M52 62 L72 84 L84 98"/>
+       <path d="M50 40 L38 46 L30 50"/><circle class="gear" cx="27" cy="53" r="5"/>`,
+  },
+  'Half Kneeling Press':{
+    cap:'schouder → boven hoofd',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="52" cy="26" r="8"/><path d="M52 34 L52 62"/>
+       <path d="M52 62 L38 80 L38 100"/><path d="M32 100 L46 100"/>
+       <path d="M52 62 L64 100"/><path d="M64 100 L80 97"/>
+       <path d="M52 40 L44 46 L47 37"/><circle class="gear" cx="47" cy="32" r="4.5"/>`,
+    b:`<circle cx="52" cy="26" r="8"/><path d="M52 34 L52 62"/>
+       <path d="M52 62 L38 80 L38 100"/><path d="M32 100 L46 100"/>
+       <path d="M52 62 L64 100"/><path d="M64 100 L80 97"/>
+       <path d="M52 40 L50 26 L49 14"/><circle class="gear" cx="49" cy="9" r="4.5"/>`,
+  },
+  'Good Mornings':{
+    cap:'staan → heup naar achter',
+    ground:`<line x1="24" y1="106" x2="96" y2="106"/>`,
+    a:`<circle cx="58" cy="18" r="8"/><path d="M58 26 L58 60"/>
+       <path d="M58 60 L57 82 L56 105"/><path d="M48 105 L66 105"/>
+       <path d="M58 32 L66 26"/><circle class="gear" cx="70" cy="24" r="5"/>`,
+    b:`<circle cx="36" cy="46" r="8"/><path d="M43 50 L64 64"/>
+       <path d="M64 64 L60 84 L58 105"/><path d="M50 105 L68 105"/>
+       <path d="M44 48 L50 40"/><circle class="gear" cx="52" cy="36" r="5"/>`,
+  },
+  'KB Kneeling Stand-up':{
+    cap:'knielen → opstaan',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="54" cy="28" r="8"/><path d="M54 36 L54 66"/>
+       <path d="M54 66 L52 100"/><path d="M52 100 L72 100"/>
+       <path d="M54 42 L44 52 L50 56"/><circle class="gear" cx="51" cy="60" r="5"/>`,
+    b:`<circle cx="56" cy="18" r="8"/><path d="M56 26 L56 58"/>
+       <path d="M56 58 L50 100"/><path d="M56 58 L62 100"/>
+       <path d="M44 100 L55 100"/><path d="M57 100 L68 100"/>
+       <path d="M56 34 L48 44 L54 48"/><circle class="gear" cx="55" cy="51" r="5"/>`,
+  },
+  'Big Ball Squeeze':{
+    cap:'knijpen',
+    a:`<circle cx="60" cy="16" r="7"/><path d="M60 23 L60 54"/>
+       <path d="M60 54 L46 76 L46 96"/><path d="M60 54 L74 76 L74 96"/>
+       <circle class="gear" cx="60" cy="76" r="10"/>`,
+    b:`<circle cx="60" cy="16" r="7"/><path d="M60 23 L60 54"/>
+       <path d="M60 54 L52 78 L50 96"/><path d="M60 54 L68 78 L70 96"/>
+       <circle class="gear" cx="60" cy="78" r="7"/>`,
+  },
+  'Bridges Arms Moving':{
+    cap:'armen naar achter',
+    stappen:['a','b','c'],
+    c:`<circle cx="30" cy="96" r="7"/><path d="M37 98 L62 98"/>
+       <path d="M62 98 L79 88 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M44 100 L58 102"/>`,
+    ground:`<line x1="14" y1="104" x2="102" y2="104"/>`,
+    a:`<circle cx="30" cy="96" r="7"/><path d="M37 98 L62 82"/>
+       <path d="M62 82 L80 78 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M42 94 L56 98"/>`,
+    b:`<circle cx="30" cy="96" r="7"/><path d="M37 98 L62 82"/>
+       <path d="M62 82 L80 78 L82 102"/><path d="M76 102 L90 102"/>
+       <path d="M42 94 L26 86"/>`,
+  },
+  'Split Squat':{
+    cap:'staan → zakken',
+    stappen:['a','b','a'],
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="54" cy="18" r="8"/><path d="M54 26 L54 58"/>
+       <path d="M54 58 L44 80 L44 100"/><path d="M38 100 L50 100"/>
+       <path d="M54 58 L66 80 L74 100"/><path d="M70 100 L82 100"/>
+       <path d="M54 34 L58 52"/><circle class="gear" cx="59" cy="57" r="4.5"/>`,
+    b:`<circle cx="54" cy="34" r="8"/><path d="M54 42 L54 70"/>
+       <path d="M54 70 L42 84 L44 100"/><path d="M38 100 L50 100"/>
+       <path d="M54 70 L66 86 L74 98"/><path d="M70 98 L82 98"/>
+       <path d="M54 48 L58 66"/><circle class="gear" cx="59" cy="71" r="4.5"/>`,
+  },
+  'KB March':{
+    cap:'knie omhoog',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="50" cy="18" r="8"/><path d="M50 26 L50 60"/>
+       <path d="M50 60 L44 100"/><path d="M50 60 L56 100"/>
+       <path d="M38 100 L49 100"/><path d="M51 100 L62 100"/>
+       <path d="M50 34 L64 40 L76 44"/><circle class="gear" cx="79" cy="48" r="5"/>`,
+    b:`<circle cx="50" cy="18" r="8"/><path d="M50 26 L50 60"/>
+       <path d="M50 60 L38 74 L44 88"/><path d="M50 60 L56 100"/>
+       <path d="M51 100 L62 100"/>
+       <path d="M50 34 L64 40 L76 44"/><circle class="gear" cx="79" cy="48" r="5"/>`,
+  },
+  'Step Ups':{
+    cap:'stap omhoog',
+    ground:`<line x1="14" y1="101" x2="104" y2="101"/>`,
+    a:`<path class="band" d="M64 101 L64 78 L98 78 L98 101"/>
+       <circle cx="34" cy="28" r="8"/><path d="M34 36 L34 66"/>
+       <path d="M34 66 L32 100"/><path d="M26 100 L40 100"/>
+       <path d="M34 66 L50 72 L62 78"/><path d="M58 78 L72 78"/>`,
+    b:`<path class="band" d="M64 101 L64 78 L98 78 L98 101"/>
+       <circle cx="80" cy="20" r="8"/><path d="M80 28 L80 54"/>
+       <path d="M80 54 L75 77"/><path d="M80 54 L85 77"/>
+       <path d="M69 77 L91 77"/>`,
+  },
+  'TRX Row':{
+    cap:'hangen → trekken',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<line class="band" x1="88" y1="8" x2="88" y2="14"/>
+       <circle cx="28" cy="52" r="8"/><path d="M34 57 L64 88"/>
+       <path d="M64 88 L78 100"/><path d="M74 100 L88 100"/>
+       <path d="M36 60 L56 52"/>
+       <path class="band" d="M57 51 L74 32 L88 14"/>`,
+    b:`<line class="band" x1="88" y1="8" x2="88" y2="14"/>
+       <circle cx="36" cy="42" r="8"/><path d="M42 47 L68 86"/>
+       <path d="M68 86 L80 100"/><path d="M76 100 L90 100"/>
+       <path d="M44 50 L56 62 L62 50"/>
+       <path class="band" d="M63 49 L76 31 L88 14"/>`,
+  },
+  'Bridges on Ball':{
+    cap:'heup omhoog',
+    ground:`<line x1="14" y1="104" x2="104" y2="104"/>`,
+    a:`<circle cx="26" cy="96" r="7"/><path d="M33 98 L58 98"/>
+       <path d="M58 98 L72 92 L82 90"/>
+       <circle class="gear" cx="90" cy="94" r="10"/>
+       <path d="M38 100 L52 101"/>`,
+    b:`<circle cx="26" cy="96" r="7"/><path d="M33 98 L58 84"/>
+       <path d="M58 84 L72 86 L82 90"/>
+       <circle class="gear" cx="90" cy="94" r="10"/>
+       <path d="M38 99 L52 100"/>`,
+  },
+  'ISO Split Squat Hold':{
+    cap:'30 sec vasthouden',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<line class="band" x1="30" y1="41" x2="90" y2="41"/>
+       <line class="band" x1="88" y1="41" x2="88" y2="100"/>
+       <circle cx="52" cy="26" r="8"/><path d="M52 34 L52 66"/>
+       <path d="M52 66 L40 80 L42 100"/><path d="M36 100 L48 100"/>
+       <path d="M52 66 L64 82 L72 98"/><path d="M68 98 L80 98"/>`,
+    b:`<line class="band" x1="30" y1="41" x2="90" y2="41"/>
+       <line class="band" x1="88" y1="41" x2="88" y2="100"/>
+       <circle cx="52" cy="26" r="8"/><path d="M52 34 L52 66"/>
+       <path d="M52 66 L40 80 L42 100"/><path d="M36 100 L48 100"/>
+       <path d="M52 66 L64 82 L72 98"/><path d="M68 98 L80 98"/>`,
+  },
+  'Glute Marches KB':{
+    cap:'brug + knie omhoog',
+    stappen:['c','a','b'],
+    c:`<circle cx="28" cy="98" r="7"/><path d="M35 100 L60 100"/>
+       <path d="M60 100 L76 86 L80 102"/><path d="M74 102 L90 102"/>
+       <path d="M42 98 L44 80"/><circle class="gear" cx="44" cy="75" r="5"/>`,
+    ground:`<line x1="14" y1="104" x2="102" y2="104"/>`,
+    a:`<circle cx="28" cy="98" r="7"/><path d="M35 100 L60 84"/>
+       <path d="M60 84 L78 80 L80 102"/><path d="M74 102 L90 102"/>
+       <path d="M42 95 L44 78"/><circle class="gear" cx="44" cy="73" r="5"/>`,
+    b:`<circle cx="28" cy="98" r="7"/><path d="M35 100 L60 84"/>
+       <path d="M60 84 L76 66 L86 74"/>
+       <path d="M60 84 L74 84 L76 102"/><path d="M70 102 L86 102"/>
+       <path d="M42 95 L44 78"/><circle class="gear" cx="44" cy="73" r="5"/>`,
+  },
+  'Z Press':{
+    cap:'schouder → boven hoofd',
+    ground:`<line x1="30" y1="84" x2="98" y2="84"/>`,
+    a:`<circle cx="48" cy="30" r="8"/><path d="M48 38 L48 78"/>
+       <path d="M50 80 L86 80"/><path d="M86 80 L86 72"/>
+       <path d="M48 44 L55 52 L59 44"/><circle class="gear" cx="60" cy="39" r="4.5"/>`,
+    b:`<circle cx="48" cy="30" r="8"/><path d="M48 38 L48 78"/>
+       <path d="M50 80 L86 80"/><path d="M86 80 L86 72"/>
+       <path d="M48 44 L46 32 L45 20"/><circle class="gear" cx="45" cy="15" r="4.5"/>`,
+  },
+  'Side Plank':{
+    cap:'heup omhoog',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="40" cy="64" r="7"/><path d="M40 71 L40 76"/>
+       <path d="M40 76 L66 99 L94 100"/><path d="M88 100 L100 100"/>
+       <path d="M40 76 L30 100"/><path d="M24 100 L44 100"/>`,
+    b:`<circle cx="40" cy="64" r="7"/><path d="M40 71 L40 76"/>
+       <path d="M40 76 L66 86 L94 100"/><path d="M88 100 L100 100"/>
+       <path d="M40 76 L30 100"/><path d="M24 100 L44 100"/>`,
+  },
+  'Single Arm Row':{
+    cap:'zakken → trekken',
+    ground:`<line x1="14" y1="101" x2="104" y2="101"/>`,
+    a:`<path class="band" d="M56 84 L98 84"/><line class="band" x1="60" y1="84" x2="60" y2="100"/>
+       <line class="band" x1="94" y1="84" x2="94" y2="100"/>
+       <circle cx="24" cy="60" r="7"/><path d="M31 64 L62 76"/>
+       <path d="M58 74 L62 84"/><path d="M62 76 L66 100"/><path d="M60 100 L74 100"/>
+       <path d="M38 68 L38 92"/><circle class="gear" cx="38" cy="96" r="4.5"/>`,
+    b:`<path class="band" d="M56 84 L98 84"/><line class="band" x1="60" y1="84" x2="60" y2="100"/>
+       <line class="band" x1="94" y1="84" x2="94" y2="100"/>
+       <circle cx="24" cy="60" r="7"/><path d="M31 64 L62 76"/>
+       <path d="M58 74 L62 84"/><path d="M62 76 L66 100"/><path d="M60 100 L74 100"/>
+       <path d="M38 68 L32 80 L44 78"/><circle class="gear" cx="47" cy="77" r="4.5"/>`,
+  },
+  'Farmer March':{
+    cap:'knie omhoog',
+    ground:`<line x1="20" y1="101" x2="100" y2="101"/>`,
+    a:`<circle cx="52" cy="18" r="8"/><path d="M52 26 L52 60"/>
+       <path d="M52 60 L46 100"/><path d="M52 60 L58 100"/>
+       <path d="M40 100 L51 100"/><path d="M53 100 L64 100"/>
+       <path d="M52 34 L64 58"/><circle class="gear" cx="66" cy="64" r="5.5"/>
+       <path d="M52 34 L42 56"/>`,
+    b:`<circle cx="52" cy="18" r="8"/><path d="M52 26 L52 60"/>
+       <path d="M52 60 L40 74 L46 88"/><path d="M52 60 L58 100"/>
+       <path d="M53 100 L64 100"/>
+       <path d="M52 34 L64 58"/><circle class="gear" cx="66" cy="64" r="5.5"/>
+       <path d="M52 34 L42 56"/>`,
+  },
+};
+const SPR={
+  'Jefferson Curl':5,'Goblet Squat':3,'Pallof Press':3,'Face Pull':3,
+  'Side Bends':3,'Floor Press':3,'Bruggetjes':3,'Bekkenbodem':3,
+  'Half Kneeling Wood Choppers':3,'Bear Hold KB Slides':3,'Reverse Lunges met Twist':4,
+  'Half Kneeling Press':3,'Good Mornings':4,'KB Kneeling Stand-up':4,
+  'Big Ball Squeeze':4,'Bridges Arms Moving':3,'Split Squat':4,'KB March':3,
+  'Step Ups':4,'TRX Row':3,'Bridges on Ball':3,
+  'ISO Split Squat Hold':1,'Glute Marches KB':3,'Z Press':3,'Side Plank':3,
+  'Single Arm Row':3,'Farmer March':3,
+};
+const ALTIJD_PER_KANT=['Side Bends','KB March','Step Ups','Farmer March','ISO Split Squat Hold'];
+
+// ================= Namen in gewone taal =================
+// [Nederlandse naam, wat je doet]. De officiële naam van je fysio staat er klein bij.
+const NL={
+  'Jefferson Curl':['Rug afrollen','Wervel voor wervel naar beneden en terug'],
+  'Side Bends':['Zijwaarts buigen','Met gewicht opzij buigen en terug'],
+  'Goblet Squat':['Door je knieën','Gewicht tegen je borst, rustig zakken'],
+  'Floor Press':['Duwen op de grond','Op je rug de gewichten omhoog duwen'],
+  'Pallof Press':['Band vooruit duwen','Romp stil houden terwijl je de band wegduwt'],
+  'Face Pull':['Band naar je gezicht','Elastiek trekken, ellebogen wijd'],
+  'Bruggetjes':['Bruggetje','Op je rug je heupen optillen'],
+  'Bekkenbodem':['Knieën spreiden','Op je rug met een bal, knieën open en dicht'],
+  'Half Kneeling Wood Choppers':['Houthakker','Vanuit halve knielzit diagonaal omhoog'],
+  'Bear Hold KB Slides':['Beertje met gewicht','Op handen en voeten het gewicht verschuiven'],
+  'Reverse Lunges met Twist':['Stap achteruit en draai','Achterwaartse uitstap met een draai'],
+  'Half Kneeling Press':['Omhoog duwen','Vanuit halve knielzit boven je hoofd'],
+  'Good Mornings':['Buigen vanuit je heupen','Rug recht, heupen naar achteren'],
+  'KB Kneeling Stand-up':['Van knielen naar staan','Met gewicht opstaan en terug'],
+  'Big Ball Squeeze':['Bal knijpen','Grote bal tussen je knieën samenknijpen'],
+  'Bridges Arms Moving':['Bruggetje met armen','Heupen hoog, armen naar achteren'],
+  'Split Squat':['Uitvalspas','Eén voet voor, recht naar beneden zakken'],
+  'KB March':['Marcheren met gewicht','Knieën hoog, gewicht voor je'],
+  'Step Ups':['Opstappen','Op een verhoging stappen'],
+  'TRX Row':['Jezelf optrekken','Aan de banden je borst naar je handen trekken'],
+  'Bridges on Ball':['Bruggetje op de bal','Voeten op de bal, heupen omhoog'],
+  'ISO Split Squat Hold':['Uitvalspas vasthouden','Onderin blijven staan tegen weerstand'],
+  'Glute Marches KB':['Bruggetje en marcheren','Heupen hoog, knieën om de beurt op'],
+  'Z Press':['Zittend omhoog duwen','Op de grond zitten, gewicht boven je hoofd'],
+  'Side Plank':['Zijplank','Op je zij, heupen omhoog'],
+  'Single Arm Row':['Roeien met één arm','Steunend op een bank het gewicht naar je heup'],
+  'Farmer March':['Zwaar marcheren','Eén zware kettlebell, romp recht'],
+};
+const GEAR_NL={Kettlebell:'kettlebell',Dumbbell:'dumbbell',Band:'weerstandsband',Bal:'grote bal',TRX:'TRX-banden'};
+const TRAININGEN=['27-07','20-07','13-07','basis'];
+const REST_SECS=75, WEEKDOEL=1;
+
+// ================= Hulpjes =================
+const $=id=>document.getElementById(id);
+const LS={
+  get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
+  del(k){try{localStorage.removeItem(k);}catch(e){}},
+};
+const K_HIST='fysio-v6',K_LOPEND='fysio-lopend',K_WELKOM='fysio-welkom';
+let hist=LS.get(K_HIST,[]);if(!Array.isArray(hist))hist=[];
+const bewaarHist=()=>LS.set(K_HIST,hist);
+
+const naamVan=o=>(NL[o.naam]||[o.naam])[0];
+const uitlegVan=o=>(NL[o.naam]||[,''])[1];
+function kgVan(o){const m=(o.notitie||'').match(/\d+(?:[.,]\d+)?\s*kg/i);return m?m[0].replace(/\s+/g,' '):null;}
+function perKant(o){const nt=(o.notitie||'').toLowerCase();return ALTIJD_PER_KANT.includes(o.naam)||nt.includes('kant')||nt.includes('been');}
+const isHold=o=>/^\d+\s*s$/i.test(o.reps);
+const holdTotaal=o=>parseInt(o.reps)*(perKant(o)?2:1);
+function spullen(o){
+  const kg=kgVan(o),g=GEAR_NL[o.gear];
+  if(!g) return kg||'geen spullen nodig';
+  return kg?`${kg} ${g}`:g.charAt(0).toUpperCase()+g.slice(1);
+}
+const hoeveel=o=>isHold(o)?`${parseInt(o.reps)} sec vasthouden`:`${o.reps} keer`;
+const kort=o=>`${hoeveel(o)} · ${o.sets} ${o.sets===1?'ronde':'rondes'}${perKant(o)?' · links en rechts':''}`;
+function setDuur(o){
+  if(isHold(o)) return holdTotaal(o);
+  const p=o.reps.split(/[–\-]/),avg=p.length===2?(parseInt(p[0])+parseInt(p[1]))/2:parseInt(p[0]);
+  return Math.round(avg*(SPR[o.naam]||3)*(perKant(o)?2:1));
+}
+const groep=o=>o.super?o.super.replace(/[A-Z]$/,''):null;
+const zelfdeGroep=(a,b)=>!!a.super&&!!b.super&&groep(a)===groep(b);
+function volgorde(exs){ // per groep om de beurt, ronde voor ronde
+  const groepen={};
+  exs.forEach((o,i)=>{const g=groep(o)??('x'+i);(groepen[g]=groepen[g]||[]).push(i);});
+  const max=Math.max(...exs.map(o=>o.sets)),v=[];
+  for(let r=0;r<max;r++) for(const g of Object.keys(groepen)) for(const e of groepen[g]) if(r<exs[e].sets) v.push({ex:e,set:r});
+  return v;
+}
+function duurVan(exs,order=volgorde(exs),vanaf=0){
+  let s=0;
+  for(let i=vanaf;i<order.length;i++){
+    s+=setDuur(exs[order[i].ex]);
+    if(i<order.length-1&&!zelfdeGroep(exs[order[i].ex],exs[order[i+1].ex])) s+=REST_SECS;
+  }
+  return s;
+}
+const minuten=sec=>Math.max(1,Math.round(sec/60));
+const UNIEK=(()=>{const z=new Set();return Object.values(SESSIONS).flatMap(s=>s.exercises).filter(o=>!z.has(o.naam)&&z.add(o.naam));})();
+const idxVan=naam=>UNIEK.findIndex(o=>o.naam===naam);
+
+// Datums in lokale tijd
+const dagKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const vandaag=()=>dagKey(new Date());
+const datumVan=k=>new Date(k+'T12:00:00');
+function weekKey(d){const m=new Date(d);m.setDate(m.getDate()-(m.getDay()+6)%7);return dagKey(m);}
+const fmtDag=k=>{const s=datumVan(k).toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'});return s.charAt(0).toUpperCase()+s.slice(1);};
+const fmtKort=k=>datumVan(k).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'});
+function dezeWeek(){const w=weekKey(new Date());return hist.filter(h=>weekKey(datumVan(h.datum))===w).length;}
+function weekReeks(){
+  const weken=new Set(hist.map(h=>weekKey(datumVan(h.datum))));let n=0;const d=new Date();
+  if(!weken.has(weekKey(d))) d.setDate(d.getDate()-7);
+  while(weken.has(weekKey(d))){n++;d.setDate(d.getDate()-7);}
+  return n;
+}
+function laatsteWeken(n){ // [{key,label,gedaan}] oudste eerst, incl. deze week
+  const weken=new Set(hist.map(h=>weekKey(datumVan(h.datum)))),uit=[];
+  for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-7*i);const k=weekKey(d);
+    uit.push({key:k,label:datumVan(k).toLocaleDateString('nl-NL',{day:'numeric',month:'short'}).replace('.',''),gedaan:weken.has(k)});}
+  return uit;
+}
+function geleden(datum){
+  if(!datum) return 'nog niet gedaan';
+  const d=Math.round((datumVan(vandaag())-datumVan(datum))/864e5);
+  if(d<=0) return 'vandaag gedaan'; if(d===1) return 'gisteren gedaan';
+  if(d<14) return `${d} dagen geleden`; return `${Math.round(d/7)} weken geleden`;
+}
+const laatstVan=key=>[...hist].reverse().find(h=>(h.key||OUDE_NAMEN[h.naam])===key);
+const volgendeTraining=()=>[...TRAININGEN].sort((a,b)=>(laatstVan(a)?.datum||'').localeCompare(laatstVan(b)?.datum||''))[0];
+// Oude geschiedenis gebruikte andere namen ("Benen + Core")
+const OUDE_NAMEN={'Kracht + Rotatie':'27-07','Benen + Core':'20-07','Stabiliteit + Press':'13-07'};
+const trainingNaam=h=>{const k=h.key||OUDE_NAMEN[h.naam];return k&&SESSIONS[k]?SESSIONS[k].label:(h.naam||'Training');};
+const ZWAAR={licht:'Makkelijk',goed:'Goed',zwaar:'Zwaar',tezwaar:'Te zwaar'};
+
+// ================= Iconen en figuren =================
+const I={
+  chev:`<svg class="chev" width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m1.5 1.5 6 6-6 6"/></svg>`,
+  klok:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
+  lijst:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
+  dots:`<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`,
+  x:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>`,
+  adem:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 16h15a3 3 0 1 1-3 3M3 12h7"/></svg>`,
+  info:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>`,
+  door:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
+  vink:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`,
+  vinkGroot:`<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`,
+  let:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>`,
+  vlam:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>`,
+  zoek:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`,
+  deel:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg>`,
+  play:`<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>`,
+};
+function ring(pct,groot,extra='',mid=''){ // pct 0..1
+  const r=groot/2-8,C=2*Math.PI*r;
+  return `<svg viewBox="0 0 ${groot} ${groot}" aria-hidden="true"><circle class="trk" cx="${groot/2}" cy="${groot/2}" r="${r}"/><circle class="val" ${extra} cx="${groot/2}" cy="${groot/2}" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"/></svg>${mid}`;
+}
+function houding(naam,i,tekst){
+  const f=FIG[naam];
+  if(f?.stappen?.[i]) return f.stappen[i];
+  return i===0||(i===2&&/terug|zakken|los\b/i.test(tekst))?'a':'b';
+}
+function fig(naam,anim=true,pose='a'){
+  const f=FIG[naam];if(!f) return '';
+  const lab=`${(NL[naam]||[naam])[0]}${anim?': begin- en eindhouding':''}`;
+  if(!anim) return `<svg viewBox="10 2 100 108" role="img" aria-label="${lab}"><g class="fig-g">${f.ground||''}</g><g class="fig">${f[pose]||f.a}</g></svg>`;
+  return `<svg viewBox="10 2 100 108" role="img" aria-label="${lab}" class="anim"><g class="fig-g">${f.ground||''}</g>
+    <g class="fig pose-a">${f.a}</g><g class="fig pose-b">${f.b}</g></svg>`;
+}
+
+// ================= Navigatie =================
+const TABS=['vandaag','oefeningen','voortgang'];
+let huidig='vandaag';
+function toon(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+id));
+  $('tabbar').classList.toggle('on',TABS.includes(id));
+  document.querySelectorAll('.tab').forEach(b=>{b.classList.toggle('on',b.dataset.t===id);b.setAttribute('aria-current',b.dataset.t===id?'page':'false');});
+  if(id!=='oefeningen') kiesModus(false);
+  huidig=id;window.scrollTo(0,0);
+}
+function tab(t){ if(t==='vandaag')renderVandaag(); if(t==='voortgang')renderVoortgang(); if(t==='oefeningen')renderOefeningen(); toon(t); }
+function welkomKlaar(){ LS.set(K_WELKOM,1); tab('vandaag'); }
+
+// Sheets
+let sheetTerug=null;
+function openSheet(html,terug=null){
+  sheetTerug=terug;verbergToast();
+  $('sheet').innerHTML=`<div class="grab"></div>${html}`;$('sheet').scrollTop=0;
+  $('dim').classList.add('on');$('sheet').classList.add('on');document.body.classList.add('vast');
+}
+function sluitSheet(){ if(sheetTerug){const t=sheetTerug;sheetTerug=null;t();return;} sluitAlles(); }
+function sluitAlles(){ sheetTerug=null;['dim','sheet','acts'].forEach(i=>$(i).classList.remove('on'));document.body.classList.remove('vast'); }
+const sluitKnop=`<button class="x" onclick="sluitSheet()" aria-label="Sluiten"><span>${I.x}</span></button>`;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('dim').classList.contains('on')) sluitSheet(); });
+
+// ================= Vandaag =================
+function renderVandaag(){
+  const deze=dezeWeek(),gehaald=deze>=WEEKDOEL,reeks=weekReeks();
+  const vier=laatsteWeken(4),aantal=vier.filter(w=>w.gedaan).length;
+  const vk=volgendeTraining(),vs=SESSIONS[vk],vorigeZelfde=laatstVan(vk),laatste=hist[hist.length-1];
+  const lopend=leesLopend();
+  const dagen=['M','D','W','D','V','Z','Z'].map((d,i)=>{const x=new Date();x.setDate(x.getDate()-(x.getDay()+6)%7+i);const k=dagKey(x);
+    return `<div class="day${k===vandaag()?' nu':''}${hist.some(h=>h.datum===k)?' done':''}"><i></i>${d}</div>`;}).join('');
+  let heroNote='';
+  if(vorigeZelfde?.zwaar==='zwaar'||vorigeZelfde?.zwaar==='tezwaar') heroNote=`Vorige keer voelde deze ${ZWAAR[vorigeZelfde.zwaar].toLowerCase()}. Doe rustig aan.`;
+  else if(vorigeZelfde) heroNote=`Laatst ${geleden(vorigeZelfde.datum)}.`;
+  const pijnMelding=laatste&&laatste.pijn>=7?`<div class="melding warn">${I.let}<div><b>Vorige keer deed het pijn (${laatste.pijn} van 10)</b>Bespreek dit met je fysio voor je weer traint.</div></div>`:'';
+  $('s-vandaag').innerHTML=`
+    <div class="eyebrow">${fmtDag(vandaag())}</div>
+    <h1 class="large">Vandaag</h1>
+    ${lopend?`<div class="hervat"><div class="title2" style="font-size:1.05rem">${lopend.naam||'Training'} onderbroken</div>
+      <div class="sub">${lopend.sets} sets gedaan · nog ongeveer ${minuten(duurVan(lopend.ex,lopend.order,lopend.stap))} minuten</div>
+      <div class="rij"><button class="btn klein" onclick="hervatLopend()">${I.play} Verder</button><button class="btn soft klein" onclick="LS.del(K_LOPEND);renderVandaag()">Wissen</button></div></div>`:''}
+    <div class="card week">
+      <div class="ring${gehaald?' groen':''}">${ring(aantal/4,64,'',`<div class="mid">${gehaald?I.vink.replace('14','24').replace('14','24'):`<b>${aantal}/4</b>`}</div>`)}</div>
+      <div class="week-txt"><b>${gehaald?'Weekdoel gehaald':'Nog 1 training deze week'}</b>
+        <div class="sub">${aantal?`${aantal} van de laatste 4 weken${reeks>1?` · ${reeks} weken op rij`:''}`:'Je eerste training staat klaar'}</div>
+        <div class="days" aria-hidden="true">${dagen}</div></div>
+    </div>
+    ${pijnMelding}
+    <div class="card hero">
+      <div class="hero-art">${fig(vs.exercises[0].naam)}</div>
+      <div class="hero-body">
+        <div class="label">${gehaald?'Volgende keer':'Aan de beurt'}</div>
+        <div class="title2">${vs.label}</div>
+        <div class="meta"><span>${I.klok} ${minuten(duurVan(vs.exercises))} minuten</span><span>${I.lijst} ${vs.exercises.length} oefeningen</span></div>
+        ${heroNote?`<div class="hero-note">${heroNote}</div>`:'<div style="height:.4rem"></div>'}
+        <button class="btn${gehaald?' soft':''}" onclick="openOverzicht('${vk}')">${gehaald?'Toch nog een keer':'Bekijk en start'}</button>
+      </div>
+    </div>
+    ${laatste?`<button class="card row" style="margin-top:.8rem" onclick="tab('voortgang')">
+      <div class="thumb" style="background:var(--green-soft);color:var(--green)">${I.vink}</div>
+      <div class="row-main"><div class="row-t" style="font-weight:600;font-size:.94rem">Vorige keer: ${trainingNaam(laatste)}</div>
+      <div class="row-s">${fmtDag(laatste.datum)}${laatste.zwaar?` · voelde ${ZWAAR[laatste.zwaar].toLowerCase()}`:''}</div></div>${I.chev}</button>`:''}
+    <div class="section">Liever iets anders?</div>
+    <div class="list">
+      ${TRAININGEN.filter(k=>k!==vk).map(k=>`<button class="row plain" onclick="openOverzicht('${k}')"><div class="row-main"><div class="row-t">${SESSIONS[k].label}</div><div class="row-s">${SESSIONS[k].exercises.length} oefeningen · ${minuten(duurVan(SESSIONS[k].exercises))} min</div></div>${I.chev}</button>`).join('')}
+      <button class="row plain" onclick="openKort()"><div class="row-main"><div class="row-t">Kort trainen</div><div class="row-s">5, 10 of 20 minuten</div></div>${I.chev}</button>
+    </div>`;
+}
+
+// ================= Overzicht van een training =================
+let afgevinkt=new Set();
+function openOverzicht(key){
+  const s=SESSIONS[key],exs=s.exercises;
+  const benodigd=[];
+  exs.forEach(o=>{ if(!o.gear)return; const kg=kgVan(o),n=GEAR_NL[o.gear];
+    let b=benodigd.find(x=>x.g===o.gear); if(!b){b={g:o.gear,naam:n,kg:new Set()};benodigd.push(b);} if(kg)b.kg.add(kg); });
+  const blokken={};
+  exs.forEach((o,i)=>{const g=groep(o)||('x'+i);(blokken[g]=blokken[g]||[]).push(o);});
+  const bl=Object.values(blokken);
+  afgevinkt=new Set();
+  openSheet(`
+    <div class="sheet-top"><div><div class="eyebrow" style="margin-top:0">Van je fysio · ${s.naam.replace('Training ','')}</div>
+      <h2 class="title2" style="font-size:1.65rem">${s.label}</h2></div>${sluitKnop}</div>
+    <div class="sub">Ongeveer ${minuten(duurVan(exs))} minuten. Je doet steeds ${bl.some(b=>b.length>2)?'twee of drie':'twee'} oefeningen na elkaar en rust daarna even.</div>
+    ${benodigd.length?`<div class="blok" style="margin-top:1.1rem">Pak even klaar</div>
+    <div class="list">${benodigd.map((b,i)=>`<button class="row plain" onclick="vinkAf(${i},this)" aria-pressed="false">
+      <div class="check">${I.vink}</div><div class="row-main"><div class="row-t">${b.naam.charAt(0).toUpperCase()+b.naam.slice(1)}</div>${b.kg.size?`<div class="row-s">${[...b.kg].sort((a,c)=>parseFloat(a)-parseFloat(c)).join(' en ')}</div>`:''}</div></button>`).join('')}</div>`:''}
+    ${bl.map((b,n)=>`<div class="blok">Blok ${n+1}${b.length>1?` · ${b.length===2?'twee':'drie'} na elkaar, dan pauze`:''}</div>
+      <div class="list">${b.map(o=>`<button class="row" onclick="openUitleg(${idxVan(o.naam)},()=>openOverzicht('${key}'))"><div class="thumb">${fig(o.naam,false)}</div>
+        <div class="row-main"><div class="row-t">${naamVan(o)}</div><div class="row-s">${kort(o)}${kgVan(o)?' · '+kgVan(o):''}</div></div>${I.chev}</button>`).join('')}</div>`).join('')}
+    <div class="sheet-cta"><button class="btn" onclick="startTraining('${key}')">Start training</button></div>`);
+}
+function vinkAf(i,el){ const aan=!el.classList.contains('gekozen'); el.classList.toggle('gekozen',aan); el.setAttribute('aria-pressed',aan); }
+
+function openUitleg(i,terug=null){
+  const o=UNIEK[i];if(!o)return;
+  openSheet(`
+    <div class="sheet-top"><div><div class="eyebrow" style="margin-top:0">${o.naam}</div><h2 class="title2" style="font-size:1.55rem">${naamVan(o)}</h2></div>${sluitKnop}</div>
+    <div class="sub">${uitlegVan(o)}</div>
+    <div class="how-art">${fig(o.naam)}</div>
+    <div class="steps">${o.steps.map((t,n)=>`<div class="card step"><div class="num">${n+1}</div><p>${t}</p><div class="thumb">${fig(o.naam,false,houding(o.naam,n,t))}</div></div>`).join('')}</div>
+    ${o.adem?`<div class="cue" style="margin-top:.7rem">${I.adem}<span>${o.adem}</span></div>`:''}
+    ${!tr&&!terug?`<div style="margin-top:1.1rem"><button class="btn soft" onclick="startLos(${i})">Alleen deze oefening doen</button></div>`:''}`,terug);
+}
+
+// Kort trainen
+let kortMin=10,kortVrij=false,kortLijst=[];
+function kiesKort(){
+  const pool=UNIEK.filter(o=>!kortVrij||!o.gear).map(o=>({...o,super:undefined})).sort(()=>Math.random()-.5);
+  const doel=kortMin*60,uit=[];let tot=0;
+  for(const o of pool){const d=o.sets*setDuur(o)+(o.sets-1)*REST_SECS; if(uit.length&&tot+d>doel)break; tot+=d+(uit.length?REST_SECS:0); uit.push(o);}
+  kortLijst=uit;
+}
+function openKort(nieuw=true){
+  if(nieuw) kiesKort();
+  openSheet(`
+    <div class="sheet-top"><div><h2 class="title2" style="font-size:1.65rem">Kort trainen</h2></div>${sluitKnop}</div>
+    <div class="sub" style="margin-bottom:.8rem">Een paar oefeningen uit je schema, door elkaar.</div>
+    <div class="segwide" role="group" aria-label="Duur">${[5,10,20].map(m=>`<button aria-pressed="${m===kortMin}" onclick="kortMin=${m};openKort()">${m} min</button>`).join('')}</div>
+    <div class="segwide" role="group" aria-label="Spullen"><button aria-pressed="${!kortVrij}" onclick="kortVrij=false;openKort()">Met spullen</button><button aria-pressed="${kortVrij}" onclick="kortVrij=true;openKort()">Zonder spullen</button></div>
+    <div class="list">${kortLijst.map(o=>`<button class="row" onclick="openUitleg(${idxVan(o.naam)},()=>openKort(false))"><div class="thumb">${fig(o.naam,false)}</div>
+      <div class="row-main"><div class="row-t">${naamVan(o)}</div><div class="row-s">${kort(o)}</div></div>${I.chev}</button>`).join('')}</div>
+    <p class="foot">Ongeveer ${minuten(duurVan(kortLijst))} minuten.</p>
+    <div class="duo" style="margin-top:1rem"><button class="btn soft" onclick="openKort()">Andere oefeningen</button><button class="btn" onclick="startLijst(kortLijst,'${kortMin} minuten kort',null)">Start</button></div>`);
+}
+
+// ================= Training =================
+let tr=null;
+function startTraining(key){ const s=SESSIONS[key]; startLijst(s.exercises.map(o=>({...o})),s.label,key); }
+function startLos(i){ const o=UNIEK[i]; startLijst([{...o,super:undefined}],naamVan(o),null); }
+function startLijst(exs,naam,key){
+  sluitAlles();ontgrendelGeluid();
+  tr={naam,key,ex:exs,order:volgorde(exs),stap:0,gedaan:[],sets:0,start:Date.now(),pauzeMs:0,pauzeVan:null};
+  vraagWakeLock();renderOefening(false);
+}
+function tijdBezig(){ if(!tr)return 0; return (tr.pauzeVan||Date.now())-tr.start-tr.pauzeMs; }
+function huidigeEx(){ return tr.ex[tr.order[tr.stap].ex]; }
+
+let hold=null; // {tot,rest,eind,loopt,gewisseld}
+function renderOefening(doorgaan){
+  const o=huidigeEx(),{set}=tr.order[tr.stap],n=tr.order.length;
+  const segs=n<=30?Array.from({length:n},(_,i)=>`<i class="${i<tr.stap?'d':''}"></i>`).join(''):`<i class="d" style="flex:${tr.stap}"></i><i style="flex:${n-tr.stap}"></i>`;
+  const rest=minuten(duurVan(tr.ex,tr.order,tr.stap));
+  hold=isHold(o)?{tot:holdTotaal(o),rest:holdTotaal(o),eind:0,loopt:false,gewisseld:false,perKant:perKant(o)}:null;
+  $('s-oefening').innerHTML=`
+    <div class="wk-top">
+      <button class="rond" onclick="openMenu()" aria-label="Opties">${I.dots}</button>
+      <div class="prog"><div class="prog-bar" aria-hidden="true">${segs}</div><div class="prog-t">nog ongeveer ${rest} ${rest===1?'minuut':'minuten'}</div></div>
+      <button class="rond" onclick="openUitleg(${idxVan(o.naam)})" aria-label="Hoe doe ik dit?">${I.info}</button>
+    </div>
+    ${doorgaan?`<div class="banner">${I.door} Meteen door, zonder pauze</div>`:''}
+    <div class="art">${fig(o.naam)}<button class="how" onclick="openUitleg(${idxVan(o.naam)})">Hoe doe ik dit?</button></div>
+    <div class="wk-when">Ronde ${set+1} van ${o.sets}${perKant(o)?' · links en rechts':''}</div>
+    <h1 class="wk-name">${naamVan(o)}</h1>
+    <div class="wk-plain">${uitlegVan(o)} <span>· ${o.naam}</span></div>
+    ${hold?`<div class="hold"><div class="ring" id="hold-ring" onclick="holdKnop()" role="button" tabindex="0" aria-label="Timer starten of pauzeren"
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();holdKnop();}">${ring(1,100,'id="hold-val"',`<div class="mid"><div><div class="n" id="hold-n">${hold.tot}</div><div class="l" id="hold-l">sec</div></div></div>`)}</div>
+        <div class="reps-side"><b>${hoeveel(o)}</b><span>${perKant(o)?'Eerst links, dan rechts':spullen(o)}</span>
+        <button class="btn klein" id="hold-btn" style="margin-top:.5rem" onclick="holdKnop()">${I.play} Start</button></div></div>`
+    :`<div class="reps"><span class="n">${o.reps}</span><div class="reps-side"><b>keer</b><span>${spullen(o)} · rustig tempo</span></div></div>`}
+    ${o.adem?`<div class="cue">${I.adem}<span>${o.adem}</span></div>`:''}
+    <div class="wk-foot"><button class="btn" id="klaar-btn" onclick="klaar()">${tr.stap===n-1?'Training afronden':'Klaar'}</button></div>`;
+  toon('oefening');bewaarLopend();
+}
+// Vasthoud-oefening: timer op de klok, halverwege wisselen bij links en rechts
+let holdT=null;
+function holdKnop(){
+  if(!hold)return;ontgrendelGeluid();
+  if(hold.rest<=0){hold.rest=hold.tot;hold.gewisseld=false;}
+  hold.loopt=!hold.loopt;
+  if(hold.loopt){hold.eind=Date.now()+hold.rest*1000;clearInterval(holdT);holdT=setInterval(holdTik,200);}
+  else clearInterval(holdT);
+  tekenHold();
+}
+function holdTik(){
+  if(!hold||!hold.loopt||tr?.pauzeVan)return;
+  const nu=Math.max(0,Math.ceil((hold.eind-Date.now())/1000));
+  if(nu===hold.rest)return;
+  hold.rest=nu;
+  if(hold.perKant&&!hold.gewisseld&&nu<=hold.tot/2&&nu>0){hold.gewisseld=true;toon1();zegWissel();}
+  if(nu<=0){hold.loopt=false;clearInterval(holdT);toon3();$('klaar-btn')?.classList.add('pulse');}
+  tekenHold();
+}
+let wisselTot=0;
+function zegWissel(){ wisselTot=Date.now()+2500; }
+function tekenHold(){
+  const n=$('hold-n'),l=$('hold-l'),v=$('hold-val'),b=$('hold-btn');if(!n||!hold)return;
+  n.textContent=hold.rest;
+  const C=parseFloat(v.getAttribute('stroke-dasharray'));v.style.strokeDashoffset=C*(1-hold.rest/hold.tot);
+  const wissel=Date.now()<wisselTot;
+  l.textContent=wissel?'wissel':hold.perKant?(hold.gewisseld?'rechts':'links'):'sec';l.classList.toggle('wissel',wissel);
+  b.innerHTML=hold.rest<=0?'Nog een keer':hold.loopt?'Pauze':`${I.play} ${hold.rest<hold.tot?'Verder':'Start'}`;
+}
+function openMenu(){ verbergToast();$('dim').classList.add('on');$('acts').classList.add('on');document.body.classList.add('vast'); }
+
+// Klaar / overslaan met ongedaan maken
+let snap=null,toastT=null;
+const maakSnap=()=>({stap:tr.stap,order:[...tr.order],gedaan:[...tr.gedaan],sets:tr.sets});
+function toast(t,s){ snap=s;$('toast-t').textContent=t;$('toast-b').hidden=!s;$('toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(verbergToast,5000); }
+function verbergToast(){ snap=null;clearTimeout(toastT);$('toast').classList.remove('on'); }
+function ongedaan(){
+  if(!snap||!tr)return;const s=snap;verbergToast();
+  stopPauzeTimer();clearInterval(holdT);
+  Object.assign(tr,{stap:s.stap,order:s.order,gedaan:s.gedaan,sets:s.sets});
+  renderOefening(false);
+}
+function klaar(){
+  const s=maakSnap(),o=huidigeEx();
+  clearInterval(holdT);
+  tr.sets++; if(!tr.gedaan.includes(tr.order[tr.stap].ex)) tr.gedaan.push(tr.order[tr.stap].ex);
+  volgendeStap(o,s,'Ronde afgerond');
+}
+function overslaan(){
+  if(!tr)return;const s=maakSnap(),o=huidigeEx(),e=tr.order[tr.stap].ex;
+  clearInterval(holdT);
+  tr.order=tr.order.filter((x,i)=>i<=tr.stap||x.ex!==e);
+  volgendeStap(o,s,'Overgeslagen',true);
+}
+function volgendeStap(vorige,s,tekst,overgeslagen){
+  tr.stap++;
+  if(tr.stap>=tr.order.length){afronden();return;}
+  const volgende=huidigeEx();
+  if(!overgeslagen&&zelfdeGroep(vorige,volgende)) renderOefening(true);
+  else if(overgeslagen) renderOefening(false);
+  else pauze();
+  toast(tekst,s);
+}
+
+// Pauze tussen blokken: blijft staan tot je op Verder tikt
+let pauzeT=null,pauzeEind=0,pauzeS=0;
+function pauze(){
+  const n=huidigeEx();pauzeS=REST_SECS;pauzeEind=Date.now()+REST_SECS*1000;
+  const rest=minuten(duurVan(tr.ex,tr.order,tr.stap));
+  $('s-pauze').innerHTML=`
+    <div class="wk-top"><button class="rond" onclick="openMenu()" aria-label="Opties">${I.dots}</button>
+      <div class="prog"><div class="prog-t" style="margin:0">nog ongeveer ${rest} minuten</div></div><span style="width:2.75rem"></span></div>
+    <div class="rest">
+      <div class="eyebrow" id="p-eyebrow">Goed bezig</div>
+      <h1 class="title2" style="font-size:1.65rem" id="p-titel">Even pauze</h1>
+      <div class="ring" id="p-ring">${ring(1,220,'id="p-val"',`<div class="mid"><div><div class="n" id="p-n">${REST_SECS}</div><div class="l" id="p-l">seconden</div></div></div>`)}</div>
+      <div class="sub" id="p-sub">Drink wat water en adem rustig.</div>
+      <button class="card next" onclick="openUitleg(${idxVan(n.naam)})"><div class="thumb">${fig(n.naam,false)}</div>
+        <div class="row-main"><div style="font-size:.78rem;color:var(--fg2)">Hierna</div><div class="row-t" style="font-weight:600">${naamVan(n)}</div><div class="row-s">${hoeveel(n)} · ${spullen(n)}</div></div>${I.chev}</button>
+      <div class="duo"><button class="btn soft" onclick="extraPauze()">+15 sec</button><button class="btn" id="p-verder" onclick="naPauze()">Verder</button></div>
+    </div>`;
+  toon('pauze');bewaarLopend();
+  stopPauzeTimer();pauzeT=setInterval(pauzeTik,250);
+}
+function pauzeTik(){
+  if(tr?.pauzeVan)return;
+  const nu=Math.max(0,Math.ceil((pauzeEind-Date.now())/1000));
+  if(nu===pauzeS)return;pauzeS=nu;tekenPauze();
+  if(nu<=0){stopPauzeTimer();toon3();
+    $('p-titel').textContent='Klaar voor de volgende?';$('p-eyebrow').textContent='Pauze voorbij';
+    $('p-sub').textContent='Tik op Verder als je zover bent.';$('p-verder').classList.add('pulse');}
+}
+function tekenPauze(){
+  const n=$('p-n'),v=$('p-val');if(!n)return;
+  n.textContent=pauzeS;const C=parseFloat(v.getAttribute('stroke-dasharray'));
+  v.style.strokeDashoffset=C*(1-Math.min(pauzeS,REST_SECS)/REST_SECS);
+}
+function extraPauze(){
+  if(pauzeS<=0){pauzeEind=Date.now();pauzeT=setInterval(pauzeTik,250);$('p-verder')?.classList.remove('pulse');$('p-titel').textContent='Even pauze';$('p-eyebrow').textContent='Goed bezig';$('p-sub').textContent='Drink wat water en adem rustig.';}
+  pauzeEind+=15000;pauzeS+=15;tekenPauze();
+}
+function stopPauzeTimer(){clearInterval(pauzeT);pauzeT=null;}
+function naPauze(){stopPauzeTimer();renderOefening(false);}
+
+// Pauzeren (hele training) en stoppen
+function pauzeer(){
+  if(!tr||tr.pauzeVan)return;tr.pauzeVan=Date.now();laatWakeLockLos();
+  $('paus-sub').textContent=`${tr.sets} ${tr.sets===1?'ronde':'rondes'} gedaan · ${Math.floor(tijdBezig()/60000)} min bezig`;
+  $('paus-stop').textContent=tr.sets?'Stoppen en opslaan':'Stoppen';
+  $('paus').classList.add('on');
+}
+function hervat(){
+  if(!tr?.pauzeVan)return;const d=Date.now()-tr.pauzeVan;tr.pauzeMs+=d;tr.pauzeVan=null;
+  pauzeEind+=d; if(hold?.loopt) hold.eind+=d;
+  $('paus').classList.remove('on');vraagWakeLock();
+}
+function stopVanuitPauze(){ hervat(); if(tr.sets) afronden(); else stoppenZonderOpslaan(); }
+function stoppenZonderOpslaan(){ opruimen();tab('vandaag'); }
+function opruimen(){ stopPauzeTimer();clearInterval(holdT);verbergToast();LS.del(K_LOPEND);laatWakeLockLos();$('paus').classList.remove('on');tr=null; }
+
+// ================= Klaar =================
+let laatsteIdx=-1;
+function afronden(){
+  if(!tr)return;
+  if(!tr.sets){stoppenZonderOpslaan();return;}
+  const min=Math.max(1,Math.round(tijdBezig()/60000)),aantal=tr.gedaan.length;
+  hist.push({datum:vandaag(),count:aantal,naam:tr.naam,key:tr.key,sets:tr.sets,min});
+  laatsteIdx=hist.length-1;bewaarHist();
+  const reeks=weekReeks();
+  opruimen();
+  $('s-klaar').innerHTML=`<div class="done">
+    <div class="ring groen">${ring(0,132,'id="k-val"',`<div class="mid">${I.vinkGroot}</div>`)}</div>
+    <h1 class="large" style="margin-bottom:.35rem">Goed gedaan</h1>
+    <div class="sub">Je weekdoel is gehaald${reeks>1?`. ${reeks} weken op rij`:''}.</div>
+    <div class="stats"><div class="card stat"><div class="n">${aantal}</div><div class="l">${aantal===1?'oefening':'oefeningen'}</div></div>
+      <div class="card stat"><div class="n">${min}</div><div class="l">${min===1?'minuut':'minuten'}</div></div></div>
+    <div class="card ask"><h3 id="zw-h">Hoe voelde het?</h3>
+      <div class="seg" role="group" aria-labelledby="zw-h">${Object.entries(ZWAAR).map(([k,t])=>`<button aria-pressed="false" onclick="zetZwaar('${k}',this)">${t}</button>`).join('')}</div></div>
+    <div class="card ask"><div class="pijn-top"><h3 style="margin:0" id="pijn-h">Pijn tijdens het trainen</h3><b id="pv">–</b></div>
+      <input type="range" id="pijn" min="0" max="10" step="1" value="0" aria-labelledby="pijn-h" oninput="zetPijn(this.value)">
+      <div class="scale"><span>0 · geen pijn</span><span>10 · heel veel</span></div></div>
+    <div id="pijn-advies"></div>
+    <div style="margin-top:1.3rem"><button class="btn" onclick="tab('vandaag')">Klaar</button></div>
+  </div>`;
+  toon('klaar');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const v=$('k-val');if(v)v.style.strokeDashoffset=0;}));
+}
+function zetZwaar(k,el){ el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===el)); if(hist[laatsteIdx]){hist[laatsteIdx].zwaar=k;bewaarHist();} }
+function zetPijn(v){
+  v=+v;$('pv').textContent=v; if(hist[laatsteIdx]){hist[laatsteIdx].pijn=v;bewaarHist();}
+  $('pijn-advies').innerHTML=v>=7?`<div class="melding warn" style="margin-top:.8rem;text-align:left">${I.let}<div><b>Dat is veel</b>Neem contact op met je fysio voor je volgende training. Stop als een oefening scherp pijn doet.</div></div>`:'';
+}
+
+// ================= Oefeningen-tab =================
+let zoekTekst='',alleenVrij=false,kiezen=false,gekozen=new Set();
+function renderOefeningen(){
+  $('s-oefeningen').innerHTML=`
+    <div class="navrij"><span></span><button class="link" onclick="kiesModus(!kiezen)">${kiezen?'Annuleer':'Kiezen'}</button></div>
+    <h1 class="large">Oefeningen</h1>
+    <label class="search">${I.zoek}<input id="zoek" type="search" placeholder="Zoeken" value="${zoekTekst}" oninput="zoekTekst=this.value;renderLijst()" aria-label="Zoek een oefening"></label>
+    <div class="segwide" role="group" aria-label="Filter"><button aria-pressed="${!alleenVrij}" onclick="alleenVrij=false;renderOefeningen()">Alles</button><button aria-pressed="${alleenVrij}" onclick="alleenVrij=true;renderOefeningen()">Zonder spullen</button></div>
+    ${kiezen?'<p class="foot" style="margin:-.3rem .2rem .7rem">Tik de oefeningen aan die je wilt doen.</p>':''}
+    <div class="list" id="bib"></div>`;
+  renderLijst();
+}
+function renderLijst(){
+  const q=zoekTekst.trim().toLowerCase();
+  const lijst=UNIEK.map((o,i)=>({o,i})).filter(({o})=>(!alleenVrij||!o.gear)&&(!q||(naamVan(o)+' '+o.naam+' '+uitlegVan(o)).toLowerCase().includes(q)));
+  $('bib').innerHTML=lijst.length?lijst.map(({o,i})=>`<button class="row${gekozen.has(i)?' gekozen':''}" onclick="${kiezen?`kies(${i},this)`:`openUitleg(${i})`}" ${kiezen?`aria-pressed="${gekozen.has(i)}"`:''}>
+    ${kiezen?`<div class="check">${I.vink}</div>`:''}<div class="thumb">${fig(o.naam,false)}</div>
+    <div class="row-main"><div class="row-t">${naamVan(o)}</div><div class="row-s">${uitlegVan(o)}</div></div>${kiezen?'':I.chev}</button>`).join('')
+    :`<div class="leeg">Geen oefening gevonden met "${zoekTekst.replace(/</g,'&lt;')}".</div>`;
+}
+function kiesModus(aan){ kiezen=aan; if(!aan)gekozen.clear(); if(huidig==='oefeningen'&&$('bib')) renderOefeningen(); updateKiesbalk(); }
+function kies(i,el){ gekozen.has(i)?gekozen.delete(i):gekozen.add(i); el.classList.toggle('gekozen',gekozen.has(i)); el.setAttribute('aria-pressed',gekozen.has(i)); updateKiesbalk(); }
+function updateKiesbalk(){
+  const n=gekozen.size;$('kiesbalk').classList.toggle('on',kiezen&&n>0);
+  if(n){const exs=[...gekozen].map(i=>({...UNIEK[i],super:undefined}));$('kies-start').textContent=`Start ${n} ${n===1?'oefening':'oefeningen'} · ${minuten(duurVan(exs))} min`;}
+}
+function startGekozen(){ const exs=[...gekozen].map(i=>({...UNIEK[i],super:undefined})); if(!exs.length)return; kiesModus(false); startLijst(exs,exs.length===1?naamVan(exs[0]):'Eigen selectie',null); }
+
+// ================= Voortgang =================
+function renderVoortgang(){
+  const reeks=weekReeks(),w8=laatsteWeken(8),recent=[...hist].reverse().slice(0,12);
+  $('s-voortgang').innerHTML=`
+    <div class="eyebrow">&nbsp;</div>
+    <h1 class="large">Voortgang</h1>
+    <div class="card big"><div class="ring groen">${ring(Math.min(1,w8.filter(w=>w.gedaan).length/8),64,'',`<div class="mid" style="color:var(--green)">${I.vlam}</div>`)}</div>
+      <div><div class="n">${reeks}</div><div class="sub">${reeks===1?'week':'weken'} op rij je weekdoel gehaald</div></div></div>
+    <div class="weeks" aria-label="Laatste 8 weken">${w8.map(w=>`<div class="wkb${w.gedaan?' on':''}" title="Week van ${w.label}${w.gedaan?': getraind':''}"><i></i>${w.label}</div>`).join('')}</div>
+    <div class="section">Recente trainingen</div>
+    <div class="list">${recent.length?recent.map(h=>`<div class="row plain"><div class="row-main"><div class="row-t">${trainingNaam(h)}</div><div class="row-s">${fmtDag(h.datum)}${h.count?` · ${h.count} ${h.count===1?'oefening':'oefeningen'}`:''}</div></div>
+      ${h.zwaar?`<span class="pill ${h.zwaar==='zwaar'||h.zwaar==='tezwaar'?'w':'g'}">${ZWAAR[h.zwaar]}</span>`:''}${h.pijn!=null?`<span class="pill${h.pijn>=7?' w':''}">pijn ${h.pijn}</span>`:''}</div>`).join('')
+      :`<div class="leeg">Nog geen trainingen. Je eerste training verschijnt hier.</div>`}</div>
+    ${recent.length?`<p class="foot">Na elke training vul je in hoe het voelde. Zo kan je fysio zien hoe het gaat.</p>
+    <div style="margin-top:1rem"><button class="btn soft" onclick="deel()">${I.deel} Deel met je fysio</button></div>`:''}`;
+}
+async function deel(){
+  const regels=[...hist].reverse().slice(0,10).map(h=>`- ${fmtKort(h.datum)}: ${trainingNaam(h)}${h.count?`, ${h.count} oefeningen`:''}${h.zwaar?`, voelde ${ZWAAR[h.zwaar].toLowerCase()}`:''}${h.pijn!=null?`, pijn ${h.pijn}/10`:''}`);
+  const tekst=`Mijn trainingen (${weekReeks()} weken op rij):\n${regels.join('\n')}`;
+  try{ if(navigator.share){await navigator.share({title:'Mijn trainingen',text:tekst});return;} }catch(e){ if(e.name==='AbortError')return; }
+  try{ await navigator.clipboard.writeText(tekst); toast('Gekopieerd, plak het in een bericht',null); }
+  catch(e){ openSheet(`<div class="sheet-top"><h2 class="title2">Overzicht</h2>${sluitKnop}</div><pre style="white-space:pre-wrap;font:inherit;font-size:.9rem">${tekst}</pre>`); }
+}
+
+// ================= Lopende training bewaren =================
+function bewaarLopend(){ if(tr) LS.set(K_LOPEND,{t:Date.now(),naam:tr.naam,key:tr.key,ex:tr.ex,order:tr.order,stap:tr.stap,gedaan:tr.gedaan,sets:tr.sets,bezig:tijdBezig()}); }
+function leesLopend(){ const v=LS.get(K_LOPEND,null); if(v&&v.ex&&v.order&&Date.now()-v.t<6*36e5) return v; if(v)LS.del(K_LOPEND); return null; }
+function hervatLopend(){
+  const v=leesLopend();if(!v){renderVandaag();return;}
+  ontgrendelGeluid();
+  tr={naam:v.naam,key:v.key,ex:v.ex,order:v.order,stap:v.stap,gedaan:v.gedaan,sets:v.sets,start:Date.now()-v.bezig,pauzeMs:0,pauzeVan:null};
+  vraagWakeLock();renderOefening(false);
+}
+
+// ================= Geluid, scherm aan =================
+let audio=null;
+function ontgrendelGeluid(){
+  try{
+    if(!audio){audio=new(window.AudioContext||window.webkitAudioContext)();
+      const b=audio.createBuffer(1,1,22050),s=audio.createBufferSource();s.buffer=b;s.connect(audio.destination);s.start(0);}
+    if(audio.state==='suspended')audio.resume();
+  }catch(e){}
+}
+function toonGeluid(tijden,freq){
+  try{ if(!audio)return; if(audio.state==='suspended')audio.resume();
+    tijden.forEach((t,i)=>{const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=freq[i]||freq[0];
+      o.connect(g);g.connect(audio.destination);const s=audio.currentTime+t;
+      g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.22,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.45);o.start(s);o.stop(s+.5);});
+  }catch(e){}
+}
+const toon1=()=>toonGeluid([0],[660]);            // wissel van kant
+const toon3=()=>toonGeluid([0,.22,.44],[660,784,988]); // klaar
+document.addEventListener('touchend',ontgrendelGeluid,{passive:true});
+document.addEventListener('click',ontgrendelGeluid);
+let wakeLock=null;
+async function vraagWakeLock(){ try{ if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){} }
+function laatWakeLockLos(){ if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null;} }
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible'||!tr)return;
+  if(!tr.pauzeVan) vraagWakeLock();
+  pauzeTik();holdTik();
+});
+
+// ================= Start =================
+(function start(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('mode')==='quick'){ // snelkoppeling: oefening van de dag
+    const dag=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/864e5);
+    startLos(dag%UNIEK.length);return;
+  }
+  if(!LS.get(K_WELKOM,0)&&!hist.length){toon('welkom');return;}
+  tab('vandaag');
+})();
+if('serviceWorker' in navigator&&location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+</script>
+</body>
+</html>

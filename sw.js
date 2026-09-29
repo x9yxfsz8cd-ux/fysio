@@ -1,8 +1,8 @@
 // Fysio — offline-ondersteuning.
 // Netwerk eerst, zodat je altijd de nieuwste versie krijgt; is er na 3 seconden
 // nog geen antwoord (slecht bereik in de sportschool), dan de bewaarde kopie.
-const CACHE='fysio-v1';
-const BESTANDEN=['./','./index.html','./fysio-oefeningen.html'];
+const CACHE='fysio-v2';
+const BESTANDEN=['./','./index.html','./fysio-oefeningen.html','./nieuw.html','./manifest.webmanifest','./apple-touch-icon.png','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(BESTANDEN)).then(()=>self.skipWaiting()));

@@ -1,0 +1,12 @@
+{
+  "name": "Fysio",
+  "short_name": "Fysio",
+  "start_url": "./nieuw.html",
+  "display": "standalone",
+  "background_color": "#F0F1F6",
+  "theme_color": "#5B5FB0",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
