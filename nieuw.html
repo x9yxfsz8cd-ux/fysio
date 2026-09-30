@@ -156,6 +156,12 @@ button.row:active{background:var(--fill)}
 .wk-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:.6rem;margin:0 -1.2rem .6rem;padding:calc(env(safe-area-inset-top,0px) + .4rem) 1.2rem .5rem;
   background:var(--bg)}
 #s-oefening,#s-pauze{padding-top:0}
+/* Knoppen altijd onderaan het scherm, ook als de inhoud kort is —
+   zo ligt de ongedaan-melding er nooit overheen */
+#s-oefening.on,#s-pauze.on{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+.wk-foot{margin-top:auto!important}
+#s-pauze .rest{flex:1}
+.rest .duo{margin-top:auto}
 .prog{flex:1;min-width:0}
 .prog-bar{display:flex;gap:2px;height:.25rem}
 .prog-bar i{flex:1;border-radius:2px;background:var(--fill2)}
@@ -184,7 +190,7 @@ button.row:active{background:var(--fill)}
 .hold .l.wissel{color:var(--accent);font-weight:700}
 .cue{display:flex;gap:.6rem;align-items:flex-start;background:var(--card);border-radius:1rem;padding:.75rem .85rem;font-size:.9rem;line-height:1.4;color:var(--fg2);box-shadow:var(--shadow)}
 .cue svg{flex:0 0 auto;color:var(--accent);margin-top:.1rem}
-.wk-foot{position:sticky;bottom:0;margin-top:1rem;padding:.8rem 0 calc(env(safe-area-inset-bottom,0px) + .6rem);background:linear-gradient(to top,var(--bg) 80%,transparent)}
+.wk-foot{position:sticky;bottom:0;padding:.8rem 0 calc(env(safe-area-inset-bottom,0px) + .6rem);background:linear-gradient(to top,var(--bg) 80%,transparent)}
 
 /* Figuren: dikke ronde lijnen, gevuld hoofd — pictogramstijl */
 .fig{fill:none;stroke:var(--fg);stroke-width:6.2;stroke-linecap:round;stroke-linejoin:round}
@@ -204,7 +210,7 @@ button.row:active{background:var(--fill)}
 .rest .ring .val{transition:stroke-dashoffset .3s linear}
 .rest .n{font:700 min(4.2rem,9vh)/1 var(--round);font-variant-numeric:tabular-nums}
 .rest .l{font-size:.9rem;color:var(--fg2);margin-top:.25rem}
-.next{display:flex;align-items:center;gap:.85rem;width:100%;padding:.75rem .85rem;margin:1.1rem 0}
+.next{display:flex;align-items:center;gap:.85rem;width:100%;padding:.75rem .85rem;margin:1.1rem 0 1.6rem}
 .duo{display:flex;gap:.6rem;width:100%}
 .rest .duo{position:sticky;bottom:0;padding:.8rem 0 calc(env(safe-area-inset-bottom,0px) + .6rem);background:linear-gradient(to top,var(--bg) 80%,transparent)}
 .large{overflow-wrap:anywhere}
@@ -275,7 +281,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:2.2rem;margin:0}
 .paus .knoppen{display:flex;flex-direction:column;gap:.5rem;width:100%;max-width:22rem;margin-top:2rem}
 
 /* Ongedaan maken */
-.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 5.2rem);z-index:35;transform:translate(-50%,.5rem);opacity:0;pointer-events:none;
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 5.8rem);z-index:35;transform:translate(-50%,.5rem);opacity:0;pointer-events:none;
   display:flex;align-items:center;gap:.8rem;background:var(--fg);color:var(--bg);border-radius:999px;padding:.35rem .35rem .35rem 1.1rem;font-size:.9rem;
   box-shadow:0 10px 30px rgba(0,0,0,.25);transition:opacity .2s,transform .2s;white-space:nowrap}
 .toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
@@ -330,7 +336,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:2.2rem;margin:0}
 <div class="acts" id="acts" role="dialog" aria-label="Opties">
   <div class="grp">
     <button onclick="sluitAlles();pauzeer()">Pauzeren</button>
-    <button onclick="sluitAlles();overslaan()">Deze oefening overslaan</button>
+    <button id="menu-skip" onclick="sluitAlles();overslaan()">Deze oefening overslaan</button>
     <button onclick="sluitAlles();afronden()">Training nu afronden</button>
     <button class="rood" onclick="sluitAlles();stoppenZonderOpslaan()">Stoppen zonder opslaan</button>
   </div>
@@ -963,7 +969,7 @@ function renderVandaag(){
     <div class="eyebrow">${fmtDag(vandaag())}</div>
     <h1 class="large">Vandaag</h1>
     ${lopend?`<div class="hervat"><div class="title2" style="font-size:1.05rem">${lopend.naam||'Training'} onderbroken</div>
-      <div class="sub">${lopend.sets} sets gedaan · nog ongeveer ${minuten(duurVan(lopend.ex,lopend.order,lopend.stap))} minuten</div>
+      <div class="sub">${lopend.sets} ${lopend.sets===1?'ronde':'rondes'} gedaan · nog ongeveer ${minuten(duurVan(lopend.ex,lopend.order,lopend.stap))} minuten</div>
       <div class="rij"><button class="btn klein" onclick="hervatLopend()">${I.play} Verder</button><button class="btn soft klein" onclick="LS.del(K_LOPEND);renderVandaag()">Wissen</button></div></div>`:''}
     <div class="card week">
       <div class="ring${gehaald?' groen':''}">${ring(aantal/4,64,'',`<div class="mid">${gehaald?I.vink.replace('14','24').replace('14','24'):`<b>${aantal}/4</b>`}</div>`)}</div>
@@ -1047,7 +1053,7 @@ function openKort(nieuw=true){
     <div class="list">${kortLijst.map(o=>`<button class="row" onclick="openUitleg(${idxVan(o.naam)},()=>openKort(false))"><div class="thumb">${fig(o.naam,false)}</div>
       <div class="row-main"><div class="row-t">${naamVan(o)}</div><div class="row-s">${kort(o)}</div></div>${I.chev}</button>`).join('')}</div>
     <p class="foot">Ongeveer ${minuten(duurVan(kortLijst))} minuten.</p>
-    <div class="duo" style="margin-top:1rem"><button class="btn soft" onclick="openKort()">Andere oefeningen</button><button class="btn" onclick="startLijst(kortLijst,'${kortMin} minuten kort',null)">Start</button></div>`);
+    <div class="duo" style="margin-top:1rem"><button class="btn soft" onclick="openKort()">Andere</button><button class="btn" onclick="startLijst(kortLijst,'${kortMin} minuten kort',null)">Start</button></div>`);
 }
 
 // ================= Training =================
@@ -1063,6 +1069,9 @@ function tijdBezig(){ if(!tr)return 0; return (tr.pauzeVan||Date.now())-tr.start
 function huidigeEx(){ return tr.ex[tr.order[tr.stap].ex]; }
 
 let hold=null; // {tot,rest,eind,loopt,gewisseld}
+// Een dubbele tik op Verder of Klaar mag niet meteen de volgende oefening afvinken:
+// Klaar staat op dezelfde plek als Verder in de pauze
+let schermSinds=0;const teSnel=()=>Date.now()-schermSinds<700;
 function renderOefening(doorgaan){
   const o=huidigeEx(),{set}=tr.order[tr.stap],n=tr.order.length;
   const segs=n<=30?Array.from({length:n},(_,i)=>`<i class="${i<tr.stap?'d':''}"></i>`).join(''):`<i class="d" style="flex:${tr.stap}"></i><i style="flex:${n-tr.stap}"></i>`;
@@ -1086,7 +1095,7 @@ function renderOefening(doorgaan){
     :`<div class="reps"><span class="n">${o.reps}</span><div class="reps-side"><b>keer</b><span>${spullen(o)} · rustig tempo</span></div></div>`}
     ${o.adem?`<div class="cue">${I.adem}<span>${o.adem}</span></div>`:''}
     <div class="wk-foot"><button class="btn" id="klaar-btn" onclick="klaar()">${tr.stap===n-1?'Training afronden':'Klaar'}</button></div>`;
-  toon('oefening');bewaarLopend();
+  toon('oefening');bewaarLopend();schermSinds=Date.now();
 }
 // Vasthoud-oefening: timer op de klok, halverwege wisselen bij links en rechts
 let holdT=null;
@@ -1117,7 +1126,7 @@ function tekenHold(){
   l.textContent=wissel?'wissel':hold.perKant?(hold.gewisseld?'rechts':'links'):'sec';l.classList.toggle('wissel',wissel);
   b.innerHTML=hold.rest<=0?'Nog een keer':hold.loopt?'Pauze':`${I.play} ${hold.rest<hold.tot?'Verder':'Start'}`;
 }
-function openMenu(){ verbergToast();$('dim').classList.add('on');$('acts').classList.add('on');document.body.classList.add('vast'); }
+function openMenu(){ verbergToast();$('menu-skip').textContent=huidig==='pauze'?'Volgende oefening overslaan':'Deze oefening overslaan';$('dim').classList.add('on');$('acts').classList.add('on');document.body.classList.add('vast'); }
 
 // Klaar / overslaan met ongedaan maken
 let snap=null,toastT=null;
@@ -1131,6 +1140,7 @@ function ongedaan(){
   renderOefening(false);
 }
 function klaar(){
+  if(teSnel())return;
   const s=maakSnap(),o=huidigeEx();
   clearInterval(holdT);
   tr.sets++; if(!tr.gedaan.includes(tr.order[tr.stap].ex)) tr.gedaan.push(tr.order[tr.stap].ex);
@@ -1138,7 +1148,7 @@ function klaar(){
 }
 function overslaan(){
   if(!tr)return;const s=maakSnap(),o=huidigeEx(),e=tr.order[tr.stap].ex;
-  clearInterval(holdT);
+  clearInterval(holdT);stopPauzeTimer();
   tr.order=tr.order.filter((x,i)=>i<=tr.stap||x.ex!==e);
   volgendeStap(o,s,'Overgeslagen',true);
 }
@@ -1169,11 +1179,11 @@ function pauze(){
         <div class="row-main"><div style="font-size:.78rem;color:var(--fg2)">Hierna</div><div class="row-t" style="font-weight:600">${naamVan(n)}</div><div class="row-s">${hoeveel(n)} · ${spullen(n)}</div></div>${I.chev}</button>
       <div class="duo"><button class="btn soft" onclick="extraPauze()">+15 sec</button><button class="btn" id="p-verder" onclick="naPauze()">Verder</button></div>
     </div>`;
-  toon('pauze');bewaarLopend();
+  toon('pauze');bewaarLopend();schermSinds=Date.now();
   stopPauzeTimer();pauzeT=setInterval(pauzeTik,250);
 }
 function pauzeTik(){
-  if(tr?.pauzeVan)return;
+  if(!pauzeT||tr?.pauzeVan)return;
   const nu=Math.max(0,Math.ceil((pauzeEind-Date.now())/1000));
   if(nu===pauzeS)return;pauzeS=nu;tekenPauze();
   if(nu<=0){stopPauzeTimer();toon3();
@@ -1190,7 +1200,7 @@ function extraPauze(){
   pauzeEind+=15000;pauzeS+=15;tekenPauze();
 }
 function stopPauzeTimer(){clearInterval(pauzeT);pauzeT=null;}
-function naPauze(){stopPauzeTimer();renderOefening(false);}
+function naPauze(){if(teSnel())return;stopPauzeTimer();renderOefening(false);}
 
 // Pauzeren (hele training) en stoppen
 function pauzeer(){
@@ -1228,7 +1238,8 @@ function afronden(){
       <div class="seg" role="group" aria-labelledby="zw-h">${Object.entries(ZWAAR).map(([k,t])=>`<button aria-pressed="false" onclick="zetZwaar('${k}',this)">${t}</button>`).join('')}</div></div>
     <div class="card ask"><div class="pijn-top"><h3 style="margin:0" id="pijn-h">Pijn tijdens het trainen</h3><b id="pv">–</b></div>
       <input type="range" id="pijn" min="0" max="10" step="1" value="0" aria-labelledby="pijn-h" oninput="zetPijn(this.value)">
-      <div class="scale"><span>0 · geen pijn</span><span>10 · heel veel</span></div></div>
+      <div class="scale"><span>0 · geen pijn</span><span>10 · heel veel</span></div>
+      <div class="foot" id="pijn-hint" style="margin:.4rem 0 0">Schuif om in te vullen</div></div>
     <div id="pijn-advies"></div>
     <div style="margin-top:1.3rem"><button class="btn" onclick="tab('vandaag')">Klaar</button></div>
   </div>`;
@@ -1237,7 +1248,7 @@ function afronden(){
 }
 function zetZwaar(k,el){ el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===el)); if(hist[laatsteIdx]){hist[laatsteIdx].zwaar=k;bewaarHist();} }
 function zetPijn(v){
-  v=+v;$('pv').textContent=v; if(hist[laatsteIdx]){hist[laatsteIdx].pijn=v;bewaarHist();}
+  v=+v;$('pv').textContent=v;$('pijn-hint')?.remove(); if(hist[laatsteIdx]){hist[laatsteIdx].pijn=v;bewaarHist();}
   $('pijn-advies').innerHTML=v>=7?`<div class="melding warn" style="margin-top:.8rem;text-align:left">${I.let}<div><b>Dat is veel</b>Neem contact op met je fysio voor je volgende training. Stop als een oefening scherp pijn doet.</div></div>`:'';
 }
 
@@ -1247,7 +1258,7 @@ function renderOefeningen(){
   $('s-oefeningen').innerHTML=`
     <div class="navrij"><span></span><button class="link" onclick="kiesModus(!kiezen)">${kiezen?'Annuleer':'Kiezen'}</button></div>
     <h1 class="large">Oefeningen</h1>
-    <label class="search">${I.zoek}<input id="zoek" type="search" placeholder="Zoeken" value="${zoekTekst}" oninput="zoekTekst=this.value;renderLijst()" aria-label="Zoek een oefening"></label>
+    <label class="search">${I.zoek}<input id="zoek" type="search" placeholder="Zoeken" value="${zoekTekst.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" oninput="zoekTekst=this.value;renderLijst()" aria-label="Zoek een oefening"></label>
     <div class="segwide" role="group" aria-label="Filter"><button aria-pressed="${!alleenVrij}" onclick="alleenVrij=false;renderOefeningen()">Alles</button><button aria-pressed="${alleenVrij}" onclick="alleenVrij=true;renderOefeningen()">Zonder spullen</button></div>
     ${kiezen?'<p class="foot" style="margin:-.3rem .2rem .7rem">Tik de oefeningen aan die je wilt doen.</p>':''}
     <div class="list" id="bib"></div>`;
@@ -1276,7 +1287,8 @@ function renderVoortgang(){
     <div class="eyebrow">&nbsp;</div>
     <h1 class="large">Voortgang</h1>
     <div class="card big"><div class="ring groen">${ring(Math.min(1,w8.filter(w=>w.gedaan).length/8),64,'',`<div class="mid" style="color:var(--green)">${I.vlam}</div>`)}</div>
-      <div><div class="n">${reeks}</div><div class="sub">${reeks===1?'week':'weken'} op rij je weekdoel gehaald</div></div></div>
+      <div>${hist.length?`<div class="n">${reeks}</div><div class="sub">${reeks===1?'week':'weken'} op rij je weekdoel gehaald</div>`
+        :`<div class="title2">Je eerste week</div><div class="sub">Na je eerste training begint je reeks.</div>`}</div></div>
     <div class="weeks" aria-label="Laatste 8 weken">${w8.map(w=>`<div class="wkb${w.gedaan?' on':''}" title="Week van ${w.label}${w.gedaan?': getraind':''}"><i></i>${w.label}</div>`).join('')}</div>
     <div class="section">Recente trainingen</div>
     <div class="list">${recent.length?recent.map(h=>`<div class="row plain"><div class="row-main"><div class="row-t">${trainingNaam(h)}</div><div class="row-s">${fmtDag(h.datum)}${h.count?` · ${h.count} ${h.count===1?'oefening':'oefeningen'}`:''}</div></div>
